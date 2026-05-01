@@ -1,0 +1,21 @@
+{
+  "expo": {
+    "name": "Canteen App",
+    "slug": "canteen-app",
+    "scheme": "canteen",
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      [
+        "expo-speech-recognition",
+        {
+          "microphonePermission": "Allow Canteen App to use your microphone for voice search.",
+          "speechRecognitionPermission": "Allow Canteen App to use speech recognition for voice search."
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

@@ -1,0 +1,9 @@
+
+> canteen-monorepo@0.1.0 dev:backend
+> npm run dev -w backend
+
+
+> backend@0.1.0 dev
+> tsx watch src/server.ts
+
+API listening on port 4000

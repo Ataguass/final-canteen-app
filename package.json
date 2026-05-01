@@ -1,0 +1,16 @@
+{
+  "name": "canteen-monorepo",
+  "private": true,
+  "version": "0.1.0",
+  "workspaces": [
+    "backend",
+    "mobile",
+    "web"
+  ],
+  "scripts": {
+    "dev:backend": "npm run dev -w backend",
+    "dev:web": "npm run dev -w web",
+    "dev:mobile": "npm run start -w mobile",
+    "build": "npm run build -w backend && npm run build -w web"
+  }
+}

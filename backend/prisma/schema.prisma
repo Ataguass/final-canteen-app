@@ -1,0 +1,242 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Tenant {
+  id           String   @id @default(cuid())
+  name         String
+  slug         String   @unique
+  schoolCode   String?  @unique
+  logo         String?
+  primaryColor String   @default("#FF6B35")
+  currency     String   @default("INR")
+  taxPercent   Float    @default(5.0)
+  invoiceLogoUrl String?
+  invoiceShowLogo Boolean @default(true)
+  invoiceShowSchoolName Boolean @default(true)
+  invoiceShowOrderNumber Boolean @default(true)
+  invoiceShowDate Boolean @default(true)
+  invoiceShowCashier Boolean @default(true)
+  invoiceShowPaymentDetails Boolean @default(true)
+  invoiceShowTaxBreakup Boolean @default(true)
+  invoiceShowNotes Boolean @default(true)
+  invoiceFooterNote String?
+  todaySpecialsEnabled Boolean @default(true)
+  createdAt    DateTime @default(now())
+
+  users      User[]
+  categories Category[]
+  menuItems  MenuItem[]
+  orders     Order[]
+  stockLogs  StockMovement[]
+  banners    Banner[]
+  communityPosts CommunityPost[]
+}
+
+model User {
+  id           String   @id @default(cuid())
+  tenantId     String
+  tenant       Tenant   @relation(fields: [tenantId], references: [id])
+  name         String
+  email        String?
+  phone        String?
+  passwordHash String
+  role         Role     @default(STUDENT)
+  rollNumber   String?
+  isActive     Boolean  @default(true)
+  isApproved   Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  orders Order[]
+  stockLogs StockMovement[] @relation("StockActor")
+  communityPosts CommunityPost[] @relation("CommunityAuthor")
+
+  @@unique([tenantId, rollNumber])
+  @@unique([tenantId, email])
+  @@unique([tenantId, phone])
+  @@index([tenantId, role])
+}
+
+model Banner {
+  id        String   @id @default(cuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  title     String
+  imageUrl  String
+  actionUrl String?
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId, isActive, sortOrder])
+}
+
+model CommunityPost {
+  id          String   @id @default(cuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id])
+  authorUserId String?
+  author      User?    @relation("CommunityAuthor", fields: [authorUserId], references: [id])
+  title       String
+  body        String
+  mediaUrl    String?
+  mediaType   CommunityMediaType?
+  isPinned    Boolean  @default(false)
+  isVisible   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([tenantId, isPinned, createdAt])
+  @@index([tenantId, isVisible, createdAt])
+}
+
+enum CommunityMediaType {
+  IMAGE
+  VIDEO
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  TEACHER
+  STUDENT
+  STAFF
+  GUEST
+}
+
+model Category {
+  id        String   @id @default(cuid())
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  name      String
+  description String?
+  imageUrl   String?
+  isTodaySpecial Boolean @default(false)
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  items MenuItem[]
+
+  @@index([tenantId])
+  @@index([tenantId, isTodaySpecial, isActive])
+}
+
+model MenuItem {
+  id                String   @id @default(cuid())
+  tenantId          String
+  tenant            Tenant   @relation(fields: [tenantId], references: [id])
+  categoryId        String
+  category          Category @relation(fields: [categoryId], references: [id])
+  name              String
+  description       String?
+  image             String?
+  price             Float
+  stockQty          Int      @default(0)
+  lowStockThreshold Int      @default(10)
+  isAvailable       Boolean  @default(true)
+  isTodaySpecial    Boolean  @default(false)
+  prepTimeMinutes   Int      @default(10)
+  isVeg             Boolean  @default(true)
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  orderItems OrderItem[]
+  stockLogs  StockMovement[]
+
+  @@index([tenantId, categoryId])
+  @@index([tenantId, isAvailable])
+  @@index([tenantId, isTodaySpecial, isAvailable])
+}
+
+model StockMovement {
+  id          String            @id @default(cuid())
+  tenantId    String
+  tenant      Tenant            @relation(fields: [tenantId], references: [id])
+  menuItemId  String
+  menuItem    MenuItem          @relation(fields: [menuItemId], references: [id])
+  actorUserId String?
+  actorUser   User?             @relation("StockActor", fields: [actorUserId], references: [id])
+  changeType  StockMovementType
+  delta       Int
+  previousQty Int
+  newQty      Int
+  note        String?
+  createdAt   DateTime          @default(now())
+
+  @@index([tenantId, createdAt])
+  @@index([tenantId, menuItemId, createdAt])
+}
+
+enum StockMovementType {
+  INITIAL
+  MANUAL
+  ADJUSTMENT
+  SALE
+}
+
+model Order {
+  id            String      @id @default(cuid())
+  tenantId      String
+  tenant        Tenant      @relation(fields: [tenantId], references: [id])
+  orderNumber   String      @unique
+  userId        String?
+  user          User?       @relation(fields: [userId], references: [id])
+  status        OrderStatus @default(PENDING)
+  subtotal      Float
+  taxAmount     Float
+  totalAmount   Float
+  paymentMethod PaymentMethod @default(CASH)
+  paymentStatus PaymentStatus @default(UNPAID)
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  items OrderItem[]
+
+  @@index([tenantId, status])
+  @@index([tenantId, createdAt])
+}
+
+model OrderItem {
+  id         String   @id @default(cuid())
+  orderId    String
+  order      Order    @relation(fields: [orderId], references: [id])
+  menuItemId String
+  menuItem   MenuItem @relation(fields: [menuItemId], references: [id])
+  name       String
+  price      Float
+  quantity   Int
+  note       String?
+}
+
+enum OrderStatus {
+  PENDING
+  ACCEPTED
+  PREPARING
+  READY
+  COMPLETED
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  CASH
+  UPI
+  WALLET
+  CREDIT
+  CARD
+  OTHER
+}
+
+enum PaymentStatus {
+  PAID
+  UNPAID
+  PARTIAL
+}

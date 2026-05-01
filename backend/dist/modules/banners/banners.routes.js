@@ -1,0 +1,13 @@
+import { Router } from "express";
+import { auth } from "../../middleware/auth.js";
+import { asyncHandler } from "../../middleware/asyncHandler.js";
+import { roleGuard } from "../../middleware/roleGuard.js";
+import { tenantResolver } from "../../middleware/tenantResolver.js";
+import { createBanner, deleteBanner, listBanners, toggleBanner, uploadBannerImage, updateBanner } from "./banners.controller.js";
+export const bannersRouter = Router();
+bannersRouter.get("/", auth, tenantResolver, asyncHandler(listBanners));
+bannersRouter.post("/", auth, tenantResolver, roleGuard("ADMIN", "SUPER_ADMIN"), asyncHandler(createBanner));
+bannersRouter.post("/upload-image", auth, tenantResolver, roleGuard("ADMIN", "SUPER_ADMIN"), asyncHandler(uploadBannerImage));
+bannersRouter.patch("/:id", auth, tenantResolver, roleGuard("ADMIN", "SUPER_ADMIN"), asyncHandler(updateBanner));
+bannersRouter.patch("/:id/toggle", auth, tenantResolver, roleGuard("ADMIN", "SUPER_ADMIN"), asyncHandler(toggleBanner));
+bannersRouter.delete("/:id", auth, tenantResolver, roleGuard("ADMIN", "SUPER_ADMIN"), asyncHandler(deleteBanner));

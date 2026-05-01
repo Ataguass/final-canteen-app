@@ -1,0 +1,13 @@
+node_modules
+.env
+.env.*
+!.env.example
+!backend/.env.example
+/dist
+/.turbo
+/.next
+/.expo
+.expo/
+mobile/.expo/
+coverage
+/backend/backups

@@ -1,0 +1,9 @@
+env: load .env
+env: export EXPO_PUBLIC_API_URL EXPO_PUBLIC_SOCKET_URL
+Networking has been disabled
+Starting project at C:\Users\Polna\Ataguas\codex\mobile
+Using src/app as the root directory for Expo Router.
+Starting Metro Bundler
+warning: Bundler cache is empty, rebuilding (this may take a minute)
+Waiting on http://localhost:8092
+Logs for your project will appear below.

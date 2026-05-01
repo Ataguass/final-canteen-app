@@ -1,0 +1,12 @@
+import { Router } from "express";
+import { auth } from "../../middleware/auth.js";
+import { asyncHandler } from "../../middleware/asyncHandler.js";
+import { roleGuard } from "../../middleware/roleGuard.js";
+import { tenantResolver } from "../../middleware/tenantResolver.js";
+import { getOrderById, listOrders, placeOrder, syncOrders, updateOrderStatus } from "./orders.controller.js";
+export const ordersRouter = Router();
+ordersRouter.post("/", auth, tenantResolver, asyncHandler(placeOrder));
+ordersRouter.post("/sync", auth, tenantResolver, asyncHandler(syncOrders));
+ordersRouter.get("/", auth, tenantResolver, asyncHandler(listOrders));
+ordersRouter.get("/:id", auth, tenantResolver, asyncHandler(getOrderById));
+ordersRouter.patch("/:id/status", auth, tenantResolver, roleGuard("ADMIN", "SUPER_ADMIN"), asyncHandler(updateOrderStatus));
