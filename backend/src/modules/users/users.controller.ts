@@ -119,14 +119,15 @@ export const updateMyProfile = async (req: Request, res: Response): Promise<void
     throw new AppError("Unauthorized", 401);
   }
 
-  const { name, phone, rollNumber } = req.body as {
+  const { name, phone, email, rollNumber } = req.body as {
     name?: string;
     phone?: string;
+    email?: string;
     rollNumber?: string;
   };
 
-  if (name === undefined && phone === undefined && rollNumber === undefined) {
-    throw new AppError("At least one field (name, phone, rollNumber) is required", 400);
+  if (name === undefined && phone === undefined && email === undefined && rollNumber === undefined) {
+    throw new AppError("At least one field (name, phone, email, rollNumber) is required", 400);
   }
 
   const current = await prisma.user.findFirst({
@@ -135,6 +136,7 @@ export const updateMyProfile = async (req: Request, res: Response): Promise<void
       id: true,
       tenantId: true,
       name: true,
+      email: true,
       phone: true,
       rollNumber: true
     }
@@ -146,6 +148,7 @@ export const updateMyProfile = async (req: Request, res: Response): Promise<void
 
   const nextName = name !== undefined ? name.trim() : current.name;
   const nextPhone = phone !== undefined ? phone.trim() : current.phone;
+  const nextEmail = email !== undefined ? (email.trim() ? email.trim().toLowerCase() : null) : current.email;
   const nextRollNumber =
     rollNumber !== undefined ? (rollNumber.trim() ? rollNumber.trim() : null) : current.rollNumber;
 
@@ -164,6 +167,20 @@ export const updateMyProfile = async (req: Request, res: Response): Promise<void
     throw new AppError("User already exists with this phone", 409);
   }
 
+  if (nextEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(nextEmail)) {
+    throw new AppError("Invalid email format", 400);
+  }
+
+  if (nextEmail) {
+    const emailConflict = await prisma.user.findFirst({
+      where: { tenantId, email: nextEmail, id: { not: userId } },
+      select: { id: true }
+    });
+    if (emailConflict) {
+      throw new AppError("User already exists with this email", 409);
+    }
+  }
+
   if (nextRollNumber) {
     const rollConflict = await prisma.user.findFirst({
       where: { tenantId, rollNumber: nextRollNumber, id: { not: userId } },
@@ -179,6 +196,7 @@ export const updateMyProfile = async (req: Request, res: Response): Promise<void
     data: {
       name: nextName,
       phone: nextPhone,
+      email: nextEmail,
       rollNumber: nextRollNumber
     },
     select: {

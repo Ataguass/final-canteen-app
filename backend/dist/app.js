@@ -12,6 +12,7 @@ import { menuRouter } from "./modules/menu/menu.routes.js";
 import { ordersRouter } from "./modules/orders/orders.routes.js";
 import { tenantsRouter } from "./modules/tenants/tenants.routes.js";
 import { usersRouter } from "./modules/users/users.routes.js";
+import { walletRouter } from "./modules/wallet/wallet.routes.js";
 export const app = express();
 // Mobile clients currently expect JSON bodies on every successful menu request.
 // Disable ETag-based 304 responses to avoid empty-body fetch failures.
@@ -29,6 +30,7 @@ app.use("/api/tenants", tenantsRouter);
 app.use("/api/menu", menuRouter);
 app.use("/api/orders", ordersRouter);
 app.use("/api/users", usersRouter);
+app.use("/api/wallet", walletRouter);
 app.use("/api/banners", bannersRouter);
 app.use("/api/community", communityRouter);
 app.use("/api/backups", backupsRouter);

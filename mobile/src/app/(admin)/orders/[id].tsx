@@ -130,6 +130,29 @@ export default function Screen() {
           </View>
         </View>
 
+        {(order.laneToken || order.isPreOrder) ? (
+          <View style={{ flexDirection: "row", gap: 8 }}>
+            <View style={{ flex: 1, borderRadius: 12, backgroundColor: "#F8FAFC", padding: 10 }}>
+              <Text style={{ color: "#64748B", fontSize: 12 }}>Queue Lane</Text>
+              <Text style={{ color: "#0F172A", fontWeight: "800", marginTop: 3 }}>
+                {order.serviceLane === "TEACHER_PRIORITY" ? "Teacher Priority" : "Regular"}
+              </Text>
+              {order.laneToken ? (
+                <Text style={{ color: "#334155", marginTop: 1, fontWeight: "700" }}>Token: {order.laneToken}</Text>
+              ) : null}
+            </View>
+            <View style={{ flex: 1, borderRadius: 12, backgroundColor: "#F0FDF4", padding: 10 }}>
+              <Text style={{ color: "#166534", fontSize: 12, fontWeight: "700" }}>Pickup</Text>
+              <Text style={{ color: "#14532D", fontWeight: "800", marginTop: 3 }}>
+                {order.isPreOrder ? "Scheduled" : "Immediate"}
+              </Text>
+              {order.isPreOrder && order.pickupSlotLabel ? (
+                <Text style={{ color: "#166534", marginTop: 1 }}>{order.pickupSlotLabel}</Text>
+              ) : null}
+            </View>
+          </View>
+        ) : null}
+
         <View style={{ flexDirection: "row", gap: 8 }}>
           <View style={{ flex: 1, borderRadius: 12, backgroundColor: "#F8FAFC", padding: 10 }}>
             <Text style={{ color: "#64748B", fontSize: 12 }}>Items</Text>

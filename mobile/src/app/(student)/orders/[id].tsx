@@ -90,7 +90,33 @@ export default function Screen() {
         <Text style={styles.headerMeta}>
           {new Date(order.createdAt).toLocaleString()} • {order.paymentMethod}
         </Text>
+        {(order.laneToken || order.isPreOrder) ? (
+          <View style={styles.headerTagRow}>
+            {order.serviceLane === "TEACHER_PRIORITY" ? (
+              <View style={[styles.headerTagPill, styles.headerTagPriority]}>
+                <Text style={[styles.headerTagText, styles.headerTagPriorityText]}>Teacher Priority Lane</Text>
+              </View>
+            ) : null}
+            {order.laneToken ? (
+              <View style={styles.headerTagPill}>
+                <Text style={styles.headerTagText}>Token: {order.laneToken}</Text>
+              </View>
+            ) : null}
+          </View>
+        ) : null}
       </View>
+
+      {order.isPreOrder && (order.pickupSlotLabel || order.pickupSlotStart) ? (
+        <View style={styles.slotCard}>
+          <Text style={styles.cardTitle}>Pickup Slot</Text>
+          <Text style={styles.slotLabel}>{order.pickupSlotLabel ?? "Scheduled pickup"}</Text>
+          {order.pickupSlotStart ? (
+            <Text style={styles.slotMeta}>
+              Pickup at: {new Date(order.pickupSlotStart).toLocaleString()}
+            </Text>
+          ) : null}
+        </View>
+      ) : null}
 
       <View style={styles.summaryCard}>
         <Text style={styles.cardTitle}>Order Summary</Text>
@@ -208,6 +234,45 @@ const styles = StyleSheet.create({
   },
   headerMeta: {
     color: "#64748B",
+    fontWeight: "600"
+  },
+  headerTagRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 6,
+    marginTop: 6
+  },
+  headerTagPill: {
+    borderRadius: 999,
+    backgroundColor: "#E2E8F0",
+    paddingHorizontal: 8,
+    paddingVertical: 4
+  },
+  headerTagText: {
+    color: "#334155",
+    fontWeight: "700",
+    fontSize: 11
+  },
+  headerTagPriority: {
+    backgroundColor: "#DBEAFE"
+  },
+  headerTagPriorityText: {
+    color: "#1E40AF"
+  },
+  slotCard: {
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: "#BBF7D0",
+    backgroundColor: "#F0FDF4",
+    padding: 12,
+    gap: 6
+  },
+  slotLabel: {
+    color: "#14532D",
+    fontWeight: "800"
+  },
+  slotMeta: {
+    color: "#166534",
     fontWeight: "600"
   },
   summaryCard: {

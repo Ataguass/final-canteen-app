@@ -16,6 +16,12 @@ export type Order = {
   userId?: string | null;
   orderNumber: string;
   status: string;
+  serviceLane?: "REGULAR" | "TEACHER_PRIORITY" | string;
+  laneToken?: string | null;
+  isPreOrder?: boolean;
+  pickupSlotLabel?: string | null;
+  pickupSlotStart?: string | null;
+  pickupSlotEnd?: string | null;
   subtotal: number;
   taxAmount: number;
   totalAmount: number;
@@ -25,15 +31,22 @@ export type Order = {
   items: OrderItem[];
 };
 
+type OrderPlacementPayload = {
+  items: { menuItemId: string; quantity: number; note?: string }[];
+  paymentMethod?: PaymentMethod;
+  paymentStatus?: PaymentStatus;
+  customerPhone?: string;
+  isPreOrder?: boolean;
+  pickupSlotLabel?: string;
+  pickupSlotStart?: string;
+  pickupSlotEnd?: string;
+};
+
 export const orderService = {
   placeOrder: (
     token: string,
     tenantId: string,
-    payload: {
-      items: { menuItemId: string; quantity: number; note?: string }[];
-      paymentMethod?: PaymentMethod;
-      paymentStatus?: PaymentStatus;
-    }
+    payload: OrderPlacementPayload
   ) =>
     apiRequest<{ success: boolean; data: Order }>("/orders", {
       method: "POST",
@@ -57,11 +70,7 @@ export const orderService = {
   syncOrders: (
     token: string,
     tenantId: string,
-    orders: {
-      items: { menuItemId: string; quantity: number; note?: string }[];
-      paymentMethod?: PaymentMethod;
-      paymentStatus?: PaymentStatus;
-    }[]
+    orders: OrderPlacementPayload[]
   ) =>
     apiRequest<{ success: boolean; data: Order[] }>("/orders/sync", {
       method: "POST",

@@ -104,7 +104,9 @@ export default function Screen() {
       return (
         order.orderNumber.toLowerCase().includes(normalized) ||
         order.status.toLowerCase().includes(normalized) ||
-        order.paymentMethod.toLowerCase().includes(normalized)
+        order.paymentMethod.toLowerCase().includes(normalized) ||
+        (order.laneToken ?? "").toLowerCase().includes(normalized) ||
+        (order.pickupSlotLabel ?? "").toLowerCase().includes(normalized)
       );
     });
   }, [orders, query, statusFilter]);
@@ -229,6 +231,25 @@ export default function Screen() {
                 </View>
               </View>
               <Text style={{ color: "#64748B", fontSize: 12 }}>{new Date(order.createdAt).toLocaleString()}</Text>
+              {order.laneToken || order.isPreOrder ? (
+                <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6 }}>
+                  {order.serviceLane === "TEACHER_PRIORITY" ? (
+                    <View style={{ borderRadius: 999, backgroundColor: "#DBEAFE", paddingHorizontal: 8, paddingVertical: 4 }}>
+                      <Text style={{ color: "#1E40AF", fontWeight: "800", fontSize: 11 }}>Teacher Priority</Text>
+                    </View>
+                  ) : null}
+                  {order.laneToken ? (
+                    <View style={{ borderRadius: 999, backgroundColor: "#E2E8F0", paddingHorizontal: 8, paddingVertical: 4 }}>
+                      <Text style={{ color: "#334155", fontWeight: "700", fontSize: 11 }}>{order.laneToken}</Text>
+                    </View>
+                  ) : null}
+                  {order.isPreOrder && order.pickupSlotLabel ? (
+                    <View style={{ borderRadius: 999, backgroundColor: "#DCFCE7", paddingHorizontal: 8, paddingVertical: 4 }}>
+                      <Text style={{ color: "#166534", fontWeight: "700", fontSize: 11 }}>{order.pickupSlotLabel}</Text>
+                    </View>
+                  ) : null}
+                </View>
+              ) : null}
               <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
                 <Text style={{ color: "#334155", fontWeight: "600" }}>
                   {order.items.length} item{order.items.length > 1 ? "s" : ""} · {order.paymentMethod}

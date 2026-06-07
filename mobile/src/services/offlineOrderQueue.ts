@@ -13,6 +13,7 @@ type QueueRow = {
   items_json: string;
   payment_method: PaymentMethod | null;
   payment_status: PaymentStatus | null;
+  customer_phone: string | null;
   source: "STUDENT" | "POS" | null;
   queued_at: string;
 };
@@ -28,6 +29,7 @@ export type QueuedOrder = {
   items: { menuItemId: string; quantity: number; note?: string }[];
   paymentMethod?: PaymentMethod;
   paymentStatus?: PaymentStatus;
+  customerPhone?: string;
   source?: "STUDENT" | "POS";
   queuedAt: string;
 };
@@ -60,6 +62,7 @@ const getDb = async (): Promise<SQLite.SQLiteDatabase> => {
         items_json TEXT NOT NULL,
         payment_method TEXT,
         payment_status TEXT,
+        customer_phone TEXT,
         source TEXT,
         queued_at TEXT NOT NULL
       );
@@ -73,6 +76,10 @@ const getDb = async (): Promise<SQLite.SQLiteDatabase> => {
         updated_at TEXT NOT NULL
       );
     `);
+    const offlineOrderColumns = await db.getAllAsync<{ name: string }>(`PRAGMA table_info(offline_orders)`);
+    if (!offlineOrderColumns.some((column) => column.name === "customer_phone")) {
+      await db.execAsync(`ALTER TABLE offline_orders ADD COLUMN customer_phone TEXT;`);
+    }
     schemaInitialized = true;
   }
   return db;
@@ -124,13 +131,14 @@ const migrateLegacyQueueIfNeeded = async (tenantId: string, userId: string): Pro
           for (const entry of parsed) {
             await tx.runAsync(
               `INSERT INTO offline_orders
-               (tenant_id, user_id, items_json, payment_method, payment_status, source, queued_at)
-               VALUES (?, ?, ?, ?, ?, ?, ?)`,
+               (tenant_id, user_id, items_json, payment_method, payment_status, customer_phone, source, queued_at)
+               VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
               tenantId,
               userId,
               JSON.stringify(entry.items),
               entry.paymentMethod ?? null,
               entry.paymentStatus ?? null,
+              null,
               entry.source ?? "STUDENT",
               entry.queuedAt
             );
@@ -183,7 +191,7 @@ export const offlineOrderQueue = {
     await migrateLegacyQueueIfNeeded(tenantId, userId);
     const db = await getDb();
     const rows = await db.getAllAsync<QueueRow>(
-      `SELECT id, tenant_id, user_id, items_json, payment_method, payment_status, source, queued_at
+      `SELECT id, tenant_id, user_id, items_json, payment_method, payment_status, customer_phone, source, queued_at
        FROM offline_orders
        WHERE tenant_id = ? AND user_id = ?
        ORDER BY queued_at ASC, id ASC`,
@@ -204,6 +212,7 @@ export const offlineOrderQueue = {
           items,
           paymentMethod: row.payment_method ?? undefined,
           paymentStatus: row.payment_status ?? undefined,
+          customerPhone: row.customer_phone ?? undefined,
           source: row.source ?? "STUDENT",
           queuedAt: row.queued_at
         } as QueuedOrder;
@@ -218,6 +227,7 @@ export const offlineOrderQueue = {
       items: { menuItemId: string; quantity: number; note?: string }[];
       paymentMethod?: PaymentMethod;
       paymentStatus?: PaymentStatus;
+      customerPhone?: string;
       source?: "STUDENT" | "POS";
     }
   ): Promise<void> {
@@ -225,13 +235,14 @@ export const offlineOrderQueue = {
     const db = await getDb();
     await db.runAsync(
       `INSERT INTO offline_orders
-       (tenant_id, user_id, items_json, payment_method, payment_status, source, queued_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+       (tenant_id, user_id, items_json, payment_method, payment_status, customer_phone, source, queued_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       tenantId,
       userId,
       JSON.stringify(order.items),
       order.paymentMethod ?? null,
       order.paymentStatus ?? null,
+      order.customerPhone?.trim() || null,
       order.source ?? "STUDENT",
       new Date().toISOString()
     );

@@ -39,18 +39,29 @@ const isPathActive = (pathname: string, targetPath: string): boolean => {
   return normalizedPath === normalizedTarget || normalizedPath.startsWith(`${normalizedTarget}/`);
 };
 
-const getHeaderTitle = (pathname: string): string => {
-  if (pathname.startsWith("/(student)/dashboard")) return "Dashboard";
-  if (pathname.startsWith("/(student)/menu")) return "Menu";
-  if (pathname.startsWith("/(student)/search")) return "Search";
-  if (pathname.startsWith("/(student)/orders")) return "Orders";
-  if (pathname.startsWith("/(student)/community")) return "Community";
-  if (pathname.startsWith("/(student)/profile")) return "Profile";
-  if (pathname.startsWith("/cart/checkout")) return "Checkout";
-  if (pathname.startsWith("/cart")) return "Cart";
-  if (pathname.startsWith("/menu/item/")) return "Item Details";
-  if (pathname.startsWith("/menu/")) return "Category";
+const normalizePathname = (pathname: string): string => pathname.replace(/\/\([^)]+\)/g, "");
+
+const getRoleAppTitle = (role?: string): string => {
+  if (role === "TEACHER") return "Teacher App";
+  if (role === "STAFF") return "Staff App";
+  if (role === "GUEST") return "Guest App";
   return "Student App";
+};
+
+const getHeaderTitle = (pathname: string, role?: string): string => {
+  const normalizedPath = normalizePathname(pathname);
+
+  if (normalizedPath.startsWith("/dashboard")) return "Dashboard";
+  if (normalizedPath.startsWith("/menu")) return "Menu";
+  if (normalizedPath.startsWith("/search")) return "Search";
+  if (normalizedPath.startsWith("/orders")) return "Orders";
+  if (normalizedPath.startsWith("/community")) return "Community";
+  if (normalizedPath.startsWith("/profile")) return "Profile";
+  if (normalizedPath.startsWith("/cart/checkout")) return "Checkout";
+  if (normalizedPath.startsWith("/cart")) return "Cart";
+  if (normalizedPath.startsWith("/menu/item/")) return "Item Details";
+  if (normalizedPath.startsWith("/menu/")) return "Category";
+  return getRoleAppTitle(role);
 };
 
 export default function StudentLayout() {
@@ -63,7 +74,7 @@ export default function StudentLayout() {
   const [profileMenuVisible, setProfileMenuVisible] = useState(false);
   const drawerAnim = useRef(new Animated.Value(0)).current;
 
-  const headerTitle = useMemo(() => getHeaderTitle(pathname), [pathname]);
+  const headerTitle = useMemo(() => getHeaderTitle(pathname, user?.role), [pathname, user?.role]);
   const avatarText = useMemo(
     () => (user?.name?.charAt(0) ?? "S").toUpperCase(),
     [user?.name]

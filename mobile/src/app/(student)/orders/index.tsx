@@ -100,7 +100,9 @@ export default function Screen() {
       return (
         order.orderNumber.toLowerCase().includes(normalized) ||
         order.status.toLowerCase().includes(normalized) ||
-        order.paymentMethod.toLowerCase().includes(normalized)
+        order.paymentMethod.toLowerCase().includes(normalized) ||
+        (order.laneToken ?? "").toLowerCase().includes(normalized) ||
+        (order.pickupSlotLabel ?? "").toLowerCase().includes(normalized)
       );
     });
   }, [orders, query, filter]);
@@ -221,6 +223,25 @@ export default function Screen() {
                 <Text style={styles.orderMeta}>
                   {new Date(order.createdAt).toLocaleString()}
                 </Text>
+                {order.laneToken || order.isPreOrder ? (
+                  <View style={styles.orderTagRow}>
+                    {order.serviceLane === "TEACHER_PRIORITY" ? (
+                      <View style={[styles.orderTagPill, styles.orderTagPriority]}>
+                        <Text style={[styles.orderTagText, styles.orderTagPriorityText]}>Teacher Priority</Text>
+                      </View>
+                    ) : null}
+                    {order.laneToken ? (
+                      <View style={styles.orderTagPill}>
+                        <Text style={styles.orderTagText}>Token: {order.laneToken}</Text>
+                      </View>
+                    ) : null}
+                    {order.isPreOrder && order.pickupSlotLabel ? (
+                      <View style={[styles.orderTagPill, styles.orderTagPreOrder]}>
+                        <Text style={[styles.orderTagText, styles.orderTagPreOrderText]}>{order.pickupSlotLabel}</Text>
+                      </View>
+                    ) : null}
+                  </View>
+                ) : null}
                 <View style={styles.orderBottomRow}>
                   <Text style={styles.orderMeta}>
                     {order.items.length} item{order.items.length > 1 ? "s" : ""} ·{" "}
@@ -433,6 +454,34 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center"
+  },
+  orderTagRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 6
+  },
+  orderTagPill: {
+    borderRadius: 999,
+    backgroundColor: "#E2E8F0",
+    paddingHorizontal: 8,
+    paddingVertical: 4
+  },
+  orderTagText: {
+    color: "#334155",
+    fontWeight: "700",
+    fontSize: 11
+  },
+  orderTagPriority: {
+    backgroundColor: "#DBEAFE"
+  },
+  orderTagPriorityText: {
+    color: "#1E40AF"
+  },
+  orderTagPreOrder: {
+    backgroundColor: "#DCFCE7"
+  },
+  orderTagPreOrderText: {
+    color: "#166534"
   },
   orderTotal: {
     color: "#0F172A",

@@ -36,6 +36,7 @@ model Tenant {
   stockLogs  StockMovement[]
   banners    Banner[]
   communityPosts CommunityPost[]
+  walletTransactions WalletTransaction[]
 }
 
 model User {
@@ -48,6 +49,7 @@ model User {
   passwordHash String
   role         Role     @default(STUDENT)
   rollNumber   String?
+  walletBalance Float   @default(0)
   isActive     Boolean  @default(true)
   isApproved   Boolean  @default(false)
   createdAt    DateTime @default(now())
@@ -56,11 +58,37 @@ model User {
   orders Order[]
   stockLogs StockMovement[] @relation("StockActor")
   communityPosts CommunityPost[] @relation("CommunityAuthor")
+  walletTransactions WalletTransaction[]
 
   @@unique([tenantId, rollNumber])
   @@unique([tenantId, email])
   @@unique([tenantId, phone])
   @@index([tenantId, role])
+}
+
+model WalletTransaction {
+  id            String                @id @default(cuid())
+  tenantId      String
+  tenant        Tenant                @relation(fields: [tenantId], references: [id])
+  userId        String
+  user          User                  @relation(fields: [userId], references: [id])
+  amount        Float
+  balanceAfter  Float
+  type          WalletTransactionType
+  note          String?
+  reference     String?
+  orderId       String?
+  createdAt     DateTime              @default(now())
+
+  @@index([tenantId, userId, createdAt])
+  @@index([tenantId, createdAt])
+}
+
+enum WalletTransactionType {
+  TOPUP
+  DEBIT_ORDER
+  REFUND
+  ADJUSTMENT
 }
 
 model Banner {
@@ -190,6 +218,12 @@ model Order {
   userId        String?
   user          User?       @relation(fields: [userId], references: [id])
   status        OrderStatus @default(PENDING)
+  serviceLane   String      @default("REGULAR")
+  laneToken     String?
+  isPreOrder    Boolean     @default(false)
+  pickupSlotLabel String?
+  pickupSlotStart DateTime?
+  pickupSlotEnd DateTime?
   subtotal      Float
   taxAmount     Float
   totalAmount   Float

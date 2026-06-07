@@ -1,4 +1,4 @@
-import { OrderStatus, PaymentMethod, PaymentStatus, Role, StockMovementType } from "@prisma/client";
+import { OrderStatus, PaymentMethod, PaymentStatus, Role, StockMovementType, WalletTransactionType } from "@prisma/client";
 import { randomBytes } from "node:crypto";
 import { promises as fs } from "node:fs";
 import path from "node:path";
@@ -10,6 +10,7 @@ const ORDER_STATUS_SET = new Set(Object.values(OrderStatus));
 const PAYMENT_METHOD_SET = new Set(Object.values(PaymentMethod));
 const PAYMENT_STATUS_SET = new Set(Object.values(PaymentStatus));
 const STOCK_MOVEMENT_SET = new Set(Object.values(StockMovementType));
+const WALLET_TRANSACTION_SET = new Set(Object.values(WalletTransactionType));
 const backupRootDir = path.resolve(process.cwd(), "backups");
 const toIsoString = (value) => value.toISOString();
 const parseDate = (value) => {
@@ -40,6 +41,12 @@ const parsePaymentStatus = (value) => {
 const parseStockMovementType = (value) => {
     if (!STOCK_MOVEMENT_SET.has(value)) {
         throw new AppError(`Invalid stock movement type in backup: ${value}`, 400);
+    }
+    return value;
+};
+const parseWalletTransactionType = (value) => {
+    if (!WALLET_TRANSACTION_SET.has(value)) {
+        throw new AppError(`Invalid wallet transaction type in backup: ${value}`, 400);
     }
     return value;
 };
@@ -194,7 +201,8 @@ const readBackupFile = async (tenantId, backupIdRaw) => {
         "communityPosts",
         "orders",
         "orderItems",
-        "stockMovements"
+        "stockMovements",
+        "walletTransactions"
     ];
     for (const key of requiredLists) {
         if (!Array.isArray(data[key])) {
@@ -215,7 +223,8 @@ const buildCounts = (backup) => ({
     communityPosts: backup.communityPosts.length,
     orders: backup.orders.length,
     orderItems: backup.orderItems.length,
-    stockMovements: backup.stockMovements.length
+    stockMovements: backup.stockMovements.length,
+    walletTransactions: backup.walletTransactions.length
 });
 export const listBackups = async (req, res) => {
     const tenantId = req.tenantId;
@@ -238,7 +247,7 @@ export const listBackups = async (req, res) => {
 };
 export const createBackup = async (req, res) => {
     const tenantId = req.tenantId;
-    const [tenant, users, categories, menuItems, banners, communityPosts, orders, orderItems, stockMovements] = await Promise.all([
+    const [tenant, users, categories, menuItems, banners, communityPosts, orders, orderItems, stockMovements, walletTransactions] = await Promise.all([
         prisma.tenant.findUnique({
             where: { id: tenantId },
             select: {
@@ -272,6 +281,7 @@ export const createBackup = async (req, res) => {
                 passwordHash: true,
                 role: true,
                 rollNumber: true,
+                walletBalance: true,
                 isActive: true,
                 isApproved: true,
                 createdAt: true,
@@ -345,6 +355,12 @@ export const createBackup = async (req, res) => {
                 orderNumber: true,
                 userId: true,
                 status: true,
+                serviceLane: true,
+                laneToken: true,
+                isPreOrder: true,
+                pickupSlotLabel: true,
+                pickupSlotStart: true,
+                pickupSlotEnd: true,
                 subtotal: true,
                 taxAmount: true,
                 totalAmount: true,
@@ -377,6 +393,20 @@ export const createBackup = async (req, res) => {
                 previousQty: true,
                 newQty: true,
                 note: true,
+                createdAt: true
+            }
+        }),
+        prisma.walletTransaction.findMany({
+            where: { tenantId },
+            select: {
+                id: true,
+                userId: true,
+                amount: true,
+                balanceAfter: true,
+                type: true,
+                note: true,
+                reference: true,
+                orderId: true,
                 createdAt: true
             }
         })
@@ -419,6 +449,8 @@ export const createBackup = async (req, res) => {
             status: entry.status,
             paymentMethod: entry.paymentMethod,
             paymentStatus: entry.paymentStatus,
+            pickupSlotStart: entry.pickupSlotStart ? toIsoString(entry.pickupSlotStart) : null,
+            pickupSlotEnd: entry.pickupSlotEnd ? toIsoString(entry.pickupSlotEnd) : null,
             createdAt: toIsoString(entry.createdAt),
             updatedAt: toIsoString(entry.updatedAt)
         })),
@@ -426,6 +458,11 @@ export const createBackup = async (req, res) => {
         stockMovements: stockMovements.map((entry) => ({
             ...entry,
             changeType: entry.changeType,
+            createdAt: toIsoString(entry.createdAt)
+        })),
+        walletTransactions: walletTransactions.map((entry) => ({
+            ...entry,
+            type: entry.type,
             createdAt: toIsoString(entry.createdAt)
         }))
     };
@@ -475,6 +512,12 @@ export const restoreBackup = async (req, res) => {
         ...entry,
         actorUserId: entry.actorUserId && userIds.has(entry.actorUserId) ? entry.actorUserId : null
     }));
+    const validWalletTransactions = backup.walletTransactions
+        .filter((entry) => userIds.has(entry.userId))
+        .map((entry) => ({
+        ...entry,
+        orderId: entry.orderId && orderIds.has(entry.orderId) ? entry.orderId : null
+    }));
     const validCommunityPosts = backup.communityPosts.map((entry) => ({
         ...entry,
         authorUserId: entry.authorUserId && userIds.has(entry.authorUserId) ? entry.authorUserId : null
@@ -491,6 +534,7 @@ export const restoreBackup = async (req, res) => {
         }
         await tx.order.deleteMany({ where: { tenantId } });
         await tx.stockMovement.deleteMany({ where: { tenantId } });
+        await tx.walletTransaction.deleteMany({ where: { tenantId } });
         await tx.communityPost.deleteMany({ where: { tenantId } });
         await tx.banner.deleteMany({ where: { tenantId } });
         await tx.menuItem.deleteMany({ where: { tenantId } });
@@ -528,6 +572,7 @@ export const restoreBackup = async (req, res) => {
                     passwordHash: entry.passwordHash,
                     role: entry.role,
                     rollNumber: entry.rollNumber,
+                    walletBalance: Number(entry.walletBalance ?? 0),
                     isActive: entry.isActive,
                     isApproved: entry.isApproved,
                     createdAt: parseDate(entry.createdAt),
@@ -611,6 +656,12 @@ export const restoreBackup = async (req, res) => {
                     orderNumber: entry.orderNumber,
                     userId: entry.userId,
                     status: parseOrderStatus(entry.status),
+                    serviceLane: entry.serviceLane ?? "REGULAR",
+                    laneToken: entry.laneToken ?? null,
+                    isPreOrder: entry.isPreOrder ?? false,
+                    pickupSlotLabel: entry.pickupSlotLabel ?? null,
+                    pickupSlotStart: entry.pickupSlotStart ? parseDate(entry.pickupSlotStart) : null,
+                    pickupSlotEnd: entry.pickupSlotEnd ? parseDate(entry.pickupSlotEnd) : null,
                     subtotal: entry.subtotal,
                     taxAmount: entry.taxAmount,
                     totalAmount: entry.totalAmount,
@@ -642,6 +693,22 @@ export const restoreBackup = async (req, res) => {
                 }))
             });
         }
+        if (validWalletTransactions.length) {
+            await tx.walletTransaction.createMany({
+                data: validWalletTransactions.map((entry) => ({
+                    id: entry.id,
+                    tenantId,
+                    userId: entry.userId,
+                    amount: entry.amount,
+                    balanceAfter: entry.balanceAfter,
+                    type: parseWalletTransactionType(entry.type),
+                    note: entry.note,
+                    reference: entry.reference,
+                    orderId: entry.orderId,
+                    createdAt: parseDate(entry.createdAt)
+                }))
+            });
+        }
     });
     res.status(200).json({
         success: true,
@@ -656,7 +723,8 @@ export const restoreBackup = async (req, res) => {
                 communityPosts: validCommunityPosts.length,
                 orders: validOrders.length,
                 orderItems: validOrderItems.length,
-                stockMovements: validStockMovements.length
+                stockMovements: validStockMovements.length,
+                walletTransactions: validWalletTransactions.length
             }
         }
     });

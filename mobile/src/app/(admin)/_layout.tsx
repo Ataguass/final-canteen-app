@@ -611,6 +611,16 @@ export default function AdminLayout() {
               <Text style={{ color: "#475569" }}>
                 Items: {incomingOrder?.items.length ?? 0} · {incomingOrder?.paymentMethod ?? "CASH"}
               </Text>
+              {incomingOrder?.serviceLane === "TEACHER_PRIORITY" ? (
+                <Text style={{ color: "#1E40AF", fontWeight: "800" }}>
+                  Teacher Priority Lane{incomingOrder.laneToken ? ` · ${incomingOrder.laneToken}` : ""}
+                </Text>
+              ) : null}
+              {incomingOrder?.isPreOrder && incomingOrder?.pickupSlotLabel ? (
+                <Text style={{ color: "#166534", fontWeight: "700" }}>
+                  Pickup Slot: {incomingOrder.pickupSlotLabel}
+                </Text>
+              ) : null}
               {popupBatchCount > 1 ? (
                 <Text style={{ color: "#1D4ED8", fontWeight: "700" }}>
                   New orders in this alert: {popupBatchCount}

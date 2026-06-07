@@ -62,6 +62,7 @@ export const userService = {
     payload: {
       name?: string;
       phone?: string;
+      email?: string;
       rollNumber?: string;
     }
   ) =>

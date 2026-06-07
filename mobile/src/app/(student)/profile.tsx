@@ -14,6 +14,7 @@ import {
 import { useAuth } from "../../hooks/useAuth";
 import { Order, orderService } from "../../services/orderService";
 import { MyProfile, userService } from "../../services/userService";
+import { WalletTransaction, walletService } from "../../services/walletService";
 
 const activeStatuses = new Set(["PENDING", "ACCEPTED", "PREPARING", "READY"]);
 const formatCurrency = (value: number): string => `₹ ${value.toFixed(2)}`;
@@ -38,16 +39,28 @@ const statusColorMap: Record<string, string> = {
   REFUNDED: "#6B7280"
 };
 
+const roleLabelMap: Record<MyProfile["role"], string> = {
+  SUPER_ADMIN: "Super Admin",
+  ADMIN: "Admin",
+  TEACHER: "Teacher",
+  STUDENT: "Student",
+  STAFF: "Staff",
+  GUEST: "Guest"
+};
+
 export default function Screen() {
   const router = useRouter();
   const { user, accessToken, logout, setSessionUser } = useAuth();
   const [profile, setProfile] = useState<MyProfile | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
+  const [walletBalance, setWalletBalance] = useState<number | null>(null);
+  const [walletTransactions, setWalletTransactions] = useState<WalletTransaction[]>([]);
   const [loading, setLoading] = useState(false);
 
   const [editVisible, setEditVisible] = useState(false);
   const [editName, setEditName] = useState("");
   const [editPhone, setEditPhone] = useState("");
+  const [editEmail, setEditEmail] = useState("");
   const [editRollNumber, setEditRollNumber] = useState("");
   const [savingEdit, setSavingEdit] = useState(false);
 
@@ -56,6 +69,10 @@ export default function Screen() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [savingPassword, setSavingPassword] = useState(false);
+  const [walletModalVisible, setWalletModalVisible] = useState(false);
+  const [topupAmount, setTopupAmount] = useState("");
+  const [topupReference, setTopupReference] = useState("");
+  const [savingTopup, setSavingTopup] = useState(false);
 
   const load = useCallback(async () => {
     if (!user?.tenantId || !user?.id || !accessToken) return;
@@ -80,6 +97,15 @@ export default function Screen() {
         isActive: meRes.data.isActive,
         isApproved: meRes.data.isApproved
       });
+
+      try {
+        const walletRes = await walletService.getMe(accessToken, user.tenantId);
+        setWalletBalance(walletRes.data.balance);
+        setWalletTransactions(walletRes.data.transactions);
+      } catch {
+        setWalletBalance(null);
+        setWalletTransactions([]);
+      }
     } catch (error) {
       Alert.alert(
         "Error",
@@ -122,6 +148,11 @@ export default function Screen() {
     [orders]
   );
 
+  const recentWalletTransactions = useMemo(
+    () => walletTransactions.slice(0, 3),
+    [walletTransactions]
+  );
+
   const profileView = useMemo(() => {
     if (profile) return profile;
     return {
@@ -140,20 +171,34 @@ export default function Screen() {
   }, [profile, user]);
 
   const completionPercent = useMemo(() => {
-    const checks = [
-      Boolean(profileView.name?.trim()),
-      Boolean(profileView.phone?.trim()),
-      Boolean(profileView.rollNumber?.trim()),
-      Boolean(profileView.email?.trim())
-    ];
+    const checks = profileView.role === "STUDENT"
+      ? [
+          Boolean(profileView.name?.trim()),
+          Boolean(profileView.phone?.trim()),
+          Boolean(profileView.rollNumber?.trim()),
+          Boolean(profileView.email?.trim())
+        ]
+      : [
+          Boolean(profileView.name?.trim()),
+          Boolean(profileView.phone?.trim()),
+          Boolean(profileView.email?.trim())
+        ];
     const completed = checks.filter(Boolean).length;
     return Math.round((completed / checks.length) * 100);
-  }, [profileView.email, profileView.name, profileView.phone, profileView.rollNumber]);
+  }, [profileView.email, profileView.name, profileView.phone, profileView.role, profileView.rollNumber]);
+
+  const isStudentRole = profileView.role === "STUDENT";
+  const canTopUpWallet = profileView.role === "TEACHER" || profileView.role === "STAFF";
+  const profileIdLabel = isStudentRole ? "Roll Number" : "Employee ID";
+  const profileCompletionHint = isStudentRole
+    ? "Add phone, email and roll number for a complete student profile."
+    : "Add phone and email for a complete profile.";
 
   const onOpenEdit = () => {
     const source = profileView;
     setEditName(source.name ?? "");
     setEditPhone(source.phone ?? "");
+    setEditEmail(source.email ?? "");
     setEditRollNumber(source.rollNumber ?? "");
     setEditVisible(true);
   };
@@ -168,12 +213,17 @@ export default function Screen() {
       Alert.alert("Invalid phone", "Phone must be exactly 10 digits.");
       return;
     }
+    if (editEmail.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(editEmail.trim())) {
+      Alert.alert("Invalid email", "Please enter a valid email address.");
+      return;
+    }
 
     try {
       setSavingEdit(true);
       const response = await userService.updateMe(accessToken, user.tenantId, {
         name: editName.trim(),
         phone: editPhone.trim(),
+        email: editEmail.trim(),
         rollNumber: editRollNumber.trim()
       });
       setProfile(response.data);
@@ -248,6 +298,40 @@ export default function Screen() {
     }
   };
 
+  const onTopupWallet = async () => {
+    if (!user?.tenantId || !accessToken) return;
+    const amount = Number(topupAmount);
+    if (!Number.isFinite(amount) || amount <= 0) {
+      Alert.alert("Invalid amount", "Enter a valid top-up amount.");
+      return;
+    }
+    if (amount > 50000) {
+      Alert.alert("Limit reached", "Maximum top-up is ₹ 50,000 per transaction.");
+      return;
+    }
+
+    try {
+      setSavingTopup(true);
+      const response = await walletService.topUp(accessToken, user.tenantId, {
+        amount,
+        upiReference: topupReference.trim() || undefined
+      });
+      setWalletBalance(response.data.balance);
+      setWalletTransactions((prev) => [response.data.transaction, ...prev].slice(0, 20));
+      setWalletModalVisible(false);
+      setTopupAmount("");
+      setTopupReference("");
+      Alert.alert("Top-up successful", `New balance: ${formatCurrency(response.data.balance)}`);
+    } catch (error) {
+      Alert.alert(
+        "Top-up failed",
+        error instanceof Error ? error.message : "Could not top up wallet"
+      );
+    } finally {
+      setSavingTopup(false);
+    }
+  };
+
   const avatarLetter = useMemo(
     () => (profileView.name?.charAt(0) ?? "S").toUpperCase(),
     [profileView.name]
@@ -268,7 +352,7 @@ export default function Screen() {
             <View style={{ flex: 1 }}>
               <Text style={styles.heroName}>{profileView.name}</Text>
               <Text style={styles.heroRole}>
-                {profileView.role} • {profileView.phone ?? "No phone"}
+                {roleLabelMap[profileView.role]} • {profileView.phone ?? "No phone"}
               </Text>
             </View>
             <Pressable
@@ -319,15 +403,17 @@ export default function Screen() {
             />
           </View>
           <Text style={styles.helperText}>
-            Add phone, email and roll number for a complete student profile.
+            {profileCompletionHint}
           </Text>
         </View>
 
         <View style={styles.infoCard}>
           <Text style={styles.sectionTitle}>Account Information</Text>
+          <Text style={styles.infoLine}>Account Type: {roleLabelMap[profileView.role]}</Text>
           <Text style={styles.infoLine}>Tenant ID: {profileView.tenantId || "-"}</Text>
+          <Text style={styles.infoLine}>Phone: {profileView.phone || "-"}</Text>
           <Text style={styles.infoLine}>Email: {profileView.email || "-"}</Text>
-          <Text style={styles.infoLine}>Roll Number: {profileView.rollNumber || "-"}</Text>
+          <Text style={styles.infoLine}>{profileIdLabel}: {profileView.rollNumber || "-"}</Text>
           <Text style={styles.infoLine}>Member Since: {formatDate(profileView.createdAt)}</Text>
           <Text style={styles.infoLine}>Last Updated: {formatDate(profileView.updatedAt)}</Text>
         </View>
@@ -349,6 +435,47 @@ export default function Screen() {
             <Text style={styles.statLabel}>Total Spend</Text>
             <Text style={styles.statValueSm}>{formatCurrency(stats.totalSpend)}</Text>
           </View>
+        </View>
+
+        <View style={styles.walletCard}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Wallet</Text>
+            <Text style={styles.walletBalanceText}>
+              {walletBalance === null ? "Not available" : formatCurrency(walletBalance)}
+            </Text>
+          </View>
+          <Text style={styles.helperText}>Use wallet for faster checkout in class or at canteen.</Text>
+          {canTopUpWallet ? (
+            <Pressable
+              onPress={() => setWalletModalVisible(true)}
+              style={styles.walletTopupBtn}
+            >
+              <Ionicons name="add-circle-outline" size={16} color="white" />
+              <Text style={styles.walletTopupBtnText}>Top Up via UPI</Text>
+            </Pressable>
+          ) : null}
+          {recentWalletTransactions.length > 0 ? (
+            <View style={styles.walletTxnList}>
+              {recentWalletTransactions.map((txn) => {
+                const isCredit = txn.amount > 0;
+                return (
+                  <View key={txn.id} style={styles.walletTxnRow}>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.walletTxnType}>{txn.type.replaceAll("_", " ")}</Text>
+                      <Text style={styles.walletTxnDate}>
+                        {new Date(txn.createdAt).toLocaleString()}
+                      </Text>
+                    </View>
+                    <Text style={[styles.walletTxnAmount, isCredit ? styles.walletTxnCredit : styles.walletTxnDebit]}>
+                      {isCredit ? "+" : ""}{formatCurrency(txn.amount)}
+                    </Text>
+                  </View>
+                );
+              })}
+            </View>
+          ) : (
+            <Text style={styles.helperText}>No wallet transactions yet.</Text>
+          )}
         </View>
 
         <View style={styles.sectionHeader}>
@@ -445,9 +572,17 @@ export default function Screen() {
               style={styles.modalInput}
             />
             <TextInput
+              value={editEmail}
+              onChangeText={setEditEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              placeholder="Email (optional)"
+              style={styles.modalInput}
+            />
+            <TextInput
               value={editRollNumber}
               onChangeText={setEditRollNumber}
-              placeholder="Roll Number (optional)"
+              placeholder={`${profileIdLabel} (optional)`}
               style={styles.modalInput}
             />
             <View style={styles.modalActions}>
@@ -513,6 +648,49 @@ export default function Screen() {
               </Pressable>
               <Pressable
                 onPress={() => setPasswordVisible(false)}
+                style={[styles.modalActionBtn, styles.modalActionSecondary]}
+              >
+                <Text style={styles.modalActionSecondaryText}>Cancel</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        visible={walletModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setWalletModalVisible(false)}
+      >
+        <View style={styles.modalBackdrop}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Top Up Wallet (UPI)</Text>
+            <TextInput
+              value={topupAmount}
+              onChangeText={setTopupAmount}
+              keyboardType="numeric"
+              placeholder="Amount"
+              style={styles.modalInput}
+            />
+            <TextInput
+              value={topupReference}
+              onChangeText={setTopupReference}
+              placeholder="UPI Reference (optional)"
+              style={styles.modalInput}
+            />
+            <View style={styles.modalActions}>
+              <Pressable
+                onPress={onTopupWallet}
+                disabled={savingTopup}
+                style={[styles.modalActionBtn, styles.modalActionPrimary]}
+              >
+                <Text style={styles.modalActionPrimaryText}>
+                  {savingTopup ? "Processing..." : "Top Up"}
+                </Text>
+              </Pressable>
+              <Pressable
+                onPress={() => setWalletModalVisible(false)}
                 style={[styles.modalActionBtn, styles.modalActionSecondary]}
               >
                 <Text style={styles.modalActionSecondaryText}>Cancel</Text>
@@ -636,6 +814,67 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     padding: 12,
     gap: 6
+  },
+  walletCard: {
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    backgroundColor: "white",
+    padding: 12,
+    gap: 8
+  },
+  walletBalanceText: {
+    color: "#059669",
+    fontWeight: "900",
+    fontSize: 18
+  },
+  walletTopupBtn: {
+    backgroundColor: "#0F172A",
+    borderRadius: 10,
+    paddingVertical: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6
+  },
+  walletTopupBtnText: {
+    color: "white",
+    fontWeight: "700"
+  },
+  walletTxnList: {
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    borderRadius: 10,
+    overflow: "hidden"
+  },
+  walletTxnRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 10,
+    paddingVertical: 9,
+    borderTopWidth: 1,
+    borderTopColor: "#F1F5F9"
+  },
+  walletTxnType: {
+    color: "#0F172A",
+    fontWeight: "700",
+    fontSize: 12
+  },
+  walletTxnDate: {
+    color: "#64748B",
+    fontWeight: "500",
+    marginTop: 2,
+    fontSize: 12
+  },
+  walletTxnAmount: {
+    fontWeight: "800"
+  },
+  walletTxnCredit: {
+    color: "#059669"
+  },
+  walletTxnDebit: {
+    color: "#DC2626"
   },
   sectionHeader: {
     flexDirection: "row",

@@ -103,6 +103,7 @@ export default function Screen() {
   const [paymentModalVisible, setPaymentModalVisible] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("CASH");
   const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>("PAID");
+  const [walletCustomerPhone, setWalletCustomerPhone] = useState("");
   const [paymentNote, setPaymentNote] = useState("");
   const [paymentAmount, setPaymentAmount] = useState("0");
   const [loading, setLoading] = useState(false);
@@ -263,6 +264,7 @@ export default function Screen() {
     setPaymentAmount("0");
     setPaymentMethod("CASH");
     setPaymentStatus("PAID");
+    setWalletCustomerPhone("");
   };
 
   const holdOrder = () => {
@@ -343,7 +345,8 @@ export default function Screen() {
         queued.map((entry) => ({
           items: entry.items,
           paymentMethod: entry.paymentMethod,
-          paymentStatus: entry.paymentStatus
+          paymentStatus: entry.paymentStatus,
+          customerPhone: entry.customerPhone
         }))
       );
       await offlineOrderQueue.clear(user.tenantId, user.id);
@@ -507,13 +510,18 @@ export default function Screen() {
       Alert.alert("Cart empty", "Add at least one item");
       return;
     }
+    if (paymentMethod === "WALLET" && !/^\d{10}$/.test(walletCustomerPhone.trim())) {
+      Alert.alert("Customer phone required", "Enter 10-digit teacher/staff phone for wallet payment.");
+      return;
+    }
 
     try {
       setLoading(true);
       const order = await orderService.placeOrder(accessToken, user.tenantId, {
         items: currentOrderItems,
         paymentMethod,
-        paymentStatus
+        paymentStatus,
+        customerPhone: paymentMethod === "WALLET" ? walletCustomerPhone.trim() : undefined
       });
       const placedOrder = order.data;
       setPaymentModalVisible(false);
@@ -533,6 +541,7 @@ export default function Screen() {
             items: currentOrderItems,
             paymentMethod,
             paymentStatus,
+            customerPhone: paymentMethod === "WALLET" ? walletCustomerPhone.trim() : undefined,
             source: "POS"
           });
           setPaymentModalVisible(false);
@@ -878,7 +887,7 @@ export default function Screen() {
 
               <Text style={styles.inputLabel}>Payment Type</Text>
               <View style={styles.chipRow}>
-                {(["CASH", "UPI", "CARD", "OTHER"] as PaymentMethod[]).map((method) => {
+                {(["CASH", "UPI", "WALLET", "CARD", "OTHER"] as PaymentMethod[]).map((method) => {
                   const active = paymentMethod === method;
                   return (
                     <Pressable
@@ -898,6 +907,20 @@ export default function Screen() {
                   );
                 })}
               </View>
+
+              {paymentMethod === "WALLET" ? (
+                <>
+                  <Text style={styles.inputLabel}>Teacher/Staff Phone (Wallet)</Text>
+                  <TextInput
+                    value={walletCustomerPhone}
+                    onChangeText={setWalletCustomerPhone}
+                    keyboardType="phone-pad"
+                    placeholder="10-digit customer phone"
+                    maxLength={10}
+                    style={styles.input}
+                  />
+                </>
+              ) : null}
 
               <Text style={styles.inputLabel}>Note</Text>
               <TextInput
