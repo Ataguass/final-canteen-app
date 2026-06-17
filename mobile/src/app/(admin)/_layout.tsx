@@ -1,3 +1,4 @@
+import { useTheme } from '../../hooks/useTheme';
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs, usePathname, useRouter } from "expo-router";
 import { Audio } from "expo-av";
@@ -121,6 +122,7 @@ const getHeaderMeta = (pathname: string, firstName: string) => {
 };
 
 export default function AdminLayout() {
+  const { colors, isDark, toggleTheme } = useTheme();
   const router = useRouter();
   const pathname = usePathname();
   const { user, logout } = useAuth();
@@ -328,9 +330,9 @@ export default function AdminLayout() {
         screenOptions={{
           headerShown: true,
           tabBarActiveTintColor: "#FF6B35",
-          tabBarInactiveTintColor: "#64748B",
+          tabBarInactiveTintColor: "colors.textSecondary",
           headerStyle: {
-            backgroundColor: "#EEF2F7",
+            backgroundColor: colors.headerBg,
             elevation: 0,
             shadowOpacity: 0,
             borderBottomWidth: 0,
@@ -339,11 +341,11 @@ export default function AdminLayout() {
           headerTitleAlign: "left",
           headerTitle: () => (
             <View style={{ alignItems: "flex-start", marginLeft: 4 }}>
-              <Text style={{ color: "#0F172A", fontSize: 18, fontWeight: "800" }}>{headerMeta.title}</Text>
+              <Text style={{ color: colors.text, fontSize: 18, fontWeight: "800" }}>{headerMeta.title}</Text>
               <Text 
                 numberOfLines={1}
                 ellipsizeMode="tail"
-                style={{ color: "#64748B", fontSize: 13, fontWeight: "500", marginTop: 2, maxWidth: 220 }}
+                style={{ color: colors.textSecondary, fontSize: 13, fontWeight: "500", marginTop: 2, maxWidth: 220 }}
               >
                 {headerMeta.subtitle}
               </Text>
@@ -372,7 +374,7 @@ export default function AdminLayout() {
                       }
                     ]}
                   >
-                    <Ionicons name="arrow-back" size={24} color="#0F172A" />
+                    <Ionicons name="arrow-back" size={24} color="colors.text" />
                   </Pressable>
                 ) : (
                   <Pressable
@@ -391,7 +393,7 @@ export default function AdminLayout() {
                       }
                     ]}
                   >
-                    <Ionicons name="menu" size={26} color="#0F172A" />
+                    <Ionicons name="menu" size={26} color="colors.text" />
                   </Pressable>
                 )}
               </View>
@@ -400,12 +402,12 @@ export default function AdminLayout() {
           headerRight: () => (
             <View style={{ marginRight: 16, flexDirection: "row", alignItems: "center", gap: 12 }}>
               <Pressable
-                onPress={() => Alert.alert("Dark Mode", "Dark mode is coming soon!")}
+                onPress={toggleTheme}
                 style={({ pressed }) => [
                   { padding: 4, opacity: pressed ? 0.7 : 1 }
                 ]}
               >
-                <Ionicons name="moon-outline" size={24} color="#0F172A" />
+                <Ionicons name={isDark ? "sunny-outline" : "moon-outline"} size={24} color="colors.text" />
               </Pressable>
 
               <Pressable
@@ -414,7 +416,7 @@ export default function AdminLayout() {
                   { padding: 4, opacity: pressed ? 0.7 : 1 }
                 ]}
               >
-                <Ionicons name="notifications-outline" size={24} color="#0F172A" />
+                <Ionicons name="notifications-outline" size={24} color="colors.text" />
                 {newOrderCount > 0 ? (
                   <View
                     style={{
@@ -428,7 +430,7 @@ export default function AdminLayout() {
                       alignItems: "center",
                       justifyContent: "center",
                       borderWidth: 2,
-                      borderColor: "#EEF2F7"
+                      borderColor: colors.headerBg
                     }}
                   >
                     <Text style={{ color: "white", fontSize: 10, fontWeight: "800" }}>
@@ -444,8 +446,8 @@ export default function AdminLayout() {
                   { padding: 2, opacity: pressed ? 0.7 : 1 }
                 ]}
               >
-                <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: "#E2E8F0", alignItems: "center", justifyContent: "center" }}>
-                  <Text style={{ color: "#0F172A", fontWeight: "700", fontSize: 16 }}>{avatarText}</Text>
+                <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: colors.border, alignItems: "center", justifyContent: "center" }}>
+                  <Text style={{ color: colors.text, fontWeight: "700", fontSize: 16 }}>{avatarText}</Text>
                 </View>
               </Pressable>
             </View>
@@ -508,7 +510,7 @@ export default function AdminLayout() {
             <Animated.View
               style={{
                 flex: 1,
-                backgroundColor: "#0F172A",
+                backgroundColor: colors.text,
                 opacity: Animated.multiply(backdropOpacity, 0.45)
               }}
             />
@@ -518,30 +520,30 @@ export default function AdminLayout() {
             style={{
               width: drawerWidth,
               height: "100%",
-              backgroundColor: "#F8FAFC",
+              backgroundColor: colors.background,
               borderTopRightRadius: 24,
               borderBottomRightRadius: 24,
               overflow: "hidden",
               transform: [{ translateX: drawerTranslateX }],
-              shadowColor: "#0F172A",
+              shadowColor: "colors.text",
               shadowOpacity: 0.18,
               shadowRadius: 18,
               shadowOffset: { width: 4, height: 0 },
               elevation: 12
             }}
           >
-            <View style={{ paddingHorizontal: 24, paddingTop: 64, paddingBottom: 24, backgroundColor: "#F8FAFC", borderBottomWidth: 1, borderColor: "#E2E8F0", flexDirection: "row", alignItems: "center", gap: 14 }}>
+            <View style={{ paddingHorizontal: 24, paddingTop: 64, paddingBottom: 24, backgroundColor: colors.background, borderBottomWidth: 1, borderColor: colors.border, flexDirection: "row", alignItems: "center", gap: 14 }}>
               <Image source={require("../../assets/images/canteen_logo_final.png")} style={{ width: 44, height: 44, borderRadius: 10 }} resizeMode="contain" />
               <View style={{ flex: 1 }}>
-                <Text style={{ color: "#0F172A", fontWeight: "900", fontSize: 20, letterSpacing: -0.5 }}>Canteen Admin</Text>
-                <Text style={{ color: "#64748B", fontSize: 13, fontWeight: "600" }}>Management Portal</Text>
+                <Text style={{ color: colors.text, fontWeight: "900", fontSize: 20, letterSpacing: -0.5 }}>Canteen Admin</Text>
+                <Text style={{ color: colors.textSecondary, fontSize: 13, fontWeight: "600" }}>Management Portal</Text>
               </View>
             </View>
 
             <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 20, paddingBottom: 32, gap: 20 }}>
               {drawerSections.map((section, index) => (
                 <View key={section.title} style={{ gap: 6 }}>
-                  <Text style={{ color: "#94A3B8", fontWeight: "800", fontSize: 11, letterSpacing: 1.2, paddingHorizontal: 12, marginBottom: 4 }}>
+                  <Text style={{ color: colors.textMuted, fontWeight: "800", fontSize: 11, letterSpacing: 1.2, paddingHorizontal: 12, marginBottom: 4 }}>
                     {section.title}
                   </Text>
 
@@ -562,7 +564,7 @@ export default function AdminLayout() {
                           gap: 14
                         }}
                       >
-                        <Ionicons name={item.icon} size={22} color={active ? "white" : "#64748B"} />
+                        <Ionicons name={item.icon} size={22} color={active ? "white" : "colors.textSecondary"} />
                         <Text style={{ color: active ? "white" : "#334155", fontWeight: active ? "800" : "600", fontSize: 15, flex: 1 }}>
                           {item.label}
                         </Text>
@@ -573,14 +575,14 @@ export default function AdminLayout() {
               ))}
             </ScrollView>
 
-            <View style={{ padding: 16, borderTopWidth: 1, borderColor: "#E2E8F0", backgroundColor: "#F8FAFC" }}>
+            <View style={{ padding: 16, borderTopWidth: 1, borderColor: colors.border, backgroundColor: colors.background }}>
               <View style={{ flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 12, paddingHorizontal: 8 }}>
-                <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: "#E2E8F0", alignItems: "center", justifyContent: "center" }}>
-                  <Text style={{ color: "#0F172A", fontWeight: "800", fontSize: 16 }}>{avatarText}</Text>
+                <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: colors.border, alignItems: "center", justifyContent: "center" }}>
+                  <Text style={{ color: colors.text, fontWeight: "800", fontSize: 16 }}>{avatarText}</Text>
                 </View>
                 <View style={{ flex: 1 }}>
-                  <Text style={{ color: "#0F172A", fontWeight: "800", fontSize: 15 }}>{user?.name ?? "Admin"}</Text>
-                  <Text style={{ color: "#64748B", fontSize: 12, fontWeight: "500" }}>{user?.email ?? user?.phone ?? "admin@canteen"}</Text>
+                  <Text style={{ color: colors.text, fontWeight: "800", fontSize: 15 }}>{user?.name ?? "Admin"}</Text>
+                  <Text style={{ color: colors.textSecondary, fontSize: 12, fontWeight: "500" }}>{user?.email ?? user?.phone ?? "admin@canteen"}</Text>
                 </View>
               </View>
 
@@ -626,7 +628,7 @@ export default function AdminLayout() {
               backgroundColor: "white",
               borderRadius: 18,
               borderWidth: 1,
-              borderColor: "#E2E8F0",
+              borderColor: colors.border,
               padding: 16,
               gap: 10
             }}
@@ -639,16 +641,16 @@ export default function AdminLayout() {
                   borderRadius: 12,
                   alignItems: "center",
                   justifyContent: "center",
-                  backgroundColor: "#E2E8F0"
+                  backgroundColor: colors.border
                 }}
               >
-                <Ionicons name="notifications" size={20} color="#0F172A" />
+                <Ionicons name="notifications" size={20} color="colors.text" />
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={{ fontSize: 19, fontWeight: "800", color: "#0F172A" }}>
+                <Text style={{ fontSize: 19, fontWeight: "800", color: colors.text }}>
                   {popupBatchCount > 1 ? "New Orders Received" : "New Order Received"}
                 </Text>
-                <Text style={{ color: "#64748B", marginTop: 1 }}>
+                <Text style={{ color: colors.textSecondary, marginTop: 1 }}>
                   {popupBatchCount > 1
                     ? `${popupBatchCount} new orders just arrived.`
                     : "You have received a new order."}
@@ -660,13 +662,13 @@ export default function AdminLayout() {
               style={{
                 borderRadius: 12,
                 borderWidth: 1,
-                borderColor: "#E2E8F0",
-                backgroundColor: "#F8FAFC",
+                borderColor: colors.border,
+                backgroundColor: colors.background,
                 padding: 11,
                 gap: 4
               }}
             >
-              <Text style={{ color: "#0F172A", fontWeight: "800", fontSize: 16 }}>
+              <Text style={{ color: colors.text, fontWeight: "800", fontSize: 16 }}>
                 {popupBatchCount > 1 ? `Latest: ${incomingOrder?.orderNumber ?? "Order"}` : incomingOrder?.orderNumber ?? "Order"}
               </Text>
               <Text style={{ color: "#475569" }}>
@@ -686,7 +688,7 @@ export default function AdminLayout() {
                 </Text>
               ) : null}
               {popupBatchCount > 1 ? (
-                <Text style={{ color: "#0F172A", fontWeight: "700" }}>
+                <Text style={{ color: colors.text, fontWeight: "700" }}>
                   New orders in this alert: {popupBatchCount}
                 </Text>
               ) : null}
@@ -700,7 +702,7 @@ export default function AdminLayout() {
                   borderRadius: 12,
                   borderWidth: 1,
                   borderColor: "#CBD5E1",
-                  backgroundColor: "#F8FAFC",
+                  backgroundColor: colors.background,
                   paddingVertical: 11,
                   alignItems: "center"
                 }}

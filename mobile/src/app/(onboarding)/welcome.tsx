@@ -6,12 +6,15 @@ import Animated, { FadeIn, FadeInDown, SlideInDown, withRepeat, withTiming, with
 import { useContext, useEffect } from "react";
 import { OnboardingContext } from "../_layout";
 import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../utils/responsive';
+import { useTheme } from '../../hooks/useTheme';
 
 const { width } = Dimensions.get('window');
 
 const BRAND_COLOR = "#080d2b"; // Navy Blue from logo
 
 export default function WelcomeScreen() {
+  const { colors, isDark } = useTheme();
+  const styles = createStyles(colors);
   const router = useRouter();
   const { completeOnboarding } = useContext(OnboardingContext);
 
@@ -111,10 +114,10 @@ export default function WelcomeScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fafbfc',
+    backgroundColor: colors.background,
   },
   header: {
     flexDirection: 'row',
@@ -138,7 +141,7 @@ const styles = StyleSheet.create({
   skipText: {
     fontSize: fontScale(16),
     fontWeight: '600',
-    color: '#8e8e93',
+    color: colors.textMuted,
   },
   mainContent: {
     flex: 1,
@@ -175,7 +178,7 @@ const styles = StyleSheet.create({
   floatingBadge: {
     position: 'absolute',
     padding: moderateScale(6),
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.card,
     borderRadius: moderateScale(32),
     elevation: 8,
     shadowColor: '#000',
@@ -219,7 +222,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: fontScale(34),
     fontWeight: '800',
-    color: '#1c1c1e',
+    color: colors.text,
     textAlign: 'center',
     lineHeight: 42,
     letterSpacing: -1,

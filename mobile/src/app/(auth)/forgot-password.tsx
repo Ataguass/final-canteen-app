@@ -4,10 +4,13 @@ import { Alert, Pressable, Text, TextInput, View, StyleSheet, KeyboardAvoidingVi
 import { Ionicons } from "@expo/vector-icons";
 import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
 import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../utils/responsive';
+import { useTheme } from '../../hooks/useTheme';
 
 const BRAND_COLOR = "#080d2b";
 
 export default function ForgotPasswordScreen() {
+  const { colors, isDark } = useTheme();
+  const styles = createStyles(colors);
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
@@ -82,10 +85,10 @@ export default function ForgotPasswordScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fafbfc',
+    backgroundColor: colors.background,
   },
   content: {
     flex: 1,
@@ -120,13 +123,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: fontScale(28),
     fontWeight: '800',
-    color: '#1c1c1e',
+    color: colors.text,
     marginBottom: verticalScale(8),
     letterSpacing: -0.5,
   },
   subtitle: {
     fontSize: fontScale(16),
-    color: '#8e8e93',
+    color: colors.textMuted,
     textAlign: 'center',
     lineHeight: 24,
     paddingHorizontal: moderateScale(20),
@@ -137,9 +140,9 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.card,
     borderWidth: 1,
-    borderColor: '#e5e5ea',
+    borderColor: colors.border,
     borderRadius: moderateScale(16),
     paddingHorizontal: moderateScale(16),
     height: moderateScale(56),
@@ -150,7 +153,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: fontScale(16),
-    color: '#1c1c1e',
+    color: colors.text,
     height: '100%',
   },
   primaryButton: {

@@ -1,3 +1,4 @@
+import { useTheme } from '../../hooks/useTheme';
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs, usePathname, useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -68,6 +69,7 @@ const getHeaderTitle = (pathname: string, role?: string): string => {
 };
 
 export default function StudentLayout() {
+  const { colors, isDark, toggleTheme } = useTheme();
   const router = useRouter();
   const pathname = usePathname();
   const { user, logout } = useAuth();
@@ -150,65 +152,65 @@ export default function StudentLayout() {
         backBehavior="history"
         screenOptions={{
           headerShown: false,
-          headerStyle: { backgroundColor: "#F8FAFC" },
+          headerStyle: { backgroundColor: colors.background },
           headerShadowVisible: true,
-          headerTitleStyle: { color: "#0F172A", fontWeight: "800", fontSize: 20 },
+          headerTitleStyle: { color: colors.text, fontWeight: "800", fontSize: 20 },
           headerTitle: headerTitle,
           tabBarActiveTintColor: "#FF6B35",
           tabBarInactiveTintColor: "#6B7280",
           headerLeft: () => (
             <Pressable
               onPress={openDrawer}
-              android_ripple={{ color: "#E2E8F0", borderless: true }}
+              android_ripple={{ color: colors.border, borderless: true }}
               style={{
                 marginLeft: 10,
                 width: 40,
                 height: 40,
                 borderRadius: 10,
                 borderWidth: 1,
-                borderColor: "#E2E8F0",
+                borderColor: colors.border,
                 backgroundColor: "white",
                 alignItems: "center",
                 justifyContent: "center"
               }}
             >
-              <Ionicons name="menu-outline" size={22} color="#0F172A" />
+              <Ionicons name="menu-outline" size={22} color="colors.text" />
             </Pressable>
           ),
           headerRight: () => (
             <View style={{ marginRight: 10, flexDirection: "row", alignItems: "center", gap: 8 }}>
               <Pressable
                 onPress={() => router.push("/(student)/search")}
-                android_ripple={{ color: "#E2E8F0", borderless: true }}
+                android_ripple={{ color: colors.border, borderless: true }}
                 style={{
                   width: 40,
                   height: 40,
                   borderRadius: 10,
                   borderWidth: 1,
-                  borderColor: "#E2E8F0",
+                  borderColor: colors.border,
                   backgroundColor: "white",
                   alignItems: "center",
                   justifyContent: "center"
                 }}
               >
-                <Ionicons name="search-outline" size={20} color="#0F172A" />
+                <Ionicons name="search-outline" size={20} color="colors.text" />
               </Pressable>
 
               <Pressable
                 onPress={() => router.push("/cart")}
-                android_ripple={{ color: "#E2E8F0", borderless: true }}
+                android_ripple={{ color: colors.border, borderless: true }}
                 style={{
                   width: 40,
                   height: 40,
                   borderRadius: 10,
                   borderWidth: 1,
-                  borderColor: "#E2E8F0",
+                  borderColor: colors.border,
                   backgroundColor: "white",
                   alignItems: "center",
                   justifyContent: "center"
                 }}
               >
-                <Ionicons name="cart-outline" size={20} color="#0F172A" />
+                <Ionicons name="cart-outline" size={20} color="colors.text" />
                 {itemCount > 0 ? (
                   <View
                     style={{
@@ -233,12 +235,12 @@ export default function StudentLayout() {
 
               <Pressable
                 onPress={() => setProfileMenuVisible((prev) => !prev)}
-                android_ripple={{ color: "#E2E8F0", borderless: true }}
+                android_ripple={{ color: colors.border, borderless: true }}
                 style={{
                   width: 40,
                   height: 40,
                   borderRadius: 12,
-                  backgroundColor: "#0F172A",
+                  backgroundColor: colors.text,
                   alignItems: "center",
                   justifyContent: "center"
                 }}
@@ -324,7 +326,7 @@ export default function StudentLayout() {
               width: 210,
               borderRadius: 12,
               borderWidth: 1,
-              borderColor: "#E2E8F0",
+              borderColor: colors.border,
               backgroundColor: "white",
               padding: 8,
               gap: 4
@@ -344,8 +346,8 @@ export default function StudentLayout() {
                 gap: 8
               }}
             >
-              <Ionicons name="person-outline" size={16} color="#0F172A" />
-              <Text style={{ color: "#0F172A", fontWeight: "700" }}>My Profile</Text>
+              <Ionicons name="person-outline" size={16} color="colors.text" />
+              <Text style={{ color: colors.text, fontWeight: "700" }}>My Profile</Text>
             </Pressable>
             <Pressable
               onPress={() => {
@@ -361,8 +363,8 @@ export default function StudentLayout() {
                 gap: 8
               }}
             >
-              <Ionicons name="receipt-outline" size={16} color="#0F172A" />
-              <Text style={{ color: "#0F172A", fontWeight: "700" }}>My Orders</Text>
+              <Ionicons name="receipt-outline" size={16} color="colors.text" />
+              <Text style={{ color: colors.text, fontWeight: "700" }}>My Orders</Text>
             </Pressable>
             <Pressable
               onPress={onLogout}
@@ -389,7 +391,7 @@ export default function StudentLayout() {
             <Animated.View
               style={{
                 flex: 1,
-                backgroundColor: "#0F172A",
+                backgroundColor: colors.text,
                 opacity: Animated.multiply(backdropOpacity, 0.45)
               }}
             />
@@ -399,19 +401,19 @@ export default function StudentLayout() {
             style={{
               width: drawerWidth,
               height: "100%",
-              backgroundColor: "#F8FAFC",
+              backgroundColor: colors.background,
               borderTopRightRadius: 24,
               borderBottomRightRadius: 24,
               overflow: "hidden",
               transform: [{ translateX: drawerTranslateX }],
-              shadowColor: "#0F172A",
+              shadowColor: "colors.text",
               shadowOpacity: 0.18,
               shadowRadius: 18,
               shadowOffset: { width: 4, height: 0 },
               elevation: 12
             }}
           >
-            <View style={{ paddingHorizontal: 16, paddingTop: 54, paddingBottom: 14, backgroundColor: "#0F172A" }}>
+            <View style={{ paddingHorizontal: 16, paddingTop: 54, paddingBottom: 14, backgroundColor: colors.text }}>
               <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
                 <View
                   style={{
@@ -440,7 +442,7 @@ export default function StudentLayout() {
                     <Pressable
                       key={item.path}
                       onPress={() => navigateFromDrawer(item.path)}
-                      android_ripple={{ color: "#E2E8F0" }}
+                      android_ripple={{ color: colors.border }}
                       style={{
                         borderRadius: 16,
                         backgroundColor: active ? "rgba(255, 107, 53, 0.1)" : "transparent",
@@ -464,8 +466,8 @@ export default function StudentLayout() {
                           }}
                         />
                       )}
-                      <Ionicons name={item.icon} size={22} color={active ? "#FF6B35" : "#64748B"} />
-                      <Text style={{ color: active ? "#FF6B35" : "#0F172A", fontWeight: active ? "800" : "600", fontSize: 15 }}>
+                      <Ionicons name={item.icon} size={22} color={active ? "#FF6B35" : "colors.textSecondary"} />
+                      <Text style={{ color: active ? "#FF6B35" : "colors.text", fontWeight: active ? "800" : "600", fontSize: 15 }}>
                         {item.label}
                       </Text>
                     </Pressable>
@@ -476,16 +478,16 @@ export default function StudentLayout() {
               <View
                 style={{
                   borderTopWidth: 1,
-                  borderTopColor: "#E2E8F0",
+                  borderTopColor: colors.border,
                   paddingHorizontal: 16,
                   paddingTop: 16,
                   paddingBottom: 24,
-                  backgroundColor: "#F8FAFC"
+                  backgroundColor: colors.background
                 }}
               >
                 <Pressable
                   onPress={() => closeDrawer(() => onLogout().catch(() => undefined))}
-                  android_ripple={{ color: "#E2E8F0" }}
+                  android_ripple={{ color: colors.border }}
                   style={{
                     borderRadius: 16,
                     backgroundColor: "transparent",

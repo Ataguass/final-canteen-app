@@ -6,6 +6,7 @@ import { useAuth } from "../../../hooks/useAuth";
 import { useOrderSocket } from "../../../hooks/useOrderSocket";
 import { Order, orderService } from "../../../services/orderService";
 import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../../utils/responsive';
+import { useTheme } from '../../../hooks/useTheme';
 
 type StatusFilter =
   | "ALL"
@@ -45,6 +46,8 @@ const isSameDay = (a: Date, b: Date): boolean =>
   a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 
 export default function Screen() {
+  const { colors, isDark } = useTheme();
+  const styles = createStyles(colors);
   const router = useRouter();
   const { user, accessToken } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
@@ -200,8 +203,8 @@ export default function Screen() {
                         </View>
                       ) : null}
                       {order.laneToken ? (
-                        <View style={[styles.tagPill, { backgroundColor: "#F1F5F9" }]}>
-                          <Text style={[styles.tagText, { color: "#334155" }]}>Token: {order.laneToken}</Text>
+                        <View style={[styles.tagPill, { backgroundColor: colors.surfaceAlt }]}>
+                          <Text style={[styles.tagText, { color: colors.text }]}>Token: {order.laneToken}</Text>
                         </View>
                       ) : null}
                       {order.isPreOrder && order.pickupSlotLabel ? (
@@ -228,10 +231,10 @@ export default function Screen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#F8FAFC"
+    backgroundColor: colors.background
   },
   scroll: {
     flex: 1
@@ -249,10 +252,10 @@ const styles = StyleSheet.create({
   pageTitle: {
     fontSize: fontScale(24),
     fontWeight: "900",
-    color: "#0F172A"
+    color: colors.text
   },
   lastUpdatedText: {
-    color: "#64748B",
+    color: colors.textSecondary,
     fontSize: fontScale(13),
     fontWeight: "500",
     marginTop: verticalScale(2)
@@ -264,7 +267,7 @@ const styles = StyleSheet.create({
   },
   statCard: {
     width: "48%",
-    backgroundColor: "white",
+    backgroundColor: colors.card,
     borderRadius: moderateScale(16),
     padding: moderateScale(14),
     shadowColor: "#000",
@@ -274,7 +277,7 @@ const styles = StyleSheet.create({
     elevation: 2
   },
   statLabel: {
-    color: "#64748B",
+    color: colors.textSecondary,
     fontWeight: "700",
     fontSize: fontScale(12)
   },
@@ -289,7 +292,7 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "white",
+    backgroundColor: colors.card,
     borderRadius: moderateScale(16),
     paddingHorizontal: moderateScale(14),
     height: moderateScale(50),
@@ -305,7 +308,7 @@ const styles = StyleSheet.create({
     marginLeft: moderateScale(10),
     fontSize: fontScale(15),
     fontWeight: "500",
-    color: "#0F172A"
+    color: colors.text
   },
   filterScroll: {
     gap: moderateScale(8)
@@ -323,8 +326,8 @@ const styles = StyleSheet.create({
     borderColor: "#0F172A"
   },
   filterChipInactive: {
-    backgroundColor: "white",
-    borderColor: "#E2E8F0"
+    backgroundColor: colors.card,
+    borderColor: colors.border
   },
   filterChipText: {
     fontWeight: "800",
@@ -334,7 +337,7 @@ const styles = StyleSheet.create({
     color: "white"
   },
   filterChipTextInactive: {
-    color: "#475569"
+    color: colors.textSecondary
   },
   listHeader: {
     flexDirection: "row",
@@ -345,26 +348,26 @@ const styles = StyleSheet.create({
   listTitle: {
     fontSize: fontScale(18),
     fontWeight: "900",
-    color: "#0F172A"
+    color: colors.text
   },
   listSubtitle: {
-    color: "#64748B",
+    color: colors.textSecondary,
     fontWeight: "700",
     fontSize: fontScale(13)
   },
   emptyCard: {
-    backgroundColor: "white",
+    backgroundColor: colors.card,
     borderRadius: moderateScale(20),
     padding: moderateScale(30),
     alignItems: "center",
     justifyContent: "center",
     gap: moderateScale(12),
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: colors.border,
     borderStyle: "dashed"
   },
   emptyText: {
-    color: "#64748B",
+    color: colors.textSecondary,
     fontWeight: "600",
     fontSize: fontScale(15)
   },
@@ -372,7 +375,7 @@ const styles = StyleSheet.create({
     gap: moderateScale(12)
   },
   orderCard: {
-    backgroundColor: "white",
+    backgroundColor: colors.card,
     borderRadius: moderateScale(20),
     padding: moderateScale(16),
     gap: moderateScale(12),
@@ -390,10 +393,10 @@ const styles = StyleSheet.create({
   orderNumber: {
     fontSize: fontScale(18),
     fontWeight: "900",
-    color: "#0F172A"
+    color: colors.text
   },
   orderDate: {
-    color: "#64748B",
+    color: colors.textSecondary,
     fontSize: fontScale(12),
     fontWeight: "500",
     marginTop: verticalScale(2)
@@ -432,12 +435,12 @@ const styles = StyleSheet.create({
     borderColor: "#F1F5F9"
   },
   orderItemsText: {
-    color: "#475569",
+    color: colors.textSecondary,
     fontWeight: "600",
     fontSize: fontScale(13)
   },
   orderTotalText: {
-    color: "#0F172A",
+    color: colors.text,
     fontWeight: "900",
     fontSize: fontScale(18)
   }

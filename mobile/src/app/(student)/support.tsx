@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../utils/responsive';
+import { useTheme } from '../../hooks/useTheme';
 
 const faqs = [
   {
@@ -28,6 +29,8 @@ const faqs = [
 ];
 
 export default function SupportScreen() {
+  const { colors, isDark } = useTheme();
+  const styles = createStyles(colors);
   const router = useRouter();
   const insets = useSafeAreaInsets();
   
@@ -103,10 +106,10 @@ export default function SupportScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#F8FAFC"
+    backgroundColor: colors.background
   },
   topNav: {
     flexDirection: "row",
@@ -119,7 +122,7 @@ const styles = StyleSheet.create({
     width: moderateScale(40),
     height: moderateScale(40),
     borderRadius: moderateScale(20),
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.card,
     alignItems: "center",
     justifyContent: "center",
     shadowColor: "#0F172A",
@@ -131,7 +134,7 @@ const styles = StyleSheet.create({
   topNavTitle: {
     fontSize: fontScale(18),
     fontWeight: "900",
-    color: "#0F172A"
+    color: colors.text
   },
   content: {
     padding: moderateScale(16),
@@ -168,7 +171,7 @@ const styles = StyleSheet.create({
     color: "white"
   },
   contactSub: {
-    color: "#94A3B8",
+    color: colors.textMuted,
     fontSize: fontScale(13),
     marginTop: verticalScale(4),
     lineHeight: 18
@@ -193,16 +196,16 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: fontScale(18),
     fontWeight: "900",
-    color: "#0F172A"
+    color: colors.text
   },
   faqContainer: {
     gap: moderateScale(12)
   },
   faqCard: {
-    backgroundColor: "white",
+    backgroundColor: colors.card,
     borderRadius: moderateScale(16),
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: colors.border,
     overflow: "hidden"
   },
   faqHeader: {
@@ -214,7 +217,7 @@ const styles = StyleSheet.create({
   faqQuestion: {
     fontSize: fontScale(15),
     fontWeight: "800",
-    color: "#0F172A",
+    color: colors.text,
     flex: 1,
     marginRight: moderateScale(16)
   },
@@ -225,7 +228,7 @@ const styles = StyleSheet.create({
   },
   faqAnswer: {
     fontSize: fontScale(14),
-    color: "#475569",
+    color: colors.textSecondary,
     lineHeight: 22
   }
 });

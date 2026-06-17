@@ -24,6 +24,7 @@ import { orderService, type Order } from "../../services/orderService";
 import { tenantService, type FeatureSettings } from "../../services/tenantService";
 import { useToast } from "../../components/Toast";
 import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../utils/responsive';
+import { useTheme } from '../../hooks/useTheme';
 
 type Category = {
   id: string;
@@ -50,6 +51,8 @@ const SPECIAL_CARD_WIDTH = 246;
 const SPECIAL_PITCH = SPECIAL_CARD_WIDTH + HORIZONTAL_GAP;
 
 export default function Screen() {
+  const { colors, isDark } = useTheme();
+  const styles = createStyles(colors);
   const router = useRouter();
   const { width: screenWidth } = useWindowDimensions();
   const { user, accessToken } = useAuth();
@@ -441,10 +444,10 @@ export default function Screen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#F8FAFC",
+    backgroundColor: colors.background,
   },
   topHeader: {
     flexDirection: "row",
@@ -453,7 +456,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: moderateScale(16),
     paddingTop: verticalScale(54),
     paddingBottom: verticalScale(12),
-    backgroundColor: "#F8FAFC",
+    backgroundColor: colors.background,
   },
   headerLeft: {
     flexDirection: "row",
@@ -461,7 +464,7 @@ const styles = StyleSheet.create({
     gap: moderateScale(6),
   },
   headerUserName: {
-    color: "#0F172A",
+    color: colors.text,
     fontSize: fontScale(18),
     fontWeight: "800",
   },
@@ -512,7 +515,7 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.card,
     borderRadius: moderateScale(999),
     paddingHorizontal: moderateScale(18),
     paddingVertical: moderateScale(14),
@@ -527,13 +530,13 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: fontScale(15),
     fontWeight: "600",
-    color: "#0F172A",
+    color: colors.text,
     padding: 0,
   },
   micWrap: {
     paddingLeft: moderateScale(10),
     borderLeftWidth: 1,
-    borderLeftColor: "#E2E8F0",
+    borderLeftColor: colors.border,
   },
   sectionWrap: {
     gap: moderateScale(16),
@@ -542,7 +545,7 @@ const styles = StyleSheet.create({
     height: moderateScale(160),
     borderRadius: moderateScale(16),
     overflow: "hidden",
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.card,
   },
   bannerImage: {
     width: "100%",
@@ -563,12 +566,12 @@ const styles = StyleSheet.create({
     width: moderateScale(72),
     height: moderateScale(72),
     borderRadius: moderateScale(36),
-    backgroundColor: "#F1F5F9",
+    backgroundColor: colors.surfaceAlt,
     alignItems: "center",
     justifyContent: "center",
     overflow: "hidden",
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: colors.border,
   },
   categoryCircleImage: {
     width: "100%",
@@ -577,12 +580,12 @@ const styles = StyleSheet.create({
   categoryCircleName: {
     fontSize: fontScale(13),
     fontWeight: "700",
-    color: "#0F172A",
+    color: colors.text,
     textAlign: "center",
   },
 
   sectionTitleRecommended: {
-    color: "#64748B",
+    color: colors.textSecondary,
     fontSize: fontScale(14),
     fontWeight: "800",
     letterSpacing: 1,
@@ -602,7 +605,7 @@ const styles = StyleSheet.create({
     width: "100%",
     aspectRatio: 1,
     borderRadius: moderateScale(20),
-    backgroundColor: "#F1F5F9",
+    backgroundColor: colors.surfaceAlt,
     overflow: "hidden",
   },
   gridImage: {
@@ -614,7 +617,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     bottom: verticalScale(8),
     right: moderateScale(8),
-    backgroundColor: "white",
+    backgroundColor: colors.card,
     width: moderateScale(32),
     height: moderateScale(32),
     borderRadius: moderateScale(16),
@@ -629,7 +632,7 @@ const styles = StyleSheet.create({
   gridName: {
     fontSize: fontScale(16),
     fontWeight: "800",
-    color: "#0F172A",
+    color: colors.text,
     marginTop: verticalScale(2),
   },
   gridMetaRow: {
@@ -640,12 +643,12 @@ const styles = StyleSheet.create({
   gridMetaText: {
     fontSize: fontScale(12),
     fontWeight: "600",
-    color: "#64748B",
+    color: colors.textSecondary,
   },
   gridPriceText: {
     fontSize: fontScale(12),
     fontWeight: "700",
-    color: "#0F172A",
+    color: colors.text,
   },
   sectionHeaderRow: {
     flexDirection: "row",
@@ -659,12 +662,12 @@ const styles = StyleSheet.create({
   emptyCard: {
     borderRadius: moderateScale(12),
     padding: moderateScale(14),
-    backgroundColor: "#F8FAFC",
+    backgroundColor: colors.background,
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: colors.border,
   },
   emptyText: {
-    color: "#64748B",
+    color: colors.textSecondary,
     fontWeight: "600",
   },
   orderCard: {
@@ -672,9 +675,9 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     borderRadius: moderateScale(12),
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.card,
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: colors.border,
     padding: moderateScale(14),
     shadowColor: "#000",
     shadowOpacity: 0.02,
@@ -683,17 +686,17 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   orderNumber: {
-    color: "#0F172A",
+    color: colors.text,
     fontWeight: "800",
     fontSize: fontScale(15),
   },
   orderMeta: {
-    color: "#64748B",
+    color: colors.textSecondary,
     fontWeight: "600",
     marginTop: verticalScale(4),
   },
   orderPrice: {
-    color: "#0F172A",
+    color: colors.text,
     fontWeight: "800",
     fontSize: fontScale(15),
   }

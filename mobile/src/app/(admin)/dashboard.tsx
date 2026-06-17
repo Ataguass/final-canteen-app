@@ -8,6 +8,7 @@ import { menuService } from "../../services/menuService";
 import { orderService, type Order } from "../../services/orderService";
 import { userService, type ManagedUser } from "../../services/userService";
 import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../utils/responsive';
+import { useTheme } from '../../hooks/useTheme';
 
 type MenuItem = {
   id: string;
@@ -69,6 +70,8 @@ const quickActions: QuickAction[] = [
 ];
 
 export default function Screen() {
+  const { colors, isDark } = useTheme();
+  const styles = createStyles(colors);
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { user, accessToken } = useAuth();
@@ -274,8 +277,8 @@ export default function Screen() {
       >
         {/* Overview Header */}
         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end", marginBottom: verticalScale(12), paddingHorizontal: moderateScale(4) }}>
-          <Text style={{ fontSize: fontScale(18), fontWeight: "900", color: "#0F172A" }}>Overview</Text>
-          <Text style={{ fontSize: fontScale(13), fontWeight: "600", color: "#64748B", marginBottom: verticalScale(2) }}>
+          <Text style={{ fontSize: fontScale(18), fontWeight: "900", color: colors.text }}>Overview</Text>
+          <Text style={{ fontSize: fontScale(13), fontWeight: "600", color: colors.textSecondary, marginBottom: verticalScale(2) }}>
             {new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "short" })}
           </Text>
         </View>
@@ -457,9 +460,9 @@ export default function Screen() {
                 <Text style={[styles.inventoryLabel, { color: "#B45309" }]}>Low Stock</Text>
                 <Text style={[styles.inventoryValue, { color: "#78350F" }]}>{dashboardData.lowStockItems.length}</Text>
               </View>
-              <View style={[styles.inventoryBox, { backgroundColor: "#F1F5F9" }]}>
-                <Text style={[styles.inventoryLabel, { color: "#475569" }]}>Hidden</Text>
-                <Text style={[styles.inventoryValue, { color: "#0F172A" }]}>{dashboardData.hiddenItems.length}</Text>
+              <View style={[styles.inventoryBox, { backgroundColor: colors.surfaceAlt }]}>
+                <Text style={[styles.inventoryLabel, { color: colors.textSecondary }]}>Hidden</Text>
+                <Text style={[styles.inventoryValue, { color: colors.text }]}>{dashboardData.hiddenItems.length}</Text>
               </View>
             </View>
             {dashboardData.lowStockItems.length > 0 && (
@@ -532,10 +535,10 @@ export default function Screen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#EEF2F7"
+    backgroundColor: colors.background
   },
   content: {
     padding: moderateScale(16),
@@ -552,8 +555,8 @@ const styles = StyleSheet.create({
     width: "48%",
     borderRadius: moderateScale(16),
     borderWidth: 1,
-    borderColor: "#E2E8F0",
-    backgroundColor: "white",
+    borderColor: colors.border,
+    backgroundColor: colors.card,
     padding: moderateScale(14),
     shadowColor: "#0F172A",
     shadowOpacity: 0.03,
@@ -570,18 +573,18 @@ const styles = StyleSheet.create({
     marginBottom: verticalScale(10)
   },
   kpiTitle: {
-    color: "#64748B",
+    color: colors.textSecondary,
     fontSize: fontScale(12),
     fontWeight: "700"
   },
   kpiValue: {
-    color: "#0F172A",
+    color: colors.text,
     fontSize: fontScale(22),
     fontWeight: "900",
     marginVertical: moderateScale(2)
   },
   kpiNote: {
-    color: "#94A3B8",
+    color: colors.textMuted,
     fontSize: fontScale(11),
     fontWeight: "500"
   },
@@ -591,7 +594,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: fontScale(18),
     fontWeight: "800",
-    color: "#0F172A"
+    color: colors.text
   },
   sectionHeaderRow: {
     flexDirection: "row",
@@ -614,14 +617,14 @@ const styles = StyleSheet.create({
   },
   quickCard: {
     width: "23%",
-    backgroundColor: "white",
+    backgroundColor: colors.card,
     borderRadius: moderateScale(16),
     paddingVertical: moderateScale(14),
     paddingHorizontal: moderateScale(6),
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: colors.border,
     shadowColor: "#0F172A",
     shadowOpacity: 0.02,
     shadowRadius: moderateScale(6),
@@ -637,7 +640,7 @@ const styles = StyleSheet.create({
     justifyContent: "center"
   },
   quickLabel: {
-    color: "#334155",
+    color: colors.text,
     fontSize: fontScale(11),
     fontWeight: "700",
     textAlign: "center"
@@ -645,8 +648,8 @@ const styles = StyleSheet.create({
   card: {
     borderRadius: moderateScale(16),
     borderWidth: 1,
-    borderColor: "#E2E8F0",
-    backgroundColor: "white",
+    borderColor: colors.border,
+    backgroundColor: colors.card,
     padding: moderateScale(16),
     shadowColor: "#0F172A",
     shadowOpacity: 0.03,
@@ -657,7 +660,7 @@ const styles = StyleSheet.create({
   cardHeader: {
     fontSize: fontScale(16),
     fontWeight: "800",
-    color: "#0F172A",
+    color: colors.text,
     marginBottom: verticalScale(12)
   },
   chartHeader: {
@@ -670,22 +673,22 @@ const styles = StyleSheet.create({
   chartTitle: {
     fontSize: fontScale(16),
     fontWeight: "800",
-    color: "#0F172A"
+    color: colors.text
   },
   chartSubtitle: {
-    color: "#64748B",
+    color: colors.textSecondary,
     fontSize: fontScale(13),
     fontWeight: "500",
     marginTop: verticalScale(2)
   },
   chartPill: {
-    backgroundColor: "#F1F5F9",
+    backgroundColor: colors.surfaceAlt,
     borderRadius: moderateScale(999),
     paddingHorizontal: moderateScale(12),
     paddingVertical: moderateScale(6)
   },
   chartPillText: {
-    color: "#0F172A",
+    color: colors.text,
     fontWeight: "800",
     fontSize: fontScale(14)
   },
@@ -697,19 +700,19 @@ const styles = StyleSheet.create({
   },
   chartSummaryBox: {
     flex: 1,
-    backgroundColor: "#F8FAFC",
+    backgroundColor: colors.background,
     borderRadius: moderateScale(12),
     padding: moderateScale(10),
     borderWidth: 1,
     borderColor: "#F1F5F9"
   },
   chartSummaryLabel: {
-    color: "#64748B",
+    color: colors.textSecondary,
     fontSize: fontScale(11),
     fontWeight: "600"
   },
   chartSummaryValue: {
-    color: "#0F172A",
+    color: colors.text,
     fontSize: fontScale(15),
     fontWeight: "800",
     marginTop: verticalScale(2)
@@ -718,14 +721,14 @@ const styles = StyleSheet.create({
     height: moderateScale(180),
     backgroundColor: "#FAFAFA",
     borderTopWidth: 1,
-    borderTopColor: "#E2E8F0"
+    borderTopColor: colors.border
   },
   chartGridLine: {
     position: "absolute",
     left: 0,
     right: 0,
     borderTopWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: colors.border,
     borderStyle: "dashed"
   },
   chartSegment: {
@@ -743,7 +746,7 @@ const styles = StyleSheet.create({
     width: moderateScale(12),
     height: moderateScale(12),
     borderRadius: moderateScale(6),
-    backgroundColor: "white",
+    backgroundColor: colors.card,
     borderWidth: 3,
     borderColor: "#2563EB",
     zIndex: 2
@@ -770,7 +773,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-around"
   },
   chartXLabel: {
-    color: "#94A3B8",
+    color: colors.textMuted,
     fontSize: fontScale(10),
     fontWeight: "600"
   },
@@ -792,18 +795,18 @@ const styles = StyleSheet.create({
     justifyContent: "space-between"
   },
   statusRowLabel: {
-    color: "#475569",
+    color: colors.textSecondary,
     fontWeight: "600",
     fontSize: fontScale(12)
   },
   statusRowValue: {
-    color: "#0F172A",
+    color: colors.text,
     fontWeight: "800",
     fontSize: fontScale(13)
   },
   statusBarTrack: {
     height: moderateScale(6),
-    backgroundColor: "#F1F5F9",
+    backgroundColor: colors.surfaceAlt,
     borderRadius: moderateScale(3),
     overflow: "hidden"
   },
@@ -884,8 +887,8 @@ const styles = StyleSheet.create({
   orderCard: {
     borderRadius: moderateScale(16),
     borderWidth: 1,
-    borderColor: "#E2E8F0",
-    backgroundColor: "white",
+    borderColor: colors.border,
+    backgroundColor: colors.card,
     padding: moderateScale(16),
     gap: moderateScale(10),
     shadowColor: "#0F172A",
@@ -900,7 +903,7 @@ const styles = StyleSheet.create({
     alignItems: "center"
   },
   orderNumber: {
-    color: "#0F172A",
+    color: colors.text,
     fontSize: fontScale(16),
     fontWeight: "800"
   },
@@ -923,13 +926,13 @@ const styles = StyleSheet.create({
     textTransform: "uppercase"
   },
   orderDate: {
-    color: "#64748B",
+    color: colors.textSecondary,
     fontSize: fontScale(13),
     fontWeight: "600"
   },
   orderDivider: {
     height: 1,
-    backgroundColor: "#F1F5F9",
+    backgroundColor: colors.surfaceAlt,
     marginVertical: moderateScale(2)
   },
   orderBottomRow: {
@@ -938,17 +941,17 @@ const styles = StyleSheet.create({
     alignItems: "center"
   },
   orderMeta: {
-    color: "#64748B",
+    color: colors.textSecondary,
     fontSize: fontScale(13),
     fontWeight: "600"
   },
   orderTotal: {
-    color: "#0F172A",
+    color: colors.text,
     fontSize: fontScale(16),
     fontWeight: "800"
   },
   emptyText: {
-    color: "#64748B",
+    color: colors.textSecondary,
     textAlign: "center",
     padding: moderateScale(16)
   }

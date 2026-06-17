@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import { useAuth } from '../hooks/useAuth';
 import { useCart } from '../hooks/useCart';
 import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../utils/responsive';
+import { useTheme } from '../hooks/useTheme';
 
 type CanteenHeaderProps = {
   showBackButton?: boolean;
@@ -22,6 +23,8 @@ export function CanteenHeader({
   const router = useRouter();
   const { user } = useAuth();
   const { items: cartItems } = useCart();
+  const { colors, isDark } = useTheme();
+  const styles = createStyles(colors);
 
   const displayTitle = title ?? user?.name ?? 'Student';
   const displaySubtitle = subtitle ?? 'Campus Canteen';
@@ -71,7 +74,7 @@ export function CanteenHeader({
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -90,13 +93,13 @@ const styles = StyleSheet.create({
   locationTitle: {
     fontSize: fontScale(18),
     fontWeight: '800',
-    color: '#0F172A',
+    color: colors.text,
     flexDirection: 'row',
     alignItems: 'center',
   },
   locationSubtitle: {
     fontSize: fontScale(13),
-    color: '#64748B',
+    color: colors.textSecondary,
     fontWeight: '500',
   },
   headerRight: {

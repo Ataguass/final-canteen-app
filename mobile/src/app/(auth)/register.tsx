@@ -8,12 +8,15 @@ import { authService } from "../../services/authService";
 import { Ionicons } from "@expo/vector-icons";
 import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
 import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../utils/responsive';
+import { useTheme } from '../../hooks/useTheme';
 
 const BRAND_COLOR = "#080d2b";
 
 type Tenant = { id: string; name: string; slug: string; logo?: string | null };
 
 export default function RegisterScreen() {
+  const { colors, isDark } = useTheme();
+  const styles = createStyles(colors);
   const router = useRouter();
   const { setPendingRegistration, setConfirmationResult } = useAuth();
   
@@ -99,7 +102,7 @@ export default function RegisterScreen() {
             {/* School Selector */}
             <Pressable style={styles.inputContainer} onPress={() => setShowTenantModal(true)}>
               <Ionicons name="business-outline" size={20} color="#8e8e93" style={styles.inputIcon} />
-              <Text style={[styles.inputText, !selectedTenant && { color: "#8e8e93" }]}>
+              <Text style={[styles.inputText, !selectedTenant && { color: colors.textMuted }]}>
                 {selectedTenant ? selectedTenant.name : "Select your School"}
               </Text>
               <Ionicons name="chevron-down" size={20} color="#8e8e93" />
@@ -245,10 +248,10 @@ export default function RegisterScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fafbfc',
+    backgroundColor: colors.background,
   },
   scrollContent: {
     flexGrow: 1,
@@ -284,13 +287,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: fontScale(28),
     fontWeight: '800',
-    color: '#1c1c1e',
+    color: colors.text,
     marginBottom: verticalScale(8),
     letterSpacing: -0.5,
   },
   subtitle: {
     fontSize: fontScale(16),
-    color: '#8e8e93',
+    color: colors.textMuted,
     textAlign: 'center',
   },
   form: {
@@ -299,9 +302,9 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.card,
     borderWidth: 1,
-    borderColor: '#e5e5ea',
+    borderColor: colors.border,
     borderRadius: moderateScale(16),
     paddingHorizontal: moderateScale(16),
     height: moderateScale(56),
@@ -312,13 +315,13 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: fontScale(16),
-    color: '#1c1c1e',
+    color: colors.text,
     height: '100%',
   },
   inputText: {
     flex: 1,
     fontSize: fontScale(16),
-    color: '#1c1c1e',
+    color: colors.text,
   },
   eyeIcon: {
     padding: moderateScale(8),
@@ -347,7 +350,7 @@ const styles = StyleSheet.create({
     marginTop: verticalScale(32),
   },
   footerText: {
-    color: '#8e8e93',
+    color: colors.textMuted,
     fontSize: fontScale(15),
   },
   loginLink: {
@@ -361,7 +364,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.card,
     borderTopLeftRadius: moderateScale(24),
     borderTopRightRadius: moderateScale(24),
     maxHeight: '80%',
@@ -378,7 +381,7 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: fontScale(20),
     fontWeight: '700',
-    color: '#1c1c1e',
+    color: colors.text,
   },
   closeModalButton: {
     padding: moderateScale(4),
@@ -397,7 +400,7 @@ const styles = StyleSheet.create({
   },
   tenantOptionText: {
     fontSize: fontScale(16),
-    color: '#1c1c1e',
+    color: colors.text,
     fontWeight: '500',
   },
   tenantOptionTextSelected: {
@@ -406,7 +409,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     textAlign: 'center',
-    color: '#8e8e93',
+    color: colors.textMuted,
     padding: moderateScale(24),
   }
 });

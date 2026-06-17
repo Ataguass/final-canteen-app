@@ -8,6 +8,7 @@ import { useOrderSocket } from "../../../hooks/useOrderSocket";
 import { Order, orderService } from "../../../services/orderService";
 import { CanteenHeader } from "../../../components/CanteenHeader";
 import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../../utils/responsive';
+import { useTheme } from '../../../hooks/useTheme';
 
 const TIMELINE = ["PENDING", "ACCEPTED", "PREPARING", "READY", "COMPLETED"];
 
@@ -24,6 +25,8 @@ const statusColorMap: Record<string, string> = {
 const formatCurrency = (value: number): string => `₹ ${value.toFixed(2)}`;
 
 export default function Screen() {
+  const { colors, isDark } = useTheme();
+  const styles = createStyles(colors);
   const { id } = useLocalSearchParams<{ id: string }>();
   const insets = useSafeAreaInsets();
   const { user, accessToken } = useAuth();
@@ -246,10 +249,10 @@ export default function Screen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#EEF2F7"
+    backgroundColor: colors.background
   },
   content: {
     padding: moderateScale(16),
@@ -264,23 +267,23 @@ const styles = StyleSheet.create({
     gap: moderateScale(12)
   },
   loadingText: {
-    color: "#64748B",
+    color: colors.textSecondary,
     fontWeight: "600",
     fontSize: fontScale(16)
   },
   emptyTitle: {
-    color: "#0F172A",
+    color: colors.text,
     fontSize: fontScale(20),
     fontWeight: "800"
   },
   emptySub: {
-    color: "#64748B",
+    color: colors.textSecondary,
     textAlign: "center",
     paddingHorizontal: moderateScale(20)
   },
   headerCard: {
     borderRadius: moderateScale(16),
-    backgroundColor: "white",
+    backgroundColor: colors.card,
     padding: moderateScale(20),
     shadowColor: "#0F172A",
     shadowOpacity: 0.03,
@@ -288,7 +291,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     elevation: 2,
     borderWidth: 1,
-    borderColor: "#E2E8F0"
+    borderColor: colors.border
   },
   headerTopRow: {
     flexDirection: "row",
@@ -297,14 +300,14 @@ const styles = StyleSheet.create({
     marginBottom: verticalScale(4)
   },
   orderNumberLabel: {
-    color: "#64748B",
+    color: colors.textSecondary,
     fontSize: fontScale(13),
     fontWeight: "700",
     textTransform: "uppercase",
     letterSpacing: 0.5
   },
   orderNumberText: {
-    color: "#0F172A",
+    color: colors.text,
     fontSize: fontScale(28),
     fontWeight: "900",
     marginBottom: verticalScale(4)
@@ -329,7 +332,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5
   },
   headerMeta: {
-    color: "#475569",
+    color: colors.textSecondary,
     fontWeight: "600",
     fontSize: fontScale(14)
   },
@@ -343,18 +346,18 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     borderRadius: moderateScale(8),
-    backgroundColor: "#F1F5F9",
+    backgroundColor: colors.surfaceAlt,
     paddingHorizontal: moderateScale(10),
     paddingVertical: moderateScale(6),
     gap: moderateScale(6)
   },
   headerTagText: {
-    color: "#334155",
+    color: colors.text,
     fontWeight: "700",
     fontSize: fontScale(13)
   },
   headerTagPriority: {
-    backgroundColor: "#F1F5F9"
+    backgroundColor: colors.surfaceAlt
   },
   headerTagPriorityText: {
     color: "#1E40AF"
@@ -390,7 +393,7 @@ const styles = StyleSheet.create({
     marginTop: verticalScale(2)
   },
   cardTitle: {
-    color: "#0F172A",
+    color: colors.text,
     fontSize: fontScale(18),
     fontWeight: "800",
     marginBottom: verticalScale(12)
@@ -398,8 +401,8 @@ const styles = StyleSheet.create({
   summaryCard: {
     borderRadius: moderateScale(16),
     borderWidth: 1,
-    borderColor: "#E2E8F0",
-    backgroundColor: "white",
+    borderColor: colors.border,
+    backgroundColor: colors.card,
     padding: moderateScale(16),
     gap: moderateScale(12),
     shadowColor: "#0F172A",
@@ -414,23 +417,23 @@ const styles = StyleSheet.create({
     alignItems: "center"
   },
   summaryLabel: {
-    color: "#64748B",
+    color: colors.textSecondary,
     fontWeight: "600",
     fontSize: fontScale(15)
   },
   summaryValue: {
-    color: "#0F172A",
+    color: colors.text,
     fontWeight: "700",
     fontSize: fontScale(15)
   },
   summaryTotalRow: {
     borderTopWidth: 1,
-    borderTopColor: "#E2E8F0",
+    borderTopColor: colors.border,
     paddingTop: verticalScale(12),
     marginTop: verticalScale(4)
   },
   summaryTotalLabel: {
-    color: "#0F172A",
+    color: colors.text,
     fontWeight: "800",
     fontSize: fontScale(16)
   },
@@ -442,8 +445,8 @@ const styles = StyleSheet.create({
   timelineCard: {
     borderRadius: moderateScale(16),
     borderWidth: 1,
-    borderColor: "#E2E8F0",
-    backgroundColor: "white",
+    borderColor: colors.border,
+    backgroundColor: colors.card,
     padding: moderateScale(16),
     shadowColor: "#0F172A",
     shadowOpacity: 0.02,
@@ -496,24 +499,24 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start"
   },
   timelineText: {
-    color: "#94A3B8",
+    color: colors.textMuted,
     fontWeight: "600",
     fontSize: fontScale(15),
     lineHeight: 16
   },
   timelineTextActive: {
-    color: "#334155"
+    color: colors.text
   },
   timelineTextCurrent: {
-    color: "#0F172A",
+    color: colors.text,
     fontWeight: "800",
     fontSize: fontScale(16)
   },
   itemsCard: {
     borderRadius: moderateScale(16),
     borderWidth: 1,
-    borderColor: "#E2E8F0",
-    backgroundColor: "white",
+    borderColor: colors.border,
+    backgroundColor: colors.card,
     padding: moderateScale(16),
     shadowColor: "#0F172A",
     shadowOpacity: 0.02,
@@ -528,7 +531,7 @@ const styles = StyleSheet.create({
     paddingVertical: moderateScale(8)
   },
   itemQuantityWrap: {
-    backgroundColor: "#F1F5F9",
+    backgroundColor: colors.surfaceAlt,
     borderRadius: moderateScale(6),
     paddingHorizontal: moderateScale(8),
     paddingVertical: moderateScale(4),
@@ -536,7 +539,7 @@ const styles = StyleSheet.create({
     alignItems: "center"
   },
   itemQuantityText: {
-    color: "#0F172A",
+    color: colors.text,
     fontWeight: "800",
     fontSize: fontScale(14)
   },
@@ -545,31 +548,31 @@ const styles = StyleSheet.create({
     gap: moderateScale(2)
   },
   itemName: {
-    color: "#0F172A",
+    color: colors.text,
     fontWeight: "700",
     fontSize: fontScale(15)
   },
   itemLineTotal: {
-    color: "#0F172A",
+    color: colors.text,
     fontWeight: "800",
     fontSize: fontScale(16)
   },
   itemMeta: {
-    color: "#64748B",
+    color: colors.textSecondary,
     fontWeight: "600",
     fontSize: fontScale(13)
   },
   noteRow: {
     flexDirection: "row",
     alignItems: "flex-start",
-    backgroundColor: "#F8FAFC",
+    backgroundColor: colors.background,
     padding: moderateScale(8),
     borderRadius: moderateScale(8),
     marginTop: verticalScale(6),
     gap: moderateScale(6)
   },
   noteText: {
-    color: "#475569",
+    color: colors.textSecondary,
     flex: 1,
     fontSize: fontScale(13),
     fontStyle: "italic"

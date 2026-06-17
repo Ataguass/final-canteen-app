@@ -6,11 +6,14 @@ import Animated, { FadeIn, FadeInDown, SlideInDown } from "react-native-reanimat
 import { useContext } from "react";
 import { OnboardingContext } from "../_layout";
 import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../utils/responsive';
+import { useTheme } from '../../hooks/useTheme';
 
 const { width } = Dimensions.get('window');
 const BRAND_COLOR = "#080d2b"; // Navy Blue from logo
 
 export default function TrackingScreen() {
+  const { colors, isDark } = useTheme();
+  const styles = createStyles(colors);
   const router = useRouter();
   const { completeOnboarding } = useContext(OnboardingContext);
 
@@ -72,10 +75,10 @@ export default function TrackingScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fafbfc',
+    backgroundColor: colors.background,
   },
   header: {
     flexDirection: 'row',
@@ -99,7 +102,7 @@ const styles = StyleSheet.create({
   skipText: {
     fontSize: fontScale(16),
     fontWeight: '600',
-    color: '#8e8e93',
+    color: colors.textMuted,
   },
   mainContent: {
     flex: 1,
@@ -143,7 +146,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: fontScale(34),
     fontWeight: '800',
-    color: '#1c1c1e',
+    color: colors.text,
     textAlign: 'center',
     lineHeight: 42,
     letterSpacing: -1,

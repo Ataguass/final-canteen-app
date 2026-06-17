@@ -20,6 +20,7 @@ import { useCart } from "../../hooks/useCart";
 import { useToast } from "../../components/Toast";
 import { menuService } from "../../services/menuService";
 import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../utils/responsive';
+import { useTheme } from '../../hooks/useTheme';
 
 type SpeechRecognitionModule = {
   requestPermissionsAsync: () => Promise<{ granted?: boolean }>;
@@ -56,6 +57,8 @@ type MenuItem = {
 const formatCurrency = (value: number): string => `₹ ${value.toFixed(2)}`;
 
 export default function Screen() {
+  const { colors, isDark } = useTheme();
+  const styles = createStyles(colors);
   const router = useRouter();
   const { width: screenWidth } = useWindowDimensions();
   const insets = useSafeAreaInsets();
@@ -431,10 +434,10 @@ export default function Screen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#F8FAFC"
+    backgroundColor: colors.background
   },
   content: {
     padding: moderateScale(16),
@@ -443,8 +446,8 @@ const styles = StyleSheet.create({
   },
   searchBarCard: {
     borderWidth: 1,
-    borderColor: "#E2E8F0",
-    backgroundColor: "#FFFFFF",
+    borderColor: colors.border,
+    backgroundColor: colors.card,
     borderRadius: moderateScale(24),
     minHeight: moderateScale(56),
     paddingHorizontal: moderateScale(12),
@@ -466,7 +469,7 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     flex: 1,
-    color: "#0F172A",
+    color: colors.text,
     fontSize: fontScale(18),
     fontWeight: "700",
     paddingVertical: moderateScale(10)
@@ -475,7 +478,7 @@ const styles = StyleSheet.create({
     gap: moderateScale(12)
   },
   discoveryTitle: {
-    color: "#64748B",
+    color: colors.textSecondary,
     fontSize: fontScale(14),
     fontWeight: "800",
     letterSpacing: 1,
@@ -497,9 +500,9 @@ const styles = StyleSheet.create({
     width: "100%",
     aspectRatio: 1,
     borderRadius: moderateScale(999),
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.card,
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: colors.border,
     alignItems: "center",
     justifyContent: "center",
     overflow: "hidden"
@@ -521,13 +524,13 @@ const styles = StyleSheet.create({
   suggestionCard: {
     borderRadius: moderateScale(14),
     borderWidth: 1,
-    borderColor: "#E2E8F0",
-    backgroundColor: "#FFFFFF",
+    borderColor: colors.border,
+    backgroundColor: colors.card,
     padding: moderateScale(11),
     gap: moderateScale(8)
   },
   suggestionTitle: {
-    color: "#0F172A",
+    color: colors.text,
     fontWeight: "800"
   },
   suggestionChipRow: {
@@ -537,8 +540,8 @@ const styles = StyleSheet.create({
   suggestionChip: {
     borderRadius: moderateScale(999),
     borderWidth: 1,
-    borderColor: "#CBD5E1",
-    backgroundColor: "#F8FAFC",
+    borderColor: colors.border,
+    backgroundColor: colors.background,
     paddingVertical: moderateScale(7),
     paddingHorizontal: moderateScale(11),
     flexDirection: "row",
@@ -547,12 +550,12 @@ const styles = StyleSheet.create({
     maxWidth: moderateScale(170)
   },
   suggestionChipText: {
-    color: "#334155",
+    color: colors.text,
     fontWeight: "700",
     fontSize: fontScale(12)
   },
   noSuggestionText: {
-    color: "#94A3B8",
+    color: colors.textMuted,
     fontWeight: "600"
   },
   resultHeader: {
@@ -561,12 +564,12 @@ const styles = StyleSheet.create({
     alignItems: "center"
   },
   resultTitle: {
-    color: "#0F172A",
+    color: colors.text,
     fontSize: fontScale(21),
     fontWeight: "800"
   },
   resultMeta: {
-    color: "#64748B",
+    color: colors.textSecondary,
     fontWeight: "700"
   },
   itemGrid: {
@@ -577,10 +580,10 @@ const styles = StyleSheet.create({
   },
   itemCard: {
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: colors.border,
     borderRadius: moderateScale(14),
     padding: moderateScale(10),
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.card,
     marginBottom: verticalScale(10)
   },
   itemTapArea: {
@@ -594,7 +597,7 @@ const styles = StyleSheet.create({
   itemImageFallback: {
     width: "100%",
     borderRadius: moderateScale(10),
-    backgroundColor: "#F1F5F9",
+    backgroundColor: colors.surfaceAlt,
     alignItems: "center",
     justifyContent: "center"
   },
@@ -608,7 +611,7 @@ const styles = StyleSheet.create({
     gap: moderateScale(8)
   },
   itemName: {
-    color: "#0F172A",
+    color: colors.text,
     fontWeight: "800",
     fontSize: fontScale(16),
     flex: 1
@@ -637,11 +640,11 @@ const styles = StyleSheet.create({
     fontSize: fontScale(12)
   },
   itemDescription: {
-    color: "#475569",
+    color: colors.textSecondary,
     fontSize: fontScale(12)
   },
   itemDescriptionMuted: {
-    color: "#94A3B8",
+    color: colors.textMuted,
     fontSize: fontScale(12),
     fontWeight: "600"
   },
@@ -671,15 +674,15 @@ const styles = StyleSheet.create({
   emptyCard: {
     borderRadius: moderateScale(12),
     borderWidth: 1,
-    borderColor: "#CBD5E1",
-    backgroundColor: "#F8FAFC",
+    borderColor: colors.border,
+    backgroundColor: colors.background,
     padding: moderateScale(14),
     flexDirection: "row",
     alignItems: "center",
     gap: moderateScale(8)
   },
   emptyText: {
-    color: "#64748B",
+    color: colors.textSecondary,
     fontWeight: "600"
   }
 });

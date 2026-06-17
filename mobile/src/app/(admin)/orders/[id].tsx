@@ -6,6 +6,7 @@ import { useAuth } from "../../../hooks/useAuth";
 import { useOrderSocket } from "../../../hooks/useOrderSocket";
 import { Order, orderService } from "../../../services/orderService";
 import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../../utils/responsive';
+import { useTheme } from '../../../hooks/useTheme';
 
 const statusActions = ["ACCEPTED", "PREPARING", "READY", "COMPLETED", "CANCELLED"] as const;
 
@@ -32,6 +33,8 @@ const statusBgMap: Record<string, string> = {
 const formatCurrency = (value: number): string => `₹ ${value.toFixed(2)}`;
 
 export default function Screen() {
+  const { colors, isDark } = useTheme();
+  const styles = createStyles(colors);
   const { id } = useLocalSearchParams<{ id: string }>();
   const { user, accessToken } = useAuth();
   const [order, setOrder] = useState<Order | null>(null);
@@ -136,8 +139,8 @@ export default function Screen() {
 
         {(order.laneToken || order.isPreOrder) ? (
           <View style={styles.infoGridRow}>
-            <View style={[styles.infoGridBox, { backgroundColor: "#F8FAFC" }]}>
-              <Text style={[styles.infoGridLabel, { color: "#64748B" }]}>Queue Lane</Text>
+            <View style={[styles.infoGridBox, { backgroundColor: colors.background }]}>
+              <Text style={[styles.infoGridLabel, { color: colors.textSecondary }]}>Queue Lane</Text>
               <Text style={styles.infoGridValue}>
                 {order.serviceLane === "TEACHER_PRIORITY" ? "Teacher Priority" : "Regular"}
               </Text>
@@ -234,26 +237,26 @@ export default function Screen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   centerScreen: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#F8FAFC"
+    backgroundColor: colors.background
   },
   loadingText: {
-    color: "#64748B",
+    color: colors.textSecondary,
     fontWeight: "600",
     fontSize: fontScale(16)
   },
   errorText: {
-    color: "#0F172A",
+    color: colors.text,
     fontWeight: "800",
     fontSize: fontScale(18)
   },
   screen: {
     flex: 1,
-    backgroundColor: "#F8FAFC"
+    backgroundColor: colors.background
   },
   content: {
     padding: moderateScale(16),
@@ -261,7 +264,7 @@ const styles = StyleSheet.create({
     paddingBottom: verticalScale(40)
   },
   headerCard: {
-    backgroundColor: "white",
+    backgroundColor: colors.card,
     borderRadius: moderateScale(20),
     padding: moderateScale(16),
     gap: moderateScale(16),
@@ -277,12 +280,12 @@ const styles = StyleSheet.create({
     alignItems: "flex-start"
   },
   headerLabel: {
-    color: "#64748B",
+    color: colors.textSecondary,
     fontWeight: "700",
     fontSize: fontScale(12)
   },
   headerNumber: {
-    color: "#0F172A",
+    color: colors.text,
     fontSize: fontScale(28),
     fontWeight: "900",
     marginTop: verticalScale(2)
@@ -311,19 +314,19 @@ const styles = StyleSheet.create({
     fontWeight: "800"
   },
   infoGridValue: {
-    color: "#0F172A",
+    color: colors.text,
     fontWeight: "900",
     fontSize: fontScale(16),
     marginTop: verticalScale(4)
   },
   infoGridSubValue: {
-    color: "#475569",
+    color: colors.textSecondary,
     fontWeight: "600",
     fontSize: fontScale(12),
     marginTop: verticalScale(2)
   },
   sectionCard: {
-    backgroundColor: "white",
+    backgroundColor: colors.card,
     borderRadius: moderateScale(20),
     padding: moderateScale(16),
     gap: moderateScale(16),
@@ -336,7 +339,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: fontScale(18),
     fontWeight: "900",
-    color: "#0F172A"
+    color: colors.text
   },
   statusActionGrid: {
     flexDirection: "row",
@@ -354,8 +357,8 @@ const styles = StyleSheet.create({
     borderColor: "#0F172A"
   },
   statusActionButtonUnselected: {
-    backgroundColor: "white",
-    borderColor: "#E2E8F0"
+    backgroundColor: colors.card,
+    borderColor: colors.border
   },
   statusActionText: {
     fontWeight: "800",
@@ -365,7 +368,7 @@ const styles = StyleSheet.create({
     color: "white"
   },
   statusActionTextUnselected: {
-    color: "#475569"
+    color: colors.textSecondary
   },
   refreshButtonLarge: {
     flexDirection: "row",
@@ -374,13 +377,13 @@ const styles = StyleSheet.create({
     gap: moderateScale(8),
     borderRadius: moderateScale(14),
     paddingVertical: moderateScale(14),
-    backgroundColor: "#F8FAFC",
+    backgroundColor: colors.background,
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: colors.border,
     marginTop: verticalScale(4)
   },
   refreshButtonLargeText: {
-    color: "#475569",
+    color: colors.textSecondary,
     fontWeight: "800",
     fontSize: fontScale(14)
   },
@@ -403,12 +406,12 @@ const styles = StyleSheet.create({
     gap: moderateScale(4)
   },
   itemName: {
-    color: "#0F172A",
+    color: colors.text,
     fontWeight: "800",
     fontSize: fontScale(16)
   },
   itemMeta: {
-    color: "#64748B",
+    color: colors.textSecondary,
     fontWeight: "600",
     fontSize: fontScale(13)
   },
@@ -419,7 +422,7 @@ const styles = StyleSheet.create({
     marginTop: verticalScale(2)
   },
   itemRowTotal: {
-    color: "#0F172A",
+    color: colors.text,
     fontWeight: "900",
     fontSize: fontScale(16)
   },
@@ -429,12 +432,12 @@ const styles = StyleSheet.create({
     alignItems: "center"
   },
   billLabel: {
-    color: "#64748B",
+    color: colors.textSecondary,
     fontWeight: "600",
     fontSize: fontScale(14)
   },
   billValue: {
-    color: "#0F172A",
+    color: colors.text,
     fontWeight: "800",
     fontSize: fontScale(15)
   },
@@ -444,11 +447,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingTop: verticalScale(16),
     borderTopWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: colors.border,
     marginTop: verticalScale(4)
   },
   grandTotalLabel: {
-    color: "#0F172A",
+    color: colors.text,
     fontWeight: "900",
     fontSize: fontScale(18)
   },

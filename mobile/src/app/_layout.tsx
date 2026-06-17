@@ -4,6 +4,7 @@ import { useAutoOrderSync } from "../hooks/useAutoOrderSync";
 import { AuthProvider, useAuth } from "../hooks/useAuth";
 import { CartProvider } from "../hooks/useCart";
 import { ErrorBoundary } from "../components/ErrorBoundary";
+import { ThemeProvider } from "../hooks/useTheme";
 import { useEffect, useState, createContext, useContext } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -90,15 +91,17 @@ export default function RootLayout() {
 
   return (
     <ErrorBoundary>
-      <ToastProvider>
-        <OnboardingContext.Provider value={{ hasSeenOnboarding, completeOnboarding }}>
-          <AuthProvider>
-            <CartProvider>
-              <GuardedStack />
-            </CartProvider>
-          </AuthProvider>
-        </OnboardingContext.Provider>
-      </ToastProvider>
+      <ThemeProvider>
+        <ToastProvider>
+          <OnboardingContext.Provider value={{ hasSeenOnboarding, completeOnboarding }}>
+            <AuthProvider>
+              <CartProvider>
+                <GuardedStack />
+              </CartProvider>
+            </AuthProvider>
+          </OnboardingContext.Provider>
+        </ToastProvider>
+      </ThemeProvider>
     </ErrorBoundary>
   );
 }

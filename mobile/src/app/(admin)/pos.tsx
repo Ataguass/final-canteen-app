@@ -24,6 +24,7 @@ import { orderService, type Order } from "../../services/orderService";
 import { tenantService, type InvoiceSettings } from "../../services/tenantService";
 import { PaymentMethod, PaymentStatus } from "../../services/types";
 import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../utils/responsive';
+import { useTheme } from '../../hooks/useTheme';
 
 type MenuItem = {
   id: string;
@@ -88,6 +89,8 @@ const paymentStatusIcons: Record<PaymentStatus, keyof typeof Ionicons.glyphMap> 
 const itemSelectSoundSource = require("../../assets/sounds/item-select.wav");
 
 export default function Screen() {
+  const { colors, isDark } = useTheme();
+  const styles = createStyles(colors);
   const { width: screenWidth } = useWindowDimensions();
   const { user, accessToken } = useAuth();
   const { isConnected } = useNetworkStatus();
@@ -563,12 +566,12 @@ export default function Screen() {
               totalAmount: grandTotal,
               items: cartLines.map((line) => ({
                 id: line.id,
+                menuItemId: line.id,
                 name: line.name,
                 price: line.price,
                 quantity: line.quantity
               })),
-              createdAt: new Date().toISOString(),
-              updatedAt: new Date().toISOString()
+              createdAt: new Date().toISOString()
             };
             await printInvoice(offlineOrder);
           }
@@ -824,10 +827,10 @@ export default function Screen() {
                 ) : (
                   cartLines.map((line) => (
                     <View key={line.id} style={styles.tableBodyRow}>
-                      <Text style={{ flex: 2, fontWeight: "600", color: "#0F172A" }}>{line.name}</Text>
-                      <Text style={{ flex: 1, textAlign: "center", color: "#475569" }}>{line.quantity}</Text>
-                      <Text style={{ flex: 1, textAlign: "right", color: "#475569" }}>{line.price.toFixed(2)}</Text>
-                      <Text style={{ flex: 1.3, textAlign: "right", fontWeight: "700", color: "#0F172A" }}>{line.lineTotal.toFixed(2)}</Text>
+                      <Text style={{ flex: 2, fontWeight: "600", color: colors.text }}>{line.name}</Text>
+                      <Text style={{ flex: 1, textAlign: "center", color: colors.textSecondary }}>{line.quantity}</Text>
+                      <Text style={{ flex: 1, textAlign: "right", color: colors.textSecondary }}>{line.price.toFixed(2)}</Text>
+                      <Text style={{ flex: 1.3, textAlign: "right", fontWeight: "700", color: colors.text }}>{line.lineTotal.toFixed(2)}</Text>
                     </View>
                   ))
                 )}
@@ -1036,10 +1039,10 @@ export default function Screen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#F8FAFC"
+    backgroundColor: colors.background
   },
   scroll: {
     flex: 1
@@ -1050,7 +1053,7 @@ const styles = StyleSheet.create({
     paddingBottom: verticalScale(200)
   },
   statusCard: {
-    backgroundColor: "white",
+    backgroundColor: colors.card,
     borderRadius: moderateScale(20),
     padding: moderateScale(16),
     gap: moderateScale(16),
@@ -1074,18 +1077,18 @@ const styles = StyleSheet.create({
     justifyContent: "space-between"
   },
   statPillBlue: {
-    backgroundColor: "#F1F5F9"
+    backgroundColor: colors.surfaceAlt
   },
   statPillAmber: {
     backgroundColor: "#FFFBEB"
   },
   statLabel: {
-    color: "#475569",
+    color: colors.textSecondary,
     fontSize: fontScale(13),
     fontWeight: "700"
   },
   statValue: {
-    color: "#0F172A",
+    color: colors.text,
     fontSize: fontScale(22),
     fontWeight: "900"
   },
@@ -1108,7 +1111,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FF6B35"
   },
   topActionButtonSecondary: {
-    backgroundColor: "#F8FAFC",
+    backgroundColor: colors.background,
     borderWidth: 1,
     borderColor: "#F1F5F9"
   },
@@ -1121,7 +1124,7 @@ const styles = StyleSheet.create({
     fontSize: fontScale(15)
   },
   topActionTextDark: {
-    color: "#0F172A",
+    color: colors.text,
     fontWeight: "700",
     fontSize: fontScale(15)
   },
@@ -1137,11 +1140,11 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: fontScale(20),
     fontWeight: "800",
-    color: "#0F172A",
+    color: colors.text,
     marginLeft: moderateScale(4)
   },
   helperText: {
-    color: "#64748B",
+    color: colors.textSecondary,
     fontWeight: "600",
     marginRight: moderateScale(4)
   },
@@ -1176,16 +1179,16 @@ const styles = StyleSheet.create({
     paddingVertical: moderateScale(10),
     paddingHorizontal: moderateScale(20),
     borderRadius: moderateScale(999),
-    backgroundColor: "white",
+    backgroundColor: colors.card,
     borderWidth: 1,
-    borderColor: "#E2E8F0"
+    borderColor: colors.border
   },
   categoryChipActive: {
     backgroundColor: "#FF6B35",
     borderColor: "#FF6B35"
   },
   categoryChipText: {
-    color: "#475569",
+    color: colors.textSecondary,
     fontWeight: "700",
     fontSize: fontScale(15)
   },
@@ -1199,7 +1202,7 @@ const styles = StyleSheet.create({
     alignItems: "flex-start"
   },
   itemCard: {
-    backgroundColor: "white",
+    backgroundColor: colors.card,
     borderRadius: moderateScale(20),
     padding: moderateScale(12),
     gap: moderateScale(10),
@@ -1214,7 +1217,7 @@ const styles = StyleSheet.create({
     width: "100%",
     height: moderateScale(110),
     borderRadius: moderateScale(14),
-    backgroundColor: "#F1F5F9"
+    backgroundColor: colors.surfaceAlt
   },
   itemHeaderRow: {
     flexDirection: "row",
@@ -1228,10 +1231,10 @@ const styles = StyleSheet.create({
   itemName: {
     fontSize: fontScale(16),
     fontWeight: "800",
-    color: "#0F172A"
+    color: colors.text
   },
   itemDescription: {
-    color: "#64748B",
+    color: colors.textSecondary,
     fontWeight: "500",
     fontSize: fontScale(13)
   },
@@ -1270,7 +1273,7 @@ const styles = StyleSheet.create({
   stepperWrap: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F1F5F9",
+    backgroundColor: colors.surfaceAlt,
     borderRadius: moderateScale(999),
     padding: moderateScale(4),
     gap: moderateScale(8)
@@ -1279,7 +1282,7 @@ const styles = StyleSheet.create({
     width: moderateScale(28),
     height: moderateScale(28),
     borderRadius: moderateScale(14),
-    backgroundColor: "white",
+    backgroundColor: colors.card,
     alignItems: "center",
     justifyContent: "center",
     shadowColor: "#000",
@@ -1290,14 +1293,14 @@ const styles = StyleSheet.create({
   },
   stepperValue: {
     fontWeight: "800",
-    color: "#0F172A",
+    color: colors.text,
     fontSize: fontScale(14),
     minWidth: moderateScale(16),
     textAlign: "center"
   },
   emptyState: {
     borderRadius: moderateScale(20),
-    backgroundColor: "white",
+    backgroundColor: colors.card,
     padding: moderateScale(32),
     alignItems: "center",
     gap: moderateScale(12),
@@ -1308,7 +1311,7 @@ const styles = StyleSheet.create({
     elevation: 1
   },
   emptyStateText: {
-    color: "#64748B",
+    color: colors.textSecondary,
     fontWeight: "600",
     fontSize: fontScale(16)
   },
@@ -1317,7 +1320,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: "white",
+    backgroundColor: colors.card,
     borderTopLeftRadius: moderateScale(32),
     borderTopRightRadius: moderateScale(32),
     paddingTop: verticalScale(20),
@@ -1368,11 +1371,11 @@ const styles = StyleSheet.create({
   },
   selectedProductsTitle: {
     fontWeight: "800",
-    color: "#0F172A",
+    color: colors.text,
     fontSize: fontScale(17)
   },
   selectedProductsHint: {
-    color: "#64748B",
+    color: colors.textSecondary,
     marginTop: verticalScale(2),
     fontWeight: "600",
     fontSize: fontScale(12)
@@ -1381,7 +1384,7 @@ const styles = StyleSheet.create({
     alignItems: "flex-end"
   },
   totalText: {
-    color: "#0F172A",
+    color: colors.text,
     fontSize: fontScale(26),
     fontWeight: "900"
   },
@@ -1396,7 +1399,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     flexDirection: "row",
     gap: moderateScale(8),
-    backgroundColor: "#F1F5F9"
+    backgroundColor: colors.surfaceAlt
   },
   holdButton: {
     flex: 1
@@ -1421,7 +1424,7 @@ const styles = StyleSheet.create({
     fontWeight: "900"
   },
   actionButtonTextDark: {
-    color: "#0F172A",
+    color: colors.text,
     fontWeight: "800",
     fontSize: fontScale(15)
   },
@@ -1435,7 +1438,7 @@ const styles = StyleSheet.create({
     padding: moderateScale(16)
   },
   modalCard: {
-    backgroundColor: "white",
+    backgroundColor: colors.card,
     borderRadius: moderateScale(24),
     padding: moderateScale(20),
     gap: moderateScale(16),
@@ -1447,7 +1450,7 @@ const styles = StyleSheet.create({
     elevation: 10
   },
   paymentModalCard: {
-    backgroundColor: "white",
+    backgroundColor: colors.card,
     borderRadius: moderateScale(24),
     padding: moderateScale(20),
     gap: moderateScale(16),
@@ -1466,13 +1469,13 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: fontScale(22),
     fontWeight: "900",
-    color: "#0F172A"
+    color: colors.text
   },
   modalCloseButton: {
     width: moderateScale(36),
     height: moderateScale(36),
     borderRadius: moderateScale(18),
-    backgroundColor: "#F1F5F9",
+    backgroundColor: colors.surfaceAlt,
     alignItems: "center",
     justifyContent: "center"
   },
@@ -1484,7 +1487,7 @@ const styles = StyleSheet.create({
     paddingTop: verticalScale(10)
   },
   orderSummaryHero: {
-    backgroundColor: "#F1F5F9",
+    backgroundColor: colors.surfaceAlt,
     borderRadius: moderateScale(16),
     padding: moderateScale(12),
     flexDirection: "row",
@@ -1492,7 +1495,7 @@ const styles = StyleSheet.create({
   },
   orderSummaryMetric: {
     flex: 1,
-    backgroundColor: "white",
+    backgroundColor: colors.card,
     borderRadius: moderateScale(12),
     paddingVertical: moderateScale(10),
     paddingHorizontal: moderateScale(12),
@@ -1504,32 +1507,32 @@ const styles = StyleSheet.create({
   },
   orderSummaryMetricLabel: {
     fontSize: fontScale(12),
-    color: "#64748B",
+    color: colors.textSecondary,
     fontWeight: "700"
   },
   orderSummaryMetricValue: {
     marginTop: verticalScale(4),
-    color: "#0F172A",
+    color: colors.text,
     fontWeight: "900",
     fontSize: fontScale(16)
   },
   tableWrap: {
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: colors.border,
     borderRadius: moderateScale(16),
     overflow: "hidden"
   },
   tableHeaderRow: {
     flexDirection: "row",
-    backgroundColor: "#F8FAFC",
+    backgroundColor: colors.background,
     paddingVertical: moderateScale(12),
     paddingHorizontal: moderateScale(14),
     borderBottomWidth: 1,
-    borderBottomColor: "#E2E8F0"
+    borderBottomColor: colors.border
   },
   tableHeaderText: {
     fontWeight: "800",
-    color: "#475569",
+    color: colors.textSecondary,
     fontSize: fontScale(12)
   },
   tableBodyRow: {
@@ -1542,35 +1545,35 @@ const styles = StyleSheet.create({
   emptyTableText: {
     padding: moderateScale(20),
     textAlign: "center",
-    color: "#94A3B8",
+    color: colors.textMuted,
     fontWeight: "700"
   },
   inputLabel: {
     fontWeight: "800",
-    color: "#0F172A",
+    color: colors.text,
     fontSize: fontScale(14),
     marginBottom: verticalScale(-4)
   },
   input: {
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: colors.border,
     borderRadius: moderateScale(14),
     padding: moderateScale(14),
-    backgroundColor: "#F8FAFC",
+    backgroundColor: colors.background,
     fontSize: fontScale(15),
     fontWeight: "600",
-    color: "#0F172A"
+    color: colors.text
   },
   adjustmentsCard: {
-    backgroundColor: "white",
+    backgroundColor: colors.card,
     borderRadius: moderateScale(16),
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: colors.border,
     padding: moderateScale(16),
     gap: moderateScale(16)
   },
   adjustmentsTitle: {
-    color: "#0F172A",
+    color: colors.text,
     fontWeight: "800",
     fontSize: fontScale(16)
   },
@@ -1612,8 +1615,8 @@ const styles = StyleSheet.create({
   },
   segmentButton: {
     borderWidth: 1,
-    borderColor: "#E2E8F0",
-    backgroundColor: "white",
+    borderColor: colors.border,
+    backgroundColor: colors.card,
     borderRadius: moderateScale(999),
     paddingVertical: moderateScale(10),
     paddingHorizontal: moderateScale(16),
@@ -1623,8 +1626,8 @@ const styles = StyleSheet.create({
   },
   gridSegmentButton: {
     borderWidth: 1,
-    borderColor: "#E2E8F0",
-    backgroundColor: "white",
+    borderColor: colors.border,
+    backgroundColor: colors.card,
     borderRadius: moderateScale(16),
     paddingVertical: moderateScale(14),
     paddingHorizontal: moderateScale(16),
@@ -1639,7 +1642,7 @@ const styles = StyleSheet.create({
     borderColor: "#FF6B35"
   },
   segmentButtonText: {
-    color: "#475569",
+    color: colors.textSecondary,
     fontWeight: "700",
     fontSize: fontScale(14)
   },
@@ -1659,13 +1662,13 @@ const styles = StyleSheet.create({
     fontWeight: "900"
   },
   paymentSummaryCard: {
-    backgroundColor: "#F8FAFC",
+    backgroundColor: colors.background,
     borderRadius: moderateScale(16),
     padding: moderateScale(16),
     gap: moderateScale(12)
   },
   paymentSummaryTitle: {
-    color: "#0F172A",
+    color: colors.text,
     fontWeight: "900",
     fontSize: fontScale(16),
     marginBottom: verticalScale(4)
@@ -1678,15 +1681,15 @@ const styles = StyleSheet.create({
   paymentSummaryRowBorder: {
     paddingTop: verticalScale(12),
     borderTopWidth: 1,
-    borderTopColor: "#E2E8F0"
+    borderTopColor: colors.border
   },
   paymentSummaryLabel: {
-    color: "#64748B",
+    color: colors.textSecondary,
     fontWeight: "700",
     fontSize: fontScale(14)
   },
   paymentSummaryValue: {
-    color: "#0F172A",
+    color: colors.text,
     fontWeight: "800",
     fontSize: fontScale(14)
   },
@@ -1703,7 +1706,7 @@ const styles = StyleSheet.create({
     justifyContent: "center"
   },
   submitButton: {
-    backgroundColor: "#F1F5F9"
+    backgroundColor: colors.surfaceAlt
   },
   printButton: {
     backgroundColor: "#FF6B35"
@@ -1714,7 +1717,7 @@ const styles = StyleSheet.create({
     fontSize: fontScale(15)
   },
   paymentActionTextSecondary: {
-    color: "#0F172A",
+    color: colors.text,
     fontWeight: "900",
     fontSize: fontScale(15)
   }

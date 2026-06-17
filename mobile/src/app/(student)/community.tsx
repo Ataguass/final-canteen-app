@@ -16,8 +16,11 @@ import { useAuth } from "../../hooks/useAuth";
 import { CanteenHeader } from "../../components/CanteenHeader";
 import { communityService, type CommunityPost } from "../../services/communityService";
 import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../utils/responsive';
+import { useTheme } from '../../hooks/useTheme';
 
 export default function Screen() {
+  const { colors, isDark } = useTheme();
+  const styles = createStyles(colors);
   const insets = useSafeAreaInsets();
   const { user, accessToken } = useAuth();
   const [posts, setPosts] = useState<CommunityPost[]>([]);
@@ -148,10 +151,10 @@ export default function Screen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#EEF2F7"
+    backgroundColor: colors.background
   },
   content: {
     padding: moderateScale(16),
@@ -165,15 +168,15 @@ const styles = StyleSheet.create({
     gap: moderateScale(8)
   },
   loadingText: {
-    color: "#64748B",
+    color: colors.textSecondary,
     fontWeight: "600",
     fontSize: fontScale(15)
   },
   emptyCard: {
     borderRadius: moderateScale(16),
     borderWidth: 1,
-    borderColor: "#E2E8F0",
-    backgroundColor: "white",
+    borderColor: colors.border,
+    backgroundColor: colors.card,
     padding: moderateScale(32),
     alignItems: "center",
     justifyContent: "center",
@@ -184,18 +187,18 @@ const styles = StyleSheet.create({
     width: moderateScale(64),
     height: moderateScale(64),
     borderRadius: moderateScale(32),
-    backgroundColor: "#F1F5F9",
+    backgroundColor: colors.surfaceAlt,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: verticalScale(8)
   },
   emptyTitle: {
-    color: "#0F172A",
+    color: colors.text,
     fontWeight: "800",
     fontSize: fontScale(18)
   },
   emptySub: {
-    color: "#64748B",
+    color: colors.textSecondary,
     textAlign: "center",
     fontSize: fontScale(14),
     lineHeight: 20
@@ -206,8 +209,8 @@ const styles = StyleSheet.create({
   postCard: {
     borderRadius: moderateScale(16),
     borderWidth: 1,
-    borderColor: "#E2E8F0",
-    backgroundColor: "white",
+    borderColor: colors.border,
+    backgroundColor: colors.card,
     padding: moderateScale(16),
     gap: moderateScale(14),
     shadowColor: "#0F172A",
@@ -236,19 +239,19 @@ const styles = StyleSheet.create({
     width: moderateScale(36),
     height: moderateScale(36),
     borderRadius: moderateScale(18),
-    backgroundColor: "#F1F5F9",
+    backgroundColor: colors.surfaceAlt,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: "#E2E8F0"
+    borderColor: colors.border
   },
   authorName: {
-    color: "#0F172A",
+    color: colors.text,
     fontWeight: "800",
     fontSize: fontScale(15)
   },
   postDate: {
-    color: "#64748B",
+    color: colors.textSecondary,
     fontWeight: "600",
     fontSize: fontScale(12),
     marginTop: 1
@@ -275,13 +278,13 @@ const styles = StyleSheet.create({
     gap: moderateScale(6)
   },
   postTitle: {
-    color: "#0F172A",
+    color: colors.text,
     fontSize: fontScale(18),
     fontWeight: "800",
     lineHeight: 24
   },
   postBody: {
-    color: "#334155",
+    color: colors.text,
     fontSize: fontScale(15),
     lineHeight: 22
   },
@@ -289,23 +292,23 @@ const styles = StyleSheet.create({
     width: "100%",
     height: moderateScale(220),
     borderRadius: moderateScale(12),
-    backgroundColor: "#F1F5F9",
+    backgroundColor: colors.surfaceAlt,
     borderWidth: 1,
-    borderColor: "#E2E8F0"
+    borderColor: colors.border
   },
   videoBtn: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#F8FAFC",
+    backgroundColor: colors.background,
     borderRadius: moderateScale(12),
     paddingVertical: moderateScale(14),
     gap: moderateScale(8),
     borderWidth: 1,
-    borderColor: "#E2E8F0"
+    borderColor: colors.border
   },
   videoBtnText: {
-    color: "#0F172A",
+    color: colors.text,
     fontWeight: "700",
     fontSize: fontScale(15)
   }

@@ -6,6 +6,7 @@ import * as ImagePicker from "expo-image-picker";
 import { useAuth } from "../../../hooks/useAuth";
 import { tenantService, type InvoiceSettings } from "../../../services/tenantService";
 import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../../utils/responsive';
+import { useTheme } from '../../../hooks/useTheme';
 
 type ToggleField =
   | "invoiceShowLogo"
@@ -68,6 +69,8 @@ const toggleRows: ToggleRow[] = [
 ];
 
 export default function Screen() {
+  const { colors, isDark } = useTheme();
+  const styles = createStyles(colors);
   const { user, accessToken } = useAuth();
   const [settings, setSettings] = useState<InvoiceSettings | null>(null);
   const [logoUrl, setLogoUrl] = useState("");
@@ -245,7 +248,7 @@ export default function Screen() {
           <View style={{ alignItems: "center", paddingVertical: verticalScale(8) }}>
             {logoUrl ? (
               <View style={{ position: "relative" }}>
-                <View style={{ width: moderateScale(100), height: moderateScale(100), borderRadius: moderateScale(20), backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#E2E8F0", overflow: "hidden", alignItems: "center", justifyContent: "center" }}>
+                <View style={{ width: moderateScale(100), height: moderateScale(100), borderRadius: moderateScale(20), backgroundColor: colors.card, borderWidth: 1, borderColor: colors.border, overflow: "hidden", alignItems: "center", justifyContent: "center" }}>
                   <Image source={{ uri: logoUrl }} resizeMode="contain" style={{ width: moderateScale(90), height: moderateScale(90) }} />
                 </View>
                 <Pressable
@@ -257,7 +260,7 @@ export default function Screen() {
                 </Pressable>
               </View>
             ) : (
-              <View style={{ width: moderateScale(100), height: moderateScale(100), borderRadius: moderateScale(20), backgroundColor: "#F8FAFC", borderWidth: 1, borderColor: "#E2E8F0", borderStyle: "dashed", alignItems: "center", justifyContent: "center" }}>
+              <View style={{ width: moderateScale(100), height: moderateScale(100), borderRadius: moderateScale(20), backgroundColor: colors.background, borderWidth: 1, borderColor: colors.border, borderStyle: "dashed", alignItems: "center", justifyContent: "center" }}>
                 <Ionicons name="image-outline" size={32} color="#94A3B8" />
               </View>
             )}
@@ -266,33 +269,33 @@ export default function Screen() {
               <Pressable
                 onPress={() => pickAndUploadLogo("fit")}
                 disabled={uploadingLogo}
-                style={{ backgroundColor: "#F1F5F9", paddingHorizontal: moderateScale(16), paddingVertical: verticalScale(8), borderRadius: moderateScale(999), borderWidth: 1, borderColor: "#E2E8F0" }}
+                style={{ backgroundColor: colors.surfaceAlt, paddingHorizontal: moderateScale(16), paddingVertical: verticalScale(8), borderRadius: moderateScale(999), borderWidth: 1, borderColor: colors.border }}
               >
-                <Text style={{ color: "#0F172A", fontWeight: "700", fontSize: fontScale(13) }}>{uploadingLogo ? "..." : "Upload Fit"}</Text>
+                <Text style={{ color: colors.text, fontWeight: "700", fontSize: fontScale(13) }}>{uploadingLogo ? "..." : "Upload Fit"}</Text>
               </Pressable>
               <Pressable
                 onPress={() => pickAndUploadLogo("square")}
                 disabled={uploadingLogo}
-                style={{ backgroundColor: "#F1F5F9", paddingHorizontal: moderateScale(16), paddingVertical: verticalScale(8), borderRadius: moderateScale(999), borderWidth: 1, borderColor: "#E2E8F0" }}
+                style={{ backgroundColor: colors.surfaceAlt, paddingHorizontal: moderateScale(16), paddingVertical: verticalScale(8), borderRadius: moderateScale(999), borderWidth: 1, borderColor: colors.border }}
               >
-                <Text style={{ color: "#0F172A", fontWeight: "700", fontSize: fontScale(13) }}>{uploadingLogo ? "..." : "Upload Square"}</Text>
+                <Text style={{ color: colors.text, fontWeight: "700", fontSize: fontScale(13) }}>{uploadingLogo ? "..." : "Upload Square"}</Text>
               </Pressable>
             </View>
             
-            <Text style={{ color: "#64748B", fontSize: fontScale(11), marginTop: verticalScale(12), textAlign: "center", fontWeight: "500" }}>
+            <Text style={{ color: colors.textSecondary, fontSize: fontScale(11), marginTop: verticalScale(12), textAlign: "center", fontWeight: "500" }}>
               Recommended: 500x500 px. Max size 1MB.
             </Text>
           </View>
 
           <View style={{ marginTop: verticalScale(4) }}>
-            <Text style={{ color: "#64748B", fontSize: fontScale(11), fontWeight: "700", textTransform: "uppercase", marginBottom: verticalScale(6), marginLeft: moderateScale(2) }}>Or enter logo URL</Text>
+            <Text style={{ color: colors.textSecondary, fontSize: fontScale(11), fontWeight: "700", textTransform: "uppercase", marginBottom: verticalScale(6), marginLeft: moderateScale(2) }}>Or enter logo URL</Text>
             <TextInput
               value={logoUrl}
               onChangeText={setLogoUrl}
               placeholder="https://your-domain.com/logo.png"
               autoCapitalize="none"
               autoCorrect={false}
-              style={{ backgroundColor: "#F8FAFC", borderWidth: 1, borderColor: "#E2E8F0", borderRadius: moderateScale(12), padding: moderateScale(10), fontSize: fontScale(13), color: "#0F172A", fontWeight: "500" }}
+              style={{ backgroundColor: colors.background, borderWidth: 1, borderColor: colors.border, borderRadius: moderateScale(12), padding: moderateScale(10), fontSize: fontScale(13), color: colors.text, fontWeight: "500" }}
             />
           </View>
         </View>
@@ -346,10 +349,10 @@ export default function Screen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#EEF2F7"
+    backgroundColor: colors.background
   },
   scroll: {
     flex: 1
@@ -364,17 +367,17 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     gap: moderateScale(8),
-    backgroundColor: "#EEF2F7"
+    backgroundColor: colors.background
   },
   centerTitle: {
-    color: "#334155",
+    color: colors.text,
     fontWeight: "700"
   },
   heroCard: {
-    backgroundColor: "#F8FAFC",
+    backgroundColor: colors.background,
     borderRadius: moderateScale(18),
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: colors.border,
     padding: moderateScale(14),
     flexDirection: "row",
     alignItems: "center",
@@ -400,17 +403,17 @@ const styles = StyleSheet.create({
   heroTitle: {
     fontSize: fontScale(22),
     fontWeight: "800",
-    color: "#0F172A"
+    color: colors.text
   },
   heroSubtitle: {
-    color: "#64748B",
+    color: colors.textSecondary,
     fontSize: fontScale(13),
     fontWeight: "500"
   },
   sectionCard: {
-    backgroundColor: "white",
+    backgroundColor: colors.card,
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: colors.border,
     borderRadius: moderateScale(16),
     padding: moderateScale(16),
     gap: moderateScale(12),
@@ -423,22 +426,22 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: fontScale(19),
     fontWeight: "800",
-    color: "#0F172A"
+    color: colors.text
   },
   sectionHint: {
-    color: "#64748B",
+    color: colors.textSecondary,
     fontWeight: "500"
   },
   fieldLabel: {
-    color: "#334155",
+    color: colors.text,
     fontWeight: "700"
   },
   input: {
     borderWidth: 1,
-    borderColor: "#CBD5E1",
+    borderColor: colors.border,
     borderRadius: moderateScale(12),
     padding: moderateScale(11),
-    backgroundColor: "#FFFFFF"
+    backgroundColor: colors.card
   },
   multilineInput: {
     minHeight: moderateScale(84),
@@ -455,9 +458,9 @@ const styles = StyleSheet.create({
   toggleListContainer: {
     marginTop: verticalScale(4),
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: colors.border,
     borderRadius: moderateScale(16),
-    backgroundColor: "#F8FAFC",
+    backgroundColor: colors.background,
     overflow: "hidden"
   },
   toggleRow: {
@@ -466,7 +469,7 @@ const styles = StyleSheet.create({
     paddingVertical: moderateScale(14),
     paddingHorizontal: moderateScale(14),
     borderBottomWidth: 1,
-    borderBottomColor: "#E2E8F0",
+    borderBottomColor: colors.border,
     gap: moderateScale(12)
   },
   toggleRowLast: {
@@ -476,11 +479,11 @@ const styles = StyleSheet.create({
     width: moderateScale(38),
     height: moderateScale(38),
     borderRadius: moderateScale(12),
-    backgroundColor: "white",
+    backgroundColor: colors.card,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: "#E2E8F0"
+    borderColor: colors.border
   },
   toggleTextWrap: {
     flex: 1,
@@ -488,16 +491,16 @@ const styles = StyleSheet.create({
     gap: moderateScale(2)
   },
   toggleTitle: {
-    color: "#0F172A",
+    color: colors.text,
     fontWeight: "800",
     fontSize: fontScale(15)
   },
   toggleTitleDisabled: {
-    color: "#64748B",
+    color: colors.textSecondary,
     fontWeight: "700"
   },
   toggleHint: {
-    color: "#64748B",
+    color: colors.textSecondary,
     fontSize: fontScale(12),
     fontWeight: "500"
   },

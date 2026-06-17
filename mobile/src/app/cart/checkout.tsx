@@ -8,6 +8,7 @@ import { orderService } from "../../services/orderService";
 import { PaymentMethod } from "../../services/types";
 import { walletService } from "../../services/walletService";
 import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../utils/responsive';
+import { useTheme } from '../../hooks/useTheme';
 
 const PAYMENT_METHODS: PaymentMethod[] = ["CASH", "UPI", "WALLET", "CREDIT"];
 const formatCurrency = (value: number): string => `₹ ${value.toFixed(2)}`;
@@ -66,6 +67,8 @@ const generatePickupSlots = (count = 8): PickupSlot[] => {
 };
 
 export default function Screen() {
+  const { colors, isDark } = useTheme();
+  const styles = createStyles(colors);
   const router = useRouter();
   const { user, accessToken } = useAuth();
   const { items, subtotal, clearCart } = useCart();
@@ -297,10 +300,10 @@ export default function Screen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#EEF2F7"
+    backgroundColor: colors.background
   },
   content: {
     padding: moderateScale(16),
@@ -310,8 +313,8 @@ const styles = StyleSheet.create({
   headerCard: {
     borderRadius: moderateScale(16),
     borderWidth: 1,
-    borderColor: "#E2E8F0",
-    backgroundColor: "white",
+    borderColor: colors.border,
+    backgroundColor: colors.card,
     padding: moderateScale(12)
   },
   headerRow: {
@@ -328,25 +331,25 @@ const styles = StyleSheet.create({
     justifyContent: "center"
   },
   headerTitle: {
-    color: "#0F172A",
+    color: colors.text,
     fontSize: fontScale(23),
     fontWeight: "800"
   },
   headerSubtitle: {
-    color: "#64748B",
+    color: colors.textSecondary,
     marginTop: verticalScale(2),
     fontWeight: "600"
   },
   summaryCard: {
     borderRadius: moderateScale(14),
     borderWidth: 1,
-    borderColor: "#E2E8F0",
-    backgroundColor: "white",
+    borderColor: colors.border,
+    backgroundColor: colors.card,
     padding: moderateScale(12),
     gap: moderateScale(8)
   },
   sectionTitle: {
-    color: "#0F172A",
+    color: colors.text,
     fontSize: fontScale(18),
     fontWeight: "800"
   },
@@ -356,20 +359,20 @@ const styles = StyleSheet.create({
     justifyContent: "space-between"
   },
   summaryLabel: {
-    color: "#64748B",
+    color: colors.textSecondary,
     fontWeight: "600"
   },
   summaryValue: {
-    color: "#0F172A",
+    color: colors.text,
     fontWeight: "700"
   },
   totalRow: {
     borderTopWidth: 1,
-    borderTopColor: "#E2E8F0",
+    borderTopColor: colors.border,
     paddingTop: verticalScale(8)
   },
   totalLabel: {
-    color: "#0F172A",
+    color: colors.text,
     fontWeight: "800"
   },
   totalValue: {
@@ -380,8 +383,8 @@ const styles = StyleSheet.create({
   paymentCard: {
     borderRadius: moderateScale(14),
     borderWidth: 1,
-    borderColor: "#E2E8F0",
-    backgroundColor: "white",
+    borderColor: colors.border,
+    backgroundColor: colors.card,
     padding: moderateScale(12),
     gap: moderateScale(10)
   },
@@ -429,8 +432,8 @@ const styles = StyleSheet.create({
   slotCard: {
     borderRadius: moderateScale(14),
     borderWidth: 1,
-    borderColor: "#E2E8F0",
-    backgroundColor: "white",
+    borderColor: colors.border,
+    backgroundColor: colors.card,
     padding: moderateScale(12),
     gap: moderateScale(10)
   },
@@ -442,8 +445,8 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: moderateScale(999),
     borderWidth: 1,
-    borderColor: "#CBD5E1",
-    backgroundColor: "#F8FAFC",
+    borderColor: colors.border,
+    backgroundColor: colors.background,
     paddingVertical: moderateScale(9),
     alignItems: "center"
   },
@@ -452,14 +455,14 @@ const styles = StyleSheet.create({
     borderColor: "#0F172A"
   },
   slotModeText: {
-    color: "#334155",
+    color: colors.text,
     fontWeight: "700"
   },
   slotModeTextActive: {
     color: "white"
   },
   slotHint: {
-    color: "#64748B",
+    color: colors.textSecondary,
     fontWeight: "600"
   },
   slotList: {
@@ -468,8 +471,8 @@ const styles = StyleSheet.create({
   slotChip: {
     borderRadius: moderateScale(10),
     borderWidth: 1,
-    borderColor: "#CBD5E1",
-    backgroundColor: "#F8FAFC",
+    borderColor: colors.border,
+    backgroundColor: colors.background,
     paddingHorizontal: moderateScale(10),
     paddingVertical: moderateScale(10)
   },
@@ -478,7 +481,7 @@ const styles = StyleSheet.create({
     borderColor: "#60A5FA"
   },
   slotChipText: {
-    color: "#334155",
+    color: colors.text,
     fontWeight: "700"
   },
   slotChipTextActive: {
@@ -494,15 +497,15 @@ const styles = StyleSheet.create({
     paddingVertical: moderateScale(8),
     borderRadius: moderateScale(999),
     borderWidth: 1,
-    borderColor: "#CBD5E1",
-    backgroundColor: "#F8FAFC"
+    borderColor: colors.border,
+    backgroundColor: colors.background
   },
   methodChipActive: {
     backgroundColor: "#1D4ED8",
     borderColor: "#1D4ED8"
   },
   methodChipText: {
-    color: "#334155",
+    color: colors.text,
     fontWeight: "700"
   },
   methodChipTextActive: {
@@ -528,7 +531,7 @@ const styles = StyleSheet.create({
     paddingVertical: moderateScale(12)
   },
   backBtnText: {
-    color: "#0F172A",
+    color: colors.text,
     textAlign: "center",
     fontWeight: "700"
   }

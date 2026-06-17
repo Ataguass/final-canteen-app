@@ -5,11 +5,14 @@ import { useAuth } from "../../hooks/useAuth";
 import { Ionicons } from "@expo/vector-icons";
 import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
 import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../utils/responsive';
+import { useTheme } from '../../hooks/useTheme';
 
 const BRAND_COLOR = "#080d2b";
 const OTP_LENGTH = 6;
 
 export default function OtpScreen() {
+  const { colors, isDark } = useTheme();
+  const styles = createStyles(colors);
   const router = useRouter();
   const { pendingRegistration, registerAfterOtp, confirmationResult } = useAuth();
   
@@ -154,10 +157,10 @@ export default function OtpScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fafbfc',
+    backgroundColor: colors.background,
   },
   content: {
     flex: 1,
@@ -192,13 +195,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: fontScale(28),
     fontWeight: '800',
-    color: '#1c1c1e',
+    color: colors.text,
     marginBottom: verticalScale(8),
     letterSpacing: -0.5,
   },
   subtitle: {
     fontSize: fontScale(16),
-    color: '#8e8e93',
+    color: colors.textMuted,
     textAlign: 'center',
     lineHeight: 24,
   },
@@ -219,8 +222,8 @@ const styles = StyleSheet.create({
     height: moderateScale(55),
     borderRadius: moderateScale(12),
     borderWidth: 1.5,
-    borderColor: '#e5e5ea',
-    backgroundColor: '#ffffff',
+    borderColor: colors.border,
+    backgroundColor: colors.card,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -230,12 +233,12 @@ const styles = StyleSheet.create({
   },
   otpBoxFilled: {
     borderColor: BRAND_COLOR,
-    backgroundColor: '#ffffff',
+    backgroundColor: colors.card,
   },
   otpText: {
     fontSize: fontScale(24),
     fontWeight: '700',
-    color: '#1c1c1e',
+    color: colors.text,
   },
   hiddenInput: {
     position: 'absolute',
@@ -267,7 +270,7 @@ const styles = StyleSheet.create({
     marginTop: verticalScale(32),
   },
   footerText: {
-    color: '#8e8e93',
+    color: colors.textMuted,
     fontSize: fontScale(15),
   },
   resendLink: {

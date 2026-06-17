@@ -18,6 +18,7 @@ import { useCart } from "../../hooks/useCart";
 import { useToast } from "../../components/Toast";
 import { menuService } from "../../services/menuService";
 import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../utils/responsive';
+import { useTheme } from '../../hooks/useTheme';
 
 type Category = {
   id: string;
@@ -40,6 +41,8 @@ type MenuItem = {
 const formatCurrency = (value: number): string => `₹ ${value.toFixed(2)}`;
 
 export default function Screen() {
+  const { colors, isDark } = useTheme();
+  const styles = createStyles(colors);
   const insets = useSafeAreaInsets();
   const { width: screenWidth } = useWindowDimensions();
   const router = useRouter();
@@ -219,10 +222,10 @@ export default function Screen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#F8FAFC"
+    backgroundColor: colors.background
   },
   topNav: {
     flexDirection: "row",
@@ -235,16 +238,16 @@ const styles = StyleSheet.create({
     width: moderateScale(40),
     height: moderateScale(40),
     borderRadius: moderateScale(20),
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.card,
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
-    borderColor: "#E2E8F0"
+    borderColor: colors.border
   },
   topNavTitle: {
     fontSize: fontScale(18),
     fontWeight: "900",
-    color: "#0F172A"
+    color: colors.text
   },
   content: {
     padding: moderateScale(16),
@@ -253,7 +256,7 @@ const styles = StyleSheet.create({
   },
   headerCard: {
     borderRadius: moderateScale(20),
-    backgroundColor: "white",
+    backgroundColor: colors.card,
     shadowColor: "#0F172A",
     shadowOpacity: 0.05,
     shadowRadius: moderateScale(12),
@@ -293,7 +296,7 @@ const styles = StyleSheet.create({
     gap: moderateScale(4)
   },
   headerTitle: {
-    color: "#0F172A",
+    color: colors.text,
     fontSize: fontScale(26),
     fontWeight: "900",
   },
@@ -306,7 +309,7 @@ const styles = StyleSheet.create({
     textShadowRadius: moderateScale(4)
   },
   headerSubtitle: {
-    color: "#64748B",
+    color: colors.textSecondary,
     fontWeight: "600",
     fontSize: fontScale(14)
   },
@@ -317,7 +320,7 @@ const styles = StyleSheet.create({
   },
   itemCountChip: {
     borderRadius: moderateScale(999),
-    backgroundColor: "#F1F5F9",
+    backgroundColor: colors.surfaceAlt,
     paddingHorizontal: moderateScale(12),
     paddingVertical: moderateScale(6)
   },
@@ -330,7 +333,7 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255,255,255,0.3)"
   },
   itemCountChipText: {
-    color: "#0F172A",
+    color: colors.text,
     fontWeight: "800",
     fontSize: fontScale(12)
   },
@@ -340,7 +343,7 @@ const styles = StyleSheet.create({
     fontSize: fontScale(12)
   },
   categoryDescription: {
-    color: "#475569",
+    color: colors.textSecondary,
     lineHeight: 20
   },
   categoryDescriptionOverlay: {
@@ -350,19 +353,19 @@ const styles = StyleSheet.create({
   emptyCard: {
     borderRadius: moderateScale(14),
     borderWidth: 1,
-    borderColor: "#CBD5E1",
-    backgroundColor: "#F8FAFC",
+    borderColor: colors.border,
+    backgroundColor: colors.background,
     padding: moderateScale(18),
     alignItems: "center",
     gap: moderateScale(6)
   },
   emptyTitle: {
-    color: "#0F172A",
+    color: colors.text,
     fontWeight: "800",
     fontSize: fontScale(18)
   },
   emptySub: {
-    color: "#64748B",
+    color: colors.textSecondary,
     textAlign: "center"
   },
   listHeaderRow: {
@@ -371,12 +374,12 @@ const styles = StyleSheet.create({
     alignItems: "center"
   },
   listHeaderTitle: {
-    color: "#0F172A",
+    color: colors.text,
     fontSize: fontScale(17),
     fontWeight: "800"
   },
   listHeaderMeta: {
-    color: "#64748B",
+    color: colors.textSecondary,
     fontWeight: "700"
   },
   itemGrid: {
@@ -387,7 +390,7 @@ const styles = StyleSheet.create({
   },
   itemCard: {
     borderRadius: moderateScale(16),
-    backgroundColor: "white",
+    backgroundColor: colors.card,
     overflow: "hidden",
     marginBottom: verticalScale(14),
     shadowColor: "#0F172A",
@@ -402,12 +405,12 @@ const styles = StyleSheet.create({
   itemImage: {
     width: "100%",
     height: moderateScale(106),
-    backgroundColor: "#F1F5F9"
+    backgroundColor: colors.surfaceAlt
   },
   itemImageFallback: {
     width: "100%",
     height: moderateScale(106),
-    backgroundColor: "#F1F5F9",
+    backgroundColor: colors.surfaceAlt,
     alignItems: "center",
     justifyContent: "center"
   },
@@ -422,17 +425,17 @@ const styles = StyleSheet.create({
     gap: moderateScale(8)
   },
   itemName: {
-    color: "#0F172A",
+    color: colors.text,
     fontWeight: "800",
     fontSize: fontScale(16),
     flex: 1
   },
   itemDescription: {
-    color: "#64748B",
+    color: colors.textSecondary,
     fontSize: fontScale(12)
   },
   itemDescriptionMuted: {
-    color: "#94A3B8",
+    color: colors.textMuted,
     fontSize: fontScale(12),
     fontWeight: "600"
   },
@@ -450,12 +453,12 @@ const styles = StyleSheet.create({
   categoryPill: {
     alignSelf: "flex-start",
     borderRadius: moderateScale(999),
-    backgroundColor: "#F1F5F9",
+    backgroundColor: colors.surfaceAlt,
     paddingHorizontal: moderateScale(8),
     paddingVertical: moderateScale(3)
   },
   categoryPillText: {
-    color: "#475569",
+    color: colors.textSecondary,
     fontWeight: "700",
     fontSize: fontScale(12)
   },

@@ -6,6 +6,7 @@ import * as DocumentPicker from "expo-document-picker";
 import { useAuth } from "../../../hooks/useAuth";
 import { backupService, type BackupFile } from "../../../services/backupService";
 import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../../utils/responsive';
+import { useTheme } from '../../../hooks/useTheme';
 
 const formatBytes = (bytes: number): string => {
   if (!Number.isFinite(bytes) || bytes <= 0) return "0 B";
@@ -33,6 +34,8 @@ const formatDate = (value: string): string => {
 };
 
 export default function Screen() {
+  const { colors, isDark } = useTheme();
+  const styles = createStyles(colors);
   const { user, accessToken } = useAuth();
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
@@ -292,10 +295,10 @@ export default function Screen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#EEF2F7"
+    backgroundColor: colors.background
   },
   content: {
     padding: moderateScale(16),
@@ -307,16 +310,16 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     gap: moderateScale(8),
-    backgroundColor: "#EEF2F7"
+    backgroundColor: colors.background
   },
   centerTitle: {
-    color: "#334155",
+    color: colors.text,
     fontWeight: "700"
   },
   infoCard: {
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.card,
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: colors.border,
     borderRadius: moderateScale(14),
     padding: moderateScale(14),
     flexDirection: "row",
@@ -330,7 +333,7 @@ const styles = StyleSheet.create({
   },
   infoText: {
     flex: 1,
-    color: "#475569",
+    color: colors.textSecondary,
     fontSize: fontScale(13),
     fontWeight: "500",
     lineHeight: 18
@@ -365,7 +368,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: fontScale(18),
     fontWeight: "800",
-    color: "#0F172A"
+    color: colors.text
   },
   refreshText: {
     color: "#1D4ED8",
@@ -373,9 +376,9 @@ const styles = StyleSheet.create({
   },
   emptyCard: {
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: colors.border,
     borderRadius: moderateScale(20),
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.card,
     padding: moderateScale(32),
     alignItems: "center",
     justifyContent: "center",
@@ -391,26 +394,26 @@ const styles = StyleSheet.create({
     width: moderateScale(72),
     height: moderateScale(72),
     borderRadius: moderateScale(36),
-    backgroundColor: "#F8FAFC",
+    backgroundColor: colors.background,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: verticalScale(4)
   },
   emptyTitle: {
-    color: "#0F172A",
+    color: colors.text,
     fontSize: fontScale(18),
     fontWeight: "800"
   },
   emptyText: {
-    color: "#64748B",
+    color: colors.textSecondary,
     fontSize: fontScale(14),
     fontWeight: "500",
     textAlign: "center"
   },
   backupCard: {
     borderWidth: 1,
-    borderColor: "#E2E8F0",
-    backgroundColor: "#FFFFFF",
+    borderColor: colors.border,
+    backgroundColor: colors.card,
     borderRadius: moderateScale(16),
     padding: moderateScale(16),
     gap: moderateScale(14),
@@ -421,12 +424,12 @@ const styles = StyleSheet.create({
     elevation: 2
   },
   backupId: {
-    color: "#0F172A",
+    color: colors.text,
     fontWeight: "800",
     fontSize: fontScale(14)
   },
   metaText: {
-    color: "#64748B",
+    color: colors.textSecondary,
     fontSize: fontScale(12),
     fontWeight: "600"
   },
@@ -456,8 +459,8 @@ const styles = StyleSheet.create({
   downloadButton: {
     borderRadius: moderateScale(10),
     borderWidth: 1,
-    borderColor: "#CBD5E1",
-    backgroundColor: "#F8FAFC",
+    borderColor: colors.border,
+    backgroundColor: colors.background,
     paddingVertical: moderateScale(10),
     alignItems: "center",
     justifyContent: "center",
@@ -465,7 +468,7 @@ const styles = StyleSheet.create({
     gap: moderateScale(6)
   },
   downloadText: {
-    color: "#0F172A",
+    color: colors.text,
     fontWeight: "700"
   }
 });

@@ -21,6 +21,7 @@ import { Order, orderService } from "../../services/orderService";
 import { MyProfile, userService } from "../../services/userService";
 import { WalletTransaction, walletService } from "../../services/walletService";
 import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../utils/responsive';
+import { useTheme } from '../../hooks/useTheme';
 
 const activeStatuses = new Set(["PENDING", "ACCEPTED", "PREPARING", "READY"]);
 const formatCurrency = (value: number): string => `₹ ${value.toFixed(2)}`;
@@ -55,6 +56,8 @@ const roleLabelMap: Record<MyProfile["role"], string> = {
 };
 
 export default function Screen() {
+  const { colors, isDark } = useTheme();
+  const styles = createStyles(colors);
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { user, accessToken, logout, setSessionUser } = useAuth();
@@ -341,7 +344,7 @@ export default function Screen() {
 
         <View style={styles.statsRow}>
           <View style={styles.statBox}>
-            <View style={[styles.statIconWrap, { backgroundColor: "#F1F5F9" }]}>
+            <View style={[styles.statIconWrap, { backgroundColor: colors.surfaceAlt }]}>
               <Ionicons name="fast-food-outline" size={20} color="#FF6B35" />
             </View>
             <View>
@@ -616,10 +619,10 @@ export default function Screen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#F8FAFC"
+    backgroundColor: colors.background
   },
   content: {
     padding: moderateScale(16),
@@ -667,7 +670,7 @@ const styles = StyleSheet.create({
     marginBottom: verticalScale(2)
   },
   heroRole: {
-    color: "#94A3B8",
+    color: colors.textMuted,
     fontWeight: "600",
     fontSize: fontScale(14)
   },
@@ -689,7 +692,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#DCFCE7"
   },
   statusChipBlue: {
-    backgroundColor: "#F1F5F9"
+    backgroundColor: colors.surfaceAlt
   },
   statusChipAmber: {
     backgroundColor: "#FEF3C7"
@@ -700,8 +703,8 @@ const styles = StyleSheet.create({
   completionCard: {
     borderRadius: moderateScale(14),
     borderWidth: 1,
-    borderColor: "#E2E8F0",
-    backgroundColor: "white",
+    borderColor: colors.border,
+    backgroundColor: colors.card,
     padding: moderateScale(12),
     gap: moderateScale(8)
   },
@@ -718,19 +721,19 @@ const styles = StyleSheet.create({
     backgroundColor: "#FF6B35"
   },
   helperText: {
-    color: "#64748B"
+    color: colors.textSecondary
   },
   infoCard: {
     borderRadius: moderateScale(14),
     borderWidth: 1,
-    borderColor: "#E2E8F0",
-    backgroundColor: "white",
+    borderColor: colors.border,
+    backgroundColor: colors.card,
     padding: moderateScale(12),
     gap: moderateScale(6)
   },
   walletCard: {
     borderRadius: moderateScale(20),
-    backgroundColor: "white",
+    backgroundColor: colors.card,
     padding: moderateScale(16),
     gap: moderateScale(12),
     shadowColor: "#0F172A",
@@ -764,7 +767,7 @@ const styles = StyleSheet.create({
   },
   walletTxnList: {
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: colors.border,
     borderRadius: moderateScale(10),
     overflow: "hidden"
   },
@@ -778,12 +781,12 @@ const styles = StyleSheet.create({
     borderTopColor: "#F1F5F9"
   },
   walletTxnType: {
-    color: "#0F172A",
+    color: colors.text,
     fontWeight: "700",
     fontSize: fontScale(12)
   },
   walletTxnDate: {
-    color: "#64748B",
+    color: colors.textSecondary,
     fontWeight: "500",
     marginTop: verticalScale(2),
     fontSize: fontScale(12)
@@ -803,7 +806,7 @@ const styles = StyleSheet.create({
     alignItems: "center"
   },
   sectionTitle: {
-    color: "#0F172A",
+    color: colors.text,
     fontSize: fontScale(18),
     fontWeight: "800"
   },
@@ -812,12 +815,12 @@ const styles = StyleSheet.create({
     fontWeight: "800"
   },
   infoLine: {
-    color: "#475569",
+    color: colors.textSecondary,
     fontWeight: "600"
   },
   statsRow: {
     flexDirection: "row",
-    backgroundColor: "white",
+    backgroundColor: colors.card,
     borderRadius: moderateScale(20),
     padding: moderateScale(16),
     alignItems: "center",
@@ -841,12 +844,12 @@ const styles = StyleSheet.create({
     justifyContent: "center"
   },
   statLabel: {
-    color: "#64748B",
+    color: colors.textSecondary,
     fontSize: fontScale(12),
     fontWeight: "600"
   },
   statValue: {
-    color: "#0F172A",
+    color: colors.text,
     fontSize: fontScale(16),
     fontWeight: "800",
     marginTop: verticalScale(2)
@@ -864,12 +867,12 @@ const styles = StyleSheet.create({
   sectionLabel: {
     fontSize: fontScale(12),
     fontWeight: "700",
-    color: "#64748B",
+    color: colors.textSecondary,
     marginLeft: moderateScale(4),
     letterSpacing: 0.5
   },
   menuCard: {
-    backgroundColor: "white",
+    backgroundColor: colors.card,
     borderRadius: moderateScale(20),
     overflow: "hidden",
     shadowColor: "#0F172A",
@@ -895,11 +898,11 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: fontScale(15),
     fontWeight: "600",
-    color: "#0F172A"
+    color: colors.text
   },
   menuDivider: {
     height: 1,
-    backgroundColor: "#F1F5F9",
+    backgroundColor: colors.surfaceAlt,
     marginLeft: moderateScale(60)
   },
   logoutBtn: {
@@ -930,7 +933,7 @@ const styles = StyleSheet.create({
     padding: moderateScale(20)
   },
   modalCard: {
-    backgroundColor: "white",
+    backgroundColor: colors.card,
     borderRadius: moderateScale(28),
     padding: moderateScale(24),
     gap: moderateScale(16),
@@ -941,7 +944,7 @@ const styles = StyleSheet.create({
     elevation: 10
   },
   modalTitle: {
-    color: "#0F172A",
+    color: colors.text,
     fontSize: fontScale(22),
     fontWeight: "900",
     textAlign: "center",
@@ -949,13 +952,13 @@ const styles = StyleSheet.create({
   },
   modalInput: {
     borderWidth: 1.5,
-    borderColor: "#E2E8F0",
-    backgroundColor: "#F8FAFC",
+    borderColor: colors.border,
+    backgroundColor: colors.background,
     borderRadius: moderateScale(16),
     paddingHorizontal: moderateScale(16),
     paddingVertical: moderateScale(16),
     fontSize: fontScale(16),
-    color: "#0F172A",
+    color: colors.text,
     fontWeight: "500"
   },
   modalActions: {
@@ -979,7 +982,7 @@ const styles = StyleSheet.create({
     elevation: 4
   },
   modalActionSecondary: {
-    backgroundColor: "#F1F5F9"
+    backgroundColor: colors.surfaceAlt
   },
   modalActionPrimaryText: {
     color: "white",
@@ -988,7 +991,7 @@ const styles = StyleSheet.create({
     fontSize: fontScale(16)
   },
   modalActionSecondaryText: {
-    color: "#64748B",
+    color: colors.textSecondary,
     textAlign: "center",
     fontWeight: "800",
     fontSize: fontScale(16)

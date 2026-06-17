@@ -11,8 +11,11 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../utils/responsive';
+import { useTheme } from '../../hooks/useTheme';
 
 export default function SettingsScreen() {
+  const { colors, isDark, toggleTheme } = useTheme();
+  const styles = createStyles(colors);
   const router = useRouter();
   const insets = useSafeAreaInsets();
   
@@ -22,7 +25,7 @@ export default function SettingsScreen() {
     <View style={[styles.screen, { paddingTop: insets.top > 0 ? insets.top + 10 : 48 }]}>
       <View style={styles.topNav}>
         <Pressable onPress={() => router.back()} style={styles.backBtn}>
-          <Ionicons name="chevron-back" size={24} color="#0F172A" />
+          <Ionicons name="chevron-back" size={24} color="colors.text" />
         </Pressable>
         <Text style={styles.topNavTitle}>Settings</Text>
         <View style={{ width: moderateScale(40) }} />
@@ -36,6 +39,25 @@ export default function SettingsScreen() {
           <Text style={styles.sectionTitle}>Preferences</Text>
           <View style={styles.card}>
 
+            
+            <View style={styles.row}>
+              <View style={styles.rowLeft}>
+                <View style={[styles.iconWrap, { backgroundColor: colors.surfaceAlt }]}>
+                  <Ionicons name="moon" size={20} color={colors.text} />
+                </View>
+                <View>
+                  <Text style={styles.rowTitle}>Dark Mode</Text>
+                  <Text style={styles.rowSubtitle}>App appearance</Text>
+                </View>
+              </View>
+              <Switch
+                value={isDark}
+                onValueChange={toggleTheme}
+                trackColor={{ false: colors.border, true: colors.accent }}
+                thumbColor={colors.card}
+              />
+            </View>
+            <View style={styles.divider} />
             <View style={styles.row}>
               <View style={styles.rowLeft}>
                 <View style={[styles.iconWrap, { backgroundColor: "#FFF7ED" }]}>
@@ -49,8 +71,8 @@ export default function SettingsScreen() {
               <Switch
                 value={notifications}
                 onValueChange={setNotifications}
-                trackColor={{ false: "#E2E8F0", true: "#FF6B35" }}
-                thumbColor={"#FFFFFF"}
+                trackColor={{ false: "colors.border", true: "#FF6B35" }}
+                thumbColor={"colors.card"}
               />
             </View>
           </View>
@@ -59,14 +81,14 @@ export default function SettingsScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Account</Text>
           <View style={styles.card}>
-            <Pressable style={styles.actionRow} android_ripple={{ color: "#F1F5F9" }}>
+            <Pressable style={styles.actionRow} android_ripple={{ color: colors.surfaceAlt }}>
               <Text style={styles.actionText}>Edit Profile</Text>
-              <Ionicons name="chevron-forward" size={20} color="#94A3B8" />
+              <Ionicons name="chevron-forward" size={20} color="colors.textMuted" />
             </Pressable>
             <View style={styles.divider} />
-            <Pressable style={styles.actionRow} android_ripple={{ color: "#F1F5F9" }}>
+            <Pressable style={styles.actionRow} android_ripple={{ color: colors.surfaceAlt }}>
               <Text style={styles.actionText}>Change Password</Text>
-              <Ionicons name="chevron-forward" size={20} color="#94A3B8" />
+              <Ionicons name="chevron-forward" size={20} color="colors.textMuted" />
             </Pressable>
           </View>
         </View>
@@ -86,10 +108,10 @@ export default function SettingsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#F8FAFC"
+    backgroundColor: colors.background
   },
   topNav: {
     flexDirection: "row",
@@ -102,10 +124,10 @@ const styles = StyleSheet.create({
     width: moderateScale(40),
     height: moderateScale(40),
     borderRadius: moderateScale(20),
-    backgroundColor: "#FFFFFF",
+    backgroundColor: colors.card,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#0F172A",
+    shadowColor: "colors.text",
     shadowOpacity: 0.05,
     shadowRadius: moderateScale(10),
     shadowOffset: { width: 0, height: 4 },
@@ -114,7 +136,7 @@ const styles = StyleSheet.create({
   topNavTitle: {
     fontSize: fontScale(18),
     fontWeight: "900",
-    color: "#0F172A"
+    color: colors.text
   },
   content: {
     padding: moderateScale(16),
@@ -127,17 +149,17 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: fontScale(14),
     fontWeight: "800",
-    color: "#64748B",
+    color: colors.textSecondary,
     textTransform: "uppercase",
     letterSpacing: 1,
     marginLeft: moderateScale(4)
   },
   card: {
-    backgroundColor: "white",
+    backgroundColor: colors.card,
     borderRadius: moderateScale(16),
     borderWidth: 1,
-    borderColor: "#E2E8F0",
-    shadowColor: "#0F172A",
+    borderColor: colors.border,
+    shadowColor: "colors.text",
     shadowOpacity: 0.03,
     shadowRadius: moderateScale(8),
     shadowOffset: { width: 0, height: 2 },
@@ -165,16 +187,16 @@ const styles = StyleSheet.create({
   rowTitle: {
     fontSize: fontScale(15),
     fontWeight: "700",
-    color: "#0F172A"
+    color: colors.text
   },
   rowSubtitle: {
     fontSize: fontScale(12),
-    color: "#64748B",
+    color: colors.textSecondary,
     marginTop: verticalScale(2)
   },
   divider: {
     height: 1,
-    backgroundColor: "#F1F5F9",
+    backgroundColor: colors.surfaceAlt,
     marginLeft: moderateScale(64)
   },
   actionRow: {
@@ -186,7 +208,7 @@ const styles = StyleSheet.create({
   actionText: {
     fontSize: fontScale(15),
     fontWeight: "700",
-    color: "#0F172A"
+    color: colors.text
   },
   dangerText: {
     fontSize: fontScale(15),
