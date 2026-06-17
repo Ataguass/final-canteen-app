@@ -23,6 +23,7 @@ import { menuService } from "../../services/menuService";
 import { orderService, type Order } from "../../services/orderService";
 import { tenantService, type FeatureSettings } from "../../services/tenantService";
 import { useToast } from "../../components/Toast";
+import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../utils/responsive';
 
 type Category = {
   id: string;
@@ -434,7 +435,7 @@ export default function Screen() {
             ))
           )}
         </View>
-        <View style={{ height: 40 }} />
+        <View style={{ height: moderateScale(40) }} />
       </ScrollView>
     </View>
   );
@@ -449,37 +450,37 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 16,
-    paddingTop: 54,
-    paddingBottom: 12,
+    paddingHorizontal: moderateScale(16),
+    paddingTop: verticalScale(54),
+    paddingBottom: verticalScale(12),
     backgroundColor: "#F8FAFC",
   },
   headerLeft: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
+    gap: moderateScale(6),
   },
   headerUserName: {
     color: "#0F172A",
-    fontSize: 18,
+    fontSize: fontScale(18),
     fontWeight: "800",
   },
   headerRight: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 16,
+    gap: moderateScale(16),
   },
   cartIconWrapper: {
     position: "relative",
   },
   cartBadge: {
     position: "absolute",
-    top: -4,
-    right: -6,
+    top: verticalScale(-4),
+    right: moderateScale(-6),
     backgroundColor: "#EF4444",
-    width: 18,
-    height: 18,
-    borderRadius: 9,
+    width: moderateScale(18),
+    height: moderateScale(18),
+    borderRadius: moderateScale(9),
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1.5,
@@ -487,13 +488,13 @@ const styles = StyleSheet.create({
   },
   cartBadgeText: {
     color: "white",
-    fontSize: 9,
+    fontSize: fontScale(9),
     fontWeight: "900",
   },
   userAvatar: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: moderateScale(32),
+    height: moderateScale(32),
+    borderRadius: moderateScale(16),
     backgroundColor: "#DBEAFE",
     alignItems: "center",
     justifyContent: "center",
@@ -501,45 +502,45 @@ const styles = StyleSheet.create({
   userAvatarText: {
     color: "#1D4ED8",
     fontWeight: "800",
-    fontSize: 14,
+    fontSize: fontScale(14),
   },
   content: {
-    paddingTop: 8,
-    paddingHorizontal: 16,
-    gap: 20,
+    paddingTop: verticalScale(8),
+    paddingHorizontal: moderateScale(16),
+    gap: moderateScale(20),
   },
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#FFFFFF",
-    borderRadius: 999,
-    paddingHorizontal: 18,
-    paddingVertical: 14,
-    gap: 12,
+    borderRadius: moderateScale(999),
+    paddingHorizontal: moderateScale(18),
+    paddingVertical: moderateScale(14),
+    gap: moderateScale(12),
     shadowColor: "#0F172A",
     shadowOpacity: 0.06,
-    shadowRadius: 12,
+    shadowRadius: moderateScale(12),
     shadowOffset: { width: 0, height: 4 },
     elevation: 3
   },
   searchInput: {
     flex: 1,
-    fontSize: 15,
+    fontSize: fontScale(15),
     fontWeight: "600",
     color: "#0F172A",
     padding: 0,
   },
   micWrap: {
-    paddingLeft: 10,
+    paddingLeft: moderateScale(10),
     borderLeftWidth: 1,
     borderLeftColor: "#E2E8F0",
   },
   sectionWrap: {
-    gap: 16,
+    gap: moderateScale(16),
   },
   bannerCard: {
-    height: 160,
-    borderRadius: 16,
+    height: moderateScale(160),
+    borderRadius: moderateScale(16),
     overflow: "hidden",
     backgroundColor: "#FFFFFF",
   },
@@ -549,19 +550,19 @@ const styles = StyleSheet.create({
     backgroundColor: "#E2E8F0",
   },
   horizontalCategories: {
-    gap: 20,
-    paddingRight: 16,
-    paddingVertical: 4,
+    gap: moderateScale(20),
+    paddingRight: moderateScale(16),
+    paddingVertical: moderateScale(4),
   },
   categoryCircleItem: {
     alignItems: "center",
-    width: 72,
-    gap: 8,
+    width: moderateScale(72),
+    gap: moderateScale(8),
   },
   categoryCircleWrap: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
+    width: moderateScale(72),
+    height: moderateScale(72),
+    borderRadius: moderateScale(36),
     backgroundColor: "#F1F5F9",
     alignItems: "center",
     justifyContent: "center",
@@ -574,7 +575,7 @@ const styles = StyleSheet.create({
     height: "100%",
   },
   categoryCircleName: {
-    fontSize: 13,
+    fontSize: fontScale(13),
     fontWeight: "700",
     color: "#0F172A",
     textAlign: "center",
@@ -582,7 +583,7 @@ const styles = StyleSheet.create({
 
   sectionTitleRecommended: {
     color: "#64748B",
-    fontSize: 14,
+    fontSize: fontScale(14),
     fontWeight: "800",
     letterSpacing: 1,
     textTransform: "uppercase",
@@ -591,16 +592,16 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",
-    rowGap: 24,
+    rowGap: moderateScale(24),
   },
   gridCard: {
     width: "48%",
-    gap: 8,
+    gap: moderateScale(8),
   },
   gridImageWrap: {
     width: "100%",
     aspectRatio: 1,
-    borderRadius: 20,
+    borderRadius: moderateScale(20),
     backgroundColor: "#F1F5F9",
     overflow: "hidden",
   },
@@ -611,38 +612,38 @@ const styles = StyleSheet.create({
 
   gridAddBtn: {
     position: "absolute",
-    bottom: 8,
-    right: 8,
+    bottom: verticalScale(8),
+    right: moderateScale(8),
     backgroundColor: "white",
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: moderateScale(32),
+    height: moderateScale(32),
+    borderRadius: moderateScale(16),
     alignItems: "center",
     justifyContent: "center",
     shadowColor: "#000",
     shadowOpacity: 0.1,
-    shadowRadius: 4,
+    shadowRadius: moderateScale(4),
     shadowOffset: { width: 0, height: 2 },
     elevation: 2,
   },
   gridName: {
-    fontSize: 16,
+    fontSize: fontScale(16),
     fontWeight: "800",
     color: "#0F172A",
-    marginTop: 2,
+    marginTop: verticalScale(2),
   },
   gridMetaRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 4,
+    gap: moderateScale(4),
   },
   gridMetaText: {
-    fontSize: 12,
+    fontSize: fontScale(12),
     fontWeight: "600",
     color: "#64748B",
   },
   gridPriceText: {
-    fontSize: 12,
+    fontSize: fontScale(12),
     fontWeight: "700",
     color: "#0F172A",
   },
@@ -656,8 +657,8 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   emptyCard: {
-    borderRadius: 12,
-    padding: 14,
+    borderRadius: moderateScale(12),
+    padding: moderateScale(14),
     backgroundColor: "#F8FAFC",
     borderWidth: 1,
     borderColor: "#E2E8F0",
@@ -670,30 +671,30 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    borderRadius: 12,
+    borderRadius: moderateScale(12),
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
     borderColor: "#E2E8F0",
-    padding: 14,
+    padding: moderateScale(14),
     shadowColor: "#000",
     shadowOpacity: 0.02,
-    shadowRadius: 8,
+    shadowRadius: moderateScale(8),
     shadowOffset: { width: 0, height: 2 },
     elevation: 1,
   },
   orderNumber: {
     color: "#0F172A",
     fontWeight: "800",
-    fontSize: 15,
+    fontSize: fontScale(15),
   },
   orderMeta: {
     color: "#64748B",
     fontWeight: "600",
-    marginTop: 4,
+    marginTop: verticalScale(4),
   },
   orderPrice: {
     color: "#0F172A",
     fontWeight: "800",
-    fontSize: 15,
+    fontSize: fontScale(15),
   }
 });

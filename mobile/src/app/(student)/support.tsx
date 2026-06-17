@@ -10,6 +10,7 @@ import {
   LayoutAnimation
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../utils/responsive';
 
 const faqs = [
   {
@@ -44,7 +45,7 @@ export default function SupportScreen() {
           <Ionicons name="chevron-back" size={24} color="#0F172A" />
         </Pressable>
         <Text style={styles.topNavTitle}>Help & Support</Text>
-        <View style={{ width: 40 }} />
+        <View style={{ width: moderateScale(40) }} />
       </View>
 
       <ScrollView
@@ -111,65 +112,65 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingBottom: 10
+    paddingHorizontal: moderateScale(16),
+    paddingBottom: verticalScale(10)
   },
   backBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: moderateScale(40),
+    height: moderateScale(40),
+    borderRadius: moderateScale(20),
     backgroundColor: "#FFFFFF",
     alignItems: "center",
     justifyContent: "center",
     shadowColor: "#0F172A",
     shadowOpacity: 0.05,
-    shadowRadius: 10,
+    shadowRadius: moderateScale(10),
     shadowOffset: { width: 0, height: 4 },
     elevation: 2
   },
   topNavTitle: {
-    fontSize: 18,
+    fontSize: fontScale(18),
     fontWeight: "900",
     color: "#0F172A"
   },
   content: {
-    padding: 16,
-    paddingBottom: 40,
-    gap: 32
+    padding: moderateScale(16),
+    paddingBottom: verticalScale(40),
+    gap: moderateScale(32)
   },
   contactCard: {
     backgroundColor: "#0F172A",
-    borderRadius: 20,
-    padding: 20,
-    gap: 16,
+    borderRadius: moderateScale(20),
+    padding: moderateScale(20),
+    gap: moderateScale(16),
     shadowColor: "#0F172A",
     shadowOpacity: 0.15,
-    shadowRadius: 16,
+    shadowRadius: moderateScale(16),
     shadowOffset: { width: 0, height: 6 },
     elevation: 5
   },
   contactHeader: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 16
+    gap: moderateScale(16)
   },
   contactIconWrap: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: moderateScale(50),
+    height: moderateScale(50),
+    borderRadius: moderateScale(25),
     backgroundColor: "#1E293B",
     alignItems: "center",
     justifyContent: "center"
   },
   contactTitle: {
-    fontSize: 18,
+    fontSize: fontScale(18),
     fontWeight: "900",
     color: "white"
   },
   contactSub: {
     color: "#94A3B8",
-    fontSize: 13,
-    marginTop: 4,
+    fontSize: fontScale(13),
+    marginTop: verticalScale(4),
     lineHeight: 18
   },
   contactBtn: {
@@ -177,29 +178,29 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 8,
-    paddingVertical: 14,
-    borderRadius: 12
+    gap: moderateScale(8),
+    paddingVertical: moderateScale(14),
+    borderRadius: moderateScale(12)
   },
   contactBtnText: {
     color: "white",
     fontWeight: "800",
-    fontSize: 15
+    fontSize: fontScale(15)
   },
   section: {
-    gap: 16
+    gap: moderateScale(16)
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: fontScale(18),
     fontWeight: "900",
     color: "#0F172A"
   },
   faqContainer: {
-    gap: 12
+    gap: moderateScale(12)
   },
   faqCard: {
     backgroundColor: "white",
-    borderRadius: 16,
+    borderRadius: moderateScale(16),
     borderWidth: 1,
     borderColor: "#E2E8F0",
     overflow: "hidden"
@@ -208,22 +209,22 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    padding: 16
+    padding: moderateScale(16)
   },
   faqQuestion: {
-    fontSize: 15,
+    fontSize: fontScale(15),
     fontWeight: "800",
     color: "#0F172A",
     flex: 1,
-    marginRight: 16
+    marginRight: moderateScale(16)
   },
   faqBody: {
-    paddingHorizontal: 16,
-    paddingBottom: 16,
+    paddingHorizontal: moderateScale(16),
+    paddingBottom: verticalScale(16),
     paddingTop: 0
   },
   faqAnswer: {
-    fontSize: 14,
+    fontSize: fontScale(14),
     color: "#475569",
     lineHeight: 22
   }

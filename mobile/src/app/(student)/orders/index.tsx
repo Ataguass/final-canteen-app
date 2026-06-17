@@ -16,6 +16,7 @@ import { useAuth } from "../../../hooks/useAuth";
 import { CanteenHeader } from "../../../components/CanteenHeader";
 import { useOrderSocket } from "../../../hooks/useOrderSocket";
 import { Order, orderService } from "../../../services/orderService";
+import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../../utils/responsive';
 
 type OrderFilter = "ALL" | "PENDING" | "PREPARING" | "READY" | "COMPLETED" | "CANCELLED";
 
@@ -316,40 +317,40 @@ const styles = StyleSheet.create({
     backgroundColor: "#EEF2F7"
   },
   content: {
-    padding: 16,
-    gap: 16,
-    paddingBottom: 28
+    padding: moderateScale(16),
+    gap: moderateScale(16),
+    paddingBottom: verticalScale(28)
   },
   statsRow: {
     flexDirection: "row",
-    gap: 12
+    gap: moderateScale(12)
   },
   statCard: {
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "white",
-    borderRadius: 16,
-    padding: 12,
-    gap: 10,
+    borderRadius: moderateScale(16),
+    padding: moderateScale(12),
+    gap: moderateScale(10),
     shadowColor: "#0F172A",
     shadowOpacity: 0.03,
-    shadowRadius: 8,
+    shadowRadius: moderateScale(8),
     shadowOffset: { width: 0, height: 2 },
     elevation: 1,
     borderWidth: 1,
     borderColor: "#E2E8F0"
   },
   statIconWrap: {
-    width: 32,
-    height: 32,
-    borderRadius: 10,
+    width: moderateScale(32),
+    height: moderateScale(32),
+    borderRadius: moderateScale(10),
     alignItems: "center",
     justifyContent: "center"
   },
   statLabel: {
     color: "#64748B",
-    fontSize: 11,
+    fontSize: fontScale(11),
     fontWeight: "700",
     textTransform: "uppercase",
     letterSpacing: 0.5
@@ -357,43 +358,43 @@ const styles = StyleSheet.create({
   statValue: {
     color: "#0F172A",
     fontWeight: "800",
-    fontSize: 18,
+    fontSize: fontScale(18),
     lineHeight: 22
   },
   searchBarCard: {
     borderWidth: 1,
     borderColor: "#E2E8F0",
     backgroundColor: "#FFFFFF",
-    borderRadius: 16,
-    minHeight: 52,
-    paddingHorizontal: 16,
+    borderRadius: moderateScale(16),
+    minHeight: moderateScale(52),
+    paddingHorizontal: moderateScale(16),
     flexDirection: "row",
     alignItems: "center",
-    gap: 10,
+    gap: moderateScale(10),
     shadowColor: "#0F172A",
     shadowOpacity: 0.04,
-    shadowRadius: 8,
+    shadowRadius: moderateScale(8),
     shadowOffset: { width: 0, height: 3 },
     elevation: 2
   },
   searchInput: {
     flex: 1,
     color: "#0F172A",
-    paddingVertical: 12,
+    paddingVertical: moderateScale(12),
     fontWeight: "600",
-    fontSize: 15
+    fontSize: fontScale(15)
   },
   clearBtn: {
-    padding: 4
+    padding: moderateScale(4)
   },
   filterRow: {
-    gap: 8,
-    paddingRight: 16
+    gap: moderateScale(8),
+    paddingRight: moderateScale(16)
   },
   filterChip: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 999,
+    paddingHorizontal: moderateScale(16),
+    paddingVertical: moderateScale(10),
+    borderRadius: moderateScale(999),
     borderWidth: 1,
     borderColor: "#CBD5E1",
     backgroundColor: "#F8FAFC"
@@ -405,7 +406,7 @@ const styles = StyleSheet.create({
   filterChipText: {
     color: "#475569",
     fontWeight: "700",
-    fontSize: 14
+    fontSize: fontScale(14)
   },
   filterChipTextActive: {
     color: "white"
@@ -414,61 +415,61 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-end",
-    marginTop: 4,
-    marginBottom: 4
+    marginTop: verticalScale(4),
+    marginBottom: verticalScale(4)
   },
   sectionTitle: {
     color: "#0F172A",
-    fontSize: 20,
+    fontSize: fontScale(20),
     fontWeight: "800"
   },
   sectionMeta: {
     color: "#64748B",
     fontWeight: "700",
-    fontSize: 14,
-    marginBottom: 2
+    fontSize: fontScale(14),
+    marginBottom: verticalScale(2)
   },
   emptyCard: {
-    borderRadius: 16,
+    borderRadius: moderateScale(16),
     borderWidth: 1,
     borderColor: "#E2E8F0",
     backgroundColor: "white",
-    padding: 32,
+    padding: moderateScale(32),
     alignItems: "center",
     justifyContent: "center",
-    gap: 8,
-    marginTop: 16
+    gap: moderateScale(8),
+    marginTop: verticalScale(16)
   },
   emptyIconWrap: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: moderateScale(64),
+    height: moderateScale(64),
+    borderRadius: moderateScale(32),
     backgroundColor: "#F1F5F9",
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 8
+    marginBottom: verticalScale(8)
   },
   emptyTitle: {
     color: "#0F172A",
     fontWeight: "800",
-    fontSize: 18
+    fontSize: fontScale(18)
   },
   emptySub: {
     color: "#64748B",
     textAlign: "center",
-    fontSize: 14,
+    fontSize: fontScale(14),
     lineHeight: 20
   },
   orderCard: {
-    borderRadius: 16,
+    borderRadius: moderateScale(16),
     borderWidth: 1,
     borderColor: "#E2E8F0",
     backgroundColor: "white",
-    padding: 16,
-    gap: 12,
+    padding: moderateScale(16),
+    gap: moderateScale(12),
     shadowColor: "#0F172A",
     shadowOpacity: 0.03,
-    shadowRadius: 8,
+    shadowRadius: moderateScale(8),
     shadowOffset: { width: 0, height: 2 },
     elevation: 2
   },
@@ -476,37 +477,37 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "flex-start",
     justifyContent: "space-between",
-    gap: 12
+    gap: moderateScale(12)
   },
   orderHeaderLeft: {
     flex: 1,
-    gap: 2
+    gap: moderateScale(2)
   },
   orderNumber: {
     color: "#0F172A",
     fontWeight: "800",
-    fontSize: 17
+    fontSize: fontScale(17)
   },
   orderDate: {
     color: "#64748B",
-    fontSize: 13,
+    fontSize: fontScale(13),
     fontWeight: "600"
   },
   statusPill: {
     flexDirection: "row",
     alignItems: "center",
-    borderRadius: 999,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    gap: 6
+    borderRadius: moderateScale(999),
+    paddingHorizontal: moderateScale(10),
+    paddingVertical: moderateScale(6),
+    gap: moderateScale(6)
   },
   statusDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3
+    width: moderateScale(6),
+    height: moderateScale(6),
+    borderRadius: moderateScale(3)
   },
   statusText: {
-    fontSize: 12,
+    fontSize: fontScale(12),
     fontWeight: "800",
     textTransform: "uppercase",
     letterSpacing: 0.5
@@ -514,22 +515,22 @@ const styles = StyleSheet.create({
   orderTagRow: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 8,
-    marginTop: 2
+    gap: moderateScale(8),
+    marginTop: verticalScale(2)
   },
   orderTagPill: {
     flexDirection: "row",
     alignItems: "center",
-    borderRadius: 8,
+    borderRadius: moderateScale(8),
     backgroundColor: "#F1F5F9",
-    paddingHorizontal: 8,
-    paddingVertical: 5,
-    gap: 4
+    paddingHorizontal: moderateScale(8),
+    paddingVertical: moderateScale(5),
+    gap: moderateScale(4)
   },
   orderTagText: {
     color: "#475569",
     fontWeight: "700",
-    fontSize: 12
+    fontSize: fontScale(12)
   },
   orderTagPriority: {
     backgroundColor: "#F1F5F9"
@@ -546,7 +547,7 @@ const styles = StyleSheet.create({
   divider: {
     height: 1,
     backgroundColor: "#E2E8F0",
-    marginVertical: 2
+    marginVertical: moderateScale(2)
   },
   orderFooter: {
     flexDirection: "row",
@@ -556,29 +557,29 @@ const styles = StyleSheet.create({
   orderItems: {
     color: "#64748B",
     fontWeight: "600",
-    fontSize: 14
+    fontSize: fontScale(14)
   },
   orderTotal: {
     color: "#0F172A",
     fontWeight: "800",
-    fontSize: 18
+    fontSize: fontScale(18)
   },
   browseBtn: {
     backgroundColor: "#0F172A",
-    borderRadius: 16,
-    paddingVertical: 16,
-    marginTop: 8,
+    borderRadius: moderateScale(16),
+    paddingVertical: moderateScale(16),
+    marginTop: verticalScale(8),
     alignItems: "center",
     justifyContent: "center",
     shadowColor: "#0F172A",
     shadowOpacity: 0.2,
-    shadowRadius: 8,
+    shadowRadius: moderateScale(8),
     shadowOffset: { width: 0, height: 4 },
     elevation: 4
   },
   browseBtnText: {
     color: "white",
-    fontSize: 16,
+    fontSize: fontScale(16),
     fontWeight: "800"
   }
 });

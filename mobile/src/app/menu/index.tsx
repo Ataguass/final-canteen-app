@@ -16,6 +16,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "../../hooks/useAuth";
 import { CanteenHeader } from "../../components/CanteenHeader";
 import { menuService } from "../../services/menuService";
+import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../utils/responsive';
 
 type Category = {
   id: string;
@@ -285,51 +286,51 @@ const styles = StyleSheet.create({
     backgroundColor: "#EEF2F7"
   },
   content: {
-    padding: 16,
-    gap: 12,
-    paddingBottom: 28
+    padding: moderateScale(16),
+    gap: moderateScale(12),
+    paddingBottom: verticalScale(28)
   },
   searchBarCard: {
     borderWidth: 1,
     borderColor: "#E2E8F0",
     backgroundColor: "#FFFFFF",
-    borderRadius: 16,
-    paddingHorizontal: 16,
+    borderRadius: moderateScale(16),
+    paddingHorizontal: moderateScale(16),
     flexDirection: "row",
     alignItems: "center",
-    gap: 10,
+    gap: moderateScale(10),
     shadowColor: "#0F172A",
     shadowOpacity: 0.04,
-    shadowRadius: 8,
+    shadowRadius: moderateScale(8),
     shadowOffset: { width: 0, height: 3 },
     elevation: 2
   },
   clearBtn: {
-    padding: 4
+    padding: moderateScale(4)
   },
 
   headerCard: {
     borderWidth: 1,
     borderColor: "#E2E8F0",
-    borderRadius: 18,
+    borderRadius: moderateScale(18),
     backgroundColor: "white",
-    padding: 14,
-    gap: 10,
+    padding: moderateScale(14),
+    gap: moderateScale(10),
     shadowColor: "#0F172A",
     shadowOpacity: 0.04,
-    shadowRadius: 8,
+    shadowRadius: moderateScale(8),
     shadowOffset: { width: 0, height: 3 },
     elevation: 1
   },
   headerTop: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 10
+    gap: moderateScale(10)
   },
   headerIconWrap: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
+    width: moderateScale(40),
+    height: moderateScale(40),
+    borderRadius: moderateScale(12),
     backgroundColor: "#EFF6FF",
     borderWidth: 1,
     borderColor: "#DBEAFE",
@@ -338,31 +339,31 @@ const styles = StyleSheet.create({
   },
   metricRow: {
     flexDirection: "row",
-    gap: 8
+    gap: moderateScale(8)
   },
   metricChip: {
     flex: 1,
-    borderRadius: 12,
+    borderRadius: moderateScale(12),
     borderWidth: 1,
     borderColor: "#E2E8F0",
     backgroundColor: "#F8FAFC",
-    paddingVertical: 8,
-    paddingHorizontal: 10
+    paddingVertical: moderateScale(8),
+    paddingHorizontal: moderateScale(10)
   },
   metricLabel: {
     color: "#64748B",
     fontWeight: "600",
-    fontSize: 12
+    fontSize: fontScale(12)
   },
   metricValue: {
     color: "#0F172A",
     fontWeight: "800",
-    fontSize: 18,
+    fontSize: fontScale(18),
     marginTop: 1
   },
   title: {
     color: "#0F172A",
-    fontSize: 23,
+    fontSize: fontScale(23),
     fontWeight: "800"
   },
   subtitle: {
@@ -372,39 +373,39 @@ const styles = StyleSheet.create({
   searchWrap: {
     borderWidth: 1,
     borderColor: "#E2E8F0",
-    borderRadius: 12,
+    borderRadius: moderateScale(12),
     backgroundColor: "#F8FAFC",
-    paddingHorizontal: 10,
+    paddingHorizontal: moderateScale(10),
     flexDirection: "row",
     alignItems: "center",
-    gap: 8
+    gap: moderateScale(8)
   },
   searchInput: {
     flex: 1,
     color: "#0F172A",
-    paddingVertical: 10,
+    paddingVertical: moderateScale(10),
     fontWeight: "600"
   },
   filterLabel: {
     color: "#475569",
     fontWeight: "700",
-    fontSize: 12
+    fontSize: fontScale(12)
   },
   segmentRow: {
     flexDirection: "row",
-    gap: 8
+    gap: moderateScale(8)
   },
   segmentButton: {
     flex: 1,
-    minHeight: 40,
-    borderRadius: 12,
+    minHeight: moderateScale(40),
+    borderRadius: moderateScale(12),
     borderWidth: 1,
     borderColor: "#CBD5E1",
     backgroundColor: "#FFFFFF",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 6
+    gap: moderateScale(6)
   },
   segmentButtonActive: {
     borderColor: "#BFDBFE",
@@ -418,17 +419,17 @@ const styles = StyleSheet.create({
     color: "#1E3A8A"
   },
   jumpBarRow: {
-    gap: 8,
-    paddingRight: 8
+    gap: moderateScale(8),
+    paddingRight: moderateScale(8)
   },
   jumpChip: {
-    borderRadius: 999,
+    borderRadius: moderateScale(999),
     borderWidth: 1,
     borderColor: "#CBD5E1",
     backgroundColor: "#FFFFFF",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    maxWidth: 168
+    paddingHorizontal: moderateScale(12),
+    paddingVertical: moderateScale(8),
+    maxWidth: moderateScale(168)
   },
   jumpChipActive: {
     borderColor: "#1D4ED8",
@@ -437,7 +438,7 @@ const styles = StyleSheet.create({
   jumpChipText: {
     color: "#334155",
     fontWeight: "700",
-    fontSize: 13
+    fontSize: fontScale(13)
   },
   jumpChipTextActive: {
     color: "#1E3A8A"
@@ -445,34 +446,34 @@ const styles = StyleSheet.create({
   showingText: {
     color: "#64748B",
     fontWeight: "600",
-    fontSize: 12
+    fontSize: fontScale(12)
   },
   emptyCard: {
-    borderRadius: 14,
+    borderRadius: moderateScale(14),
     borderWidth: 1,
     borderColor: "#CBD5E1",
     backgroundColor: "#F8FAFC",
-    padding: 14,
+    padding: moderateScale(14),
     flexDirection: "row",
     alignItems: "center",
-    gap: 8
+    gap: moderateScale(8)
   },
   categorySectionCard: {
     borderWidth: 1,
     borderColor: "#E2E8F0",
-    borderRadius: 16,
+    borderRadius: moderateScale(16),
     backgroundColor: "white",
-    padding: 12,
+    padding: moderateScale(12),
     shadowColor: "#0F172A",
     shadowOpacity: 0.04,
-    shadowRadius: 8,
+    shadowRadius: moderateScale(8),
     shadowOffset: { width: 0, height: 3 },
     elevation: 1
   },
   categoryGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 12,
+    gap: moderateScale(12),
     alignItems: "flex-start"
   },
   gridHeaderRow: {
@@ -482,7 +483,7 @@ const styles = StyleSheet.create({
   },
   gridHeaderTitle: {
     color: "#0F172A",
-    fontSize: 20,
+    fontSize: fontScale(20),
     fontWeight: "800"
   },
   gridHeaderMeta: {
@@ -497,13 +498,13 @@ const styles = StyleSheet.create({
     position: "relative",
     borderWidth: 1,
     borderColor: "#E2E8F0",
-    borderRadius: 14,
+    borderRadius: moderateScale(14),
     backgroundColor: "white",
     overflow: "hidden",
-    marginBottom: 12,
+    marginBottom: verticalScale(12),
     shadowColor: "#0F172A",
     shadowOpacity: 0.06,
-    shadowRadius: 8,
+    shadowRadius: moderateScale(8),
     shadowOffset: { width: 0, height: 3 },
     elevation: 2
   },
@@ -523,53 +524,53 @@ const styles = StyleSheet.create({
   },
   categoryItemBadge: {
     position: "absolute",
-    top: 8,
-    right: 8,
+    top: verticalScale(8),
+    right: moderateScale(8),
     backgroundColor: "rgba(15, 23, 42, 0.8)",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 8
+    paddingHorizontal: moderateScale(8),
+    paddingVertical: moderateScale(4),
+    borderRadius: moderateScale(8)
   },
   categoryItemBadgeText: {
     color: "white",
-    fontSize: 11,
+    fontSize: fontScale(11),
     fontWeight: "800"
   },
   categoryBody: {
-    padding: 12,
-    gap: 4
+    padding: moderateScale(12),
+    gap: moderateScale(4)
   },
   categoryNameRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    gap: 8
+    gap: moderateScale(8)
   },
   categoryName: {
     color: "#0F172A",
-    fontSize: 16,
+    fontSize: fontScale(16),
     fontWeight: "800"
   },
   categoryMetaPill: {
     alignSelf: "flex-start",
-    borderRadius: 999,
-    paddingVertical: 3,
-    paddingHorizontal: 8,
+    borderRadius: moderateScale(999),
+    paddingVertical: moderateScale(3),
+    paddingHorizontal: moderateScale(8),
     backgroundColor: "#EEF2FF"
   },
   categoryMeta: {
     color: "#3730A3",
     fontWeight: "700",
-    fontSize: 12
+    fontSize: fontScale(12)
   },
   categoryDescription: {
     color: "#64748B",
-    fontSize: 13,
+    fontSize: fontScale(13),
     lineHeight: 18
   },
   categoryDescriptionMuted: {
     color: "#94A3B8",
-    fontSize: 13,
+    fontSize: fontScale(13),
     fontWeight: "500"
   }
 });

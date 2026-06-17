@@ -15,6 +15,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "../../hooks/useAuth";
 import { CanteenHeader } from "../../components/CanteenHeader";
 import { communityService, type CommunityPost } from "../../services/communityService";
+import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../utils/responsive';
 
 export default function Screen() {
   const insets = useSafeAreaInsets();
@@ -153,65 +154,65 @@ const styles = StyleSheet.create({
     backgroundColor: "#EEF2F7"
   },
   content: {
-    padding: 16,
-    gap: 16,
-    paddingBottom: 40
+    padding: moderateScale(16),
+    gap: moderateScale(16),
+    paddingBottom: verticalScale(40)
   },
   loadingWrap: {
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 32,
-    gap: 8
+    paddingVertical: moderateScale(32),
+    gap: moderateScale(8)
   },
   loadingText: {
     color: "#64748B",
     fontWeight: "600",
-    fontSize: 15
+    fontSize: fontScale(15)
   },
   emptyCard: {
-    borderRadius: 16,
+    borderRadius: moderateScale(16),
     borderWidth: 1,
     borderColor: "#E2E8F0",
     backgroundColor: "white",
-    padding: 32,
+    padding: moderateScale(32),
     alignItems: "center",
     justifyContent: "center",
-    gap: 8,
-    marginTop: 16
+    gap: moderateScale(8),
+    marginTop: verticalScale(16)
   },
   emptyIconWrap: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: moderateScale(64),
+    height: moderateScale(64),
+    borderRadius: moderateScale(32),
     backgroundColor: "#F1F5F9",
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 8
+    marginBottom: verticalScale(8)
   },
   emptyTitle: {
     color: "#0F172A",
     fontWeight: "800",
-    fontSize: 18
+    fontSize: fontScale(18)
   },
   emptySub: {
     color: "#64748B",
     textAlign: "center",
-    fontSize: 14,
+    fontSize: fontScale(14),
     lineHeight: 20
   },
   feedContainer: {
-    gap: 16
+    gap: moderateScale(16)
   },
   postCard: {
-    borderRadius: 16,
+    borderRadius: moderateScale(16),
     borderWidth: 1,
     borderColor: "#E2E8F0",
     backgroundColor: "white",
-    padding: 16,
-    gap: 14,
+    padding: moderateScale(16),
+    gap: moderateScale(14),
     shadowColor: "#0F172A",
     shadowOpacity: 0.05,
-    shadowRadius: 8,
+    shadowRadius: moderateScale(8),
     shadowOffset: { width: 0, height: 4 },
     elevation: 2
   },
@@ -223,18 +224,18 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    gap: 8
+    gap: moderateScale(8)
   },
   authorWrap: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 10,
+    gap: moderateScale(10),
     flex: 1
   },
   authorAvatar: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: moderateScale(36),
+    height: moderateScale(36),
+    borderRadius: moderateScale(18),
     backgroundColor: "#F1F5F9",
     alignItems: "center",
     justifyContent: "center",
@@ -244,50 +245,50 @@ const styles = StyleSheet.create({
   authorName: {
     color: "#0F172A",
     fontWeight: "800",
-    fontSize: 15
+    fontSize: fontScale(15)
   },
   postDate: {
     color: "#64748B",
     fontWeight: "600",
-    fontSize: 12,
+    fontSize: fontScale(12),
     marginTop: 1
   },
   pinnedPill: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#EEF2FF",
-    borderRadius: 6,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    gap: 4,
+    borderRadius: moderateScale(6),
+    paddingHorizontal: moderateScale(8),
+    paddingVertical: moderateScale(4),
+    gap: moderateScale(4),
     borderWidth: 1,
     borderColor: "#C7D2FE"
   },
   pinnedPillText: {
     color: "#4F46E5",
     fontWeight: "800",
-    fontSize: 11,
+    fontSize: fontScale(11),
     textTransform: "uppercase",
     letterSpacing: 0.5
   },
   postContentWrap: {
-    gap: 6
+    gap: moderateScale(6)
   },
   postTitle: {
     color: "#0F172A",
-    fontSize: 18,
+    fontSize: fontScale(18),
     fontWeight: "800",
     lineHeight: 24
   },
   postBody: {
     color: "#334155",
-    fontSize: 15,
+    fontSize: fontScale(15),
     lineHeight: 22
   },
   postImage: {
     width: "100%",
-    height: 220,
-    borderRadius: 12,
+    height: moderateScale(220),
+    borderRadius: moderateScale(12),
     backgroundColor: "#F1F5F9",
     borderWidth: 1,
     borderColor: "#E2E8F0"
@@ -297,15 +298,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "#F8FAFC",
-    borderRadius: 12,
-    paddingVertical: 14,
-    gap: 8,
+    borderRadius: moderateScale(12),
+    paddingVertical: moderateScale(14),
+    gap: moderateScale(8),
     borderWidth: 1,
     borderColor: "#E2E8F0"
   },
   videoBtnText: {
     color: "#0F172A",
     fontWeight: "700",
-    fontSize: 15
+    fontSize: fontScale(15)
   }
 });

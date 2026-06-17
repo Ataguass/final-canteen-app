@@ -7,6 +7,7 @@ import { useCart } from "../../hooks/useCart";
 import { orderService } from "../../services/orderService";
 import { PaymentMethod } from "../../services/types";
 import { walletService } from "../../services/walletService";
+import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../utils/responsive';
 
 const PAYMENT_METHODS: PaymentMethod[] = ["CASH", "UPI", "WALLET", "CREDIT"];
 const formatCurrency = (value: number): string => `₹ ${value.toFixed(2)}`;
@@ -249,7 +250,7 @@ export default function Screen() {
               </Pressable>
             </View>
             {preOrderEnabled ? (
-              <View style={{ gap: 8 }}>
+              <View style={{ gap: moderateScale(8) }}>
                 <Text style={styles.slotHint}>Choose your pickup slot</Text>
                 <View style={styles.slotList}>
                   {pickupSlots.map((slot) => {
@@ -302,51 +303,51 @@ const styles = StyleSheet.create({
     backgroundColor: "#EEF2F7"
   },
   content: {
-    padding: 16,
-    gap: 12,
-    paddingBottom: 24
+    padding: moderateScale(16),
+    gap: moderateScale(12),
+    paddingBottom: verticalScale(24)
   },
   headerCard: {
-    borderRadius: 16,
+    borderRadius: moderateScale(16),
     borderWidth: 1,
     borderColor: "#E2E8F0",
     backgroundColor: "white",
-    padding: 12
+    padding: moderateScale(12)
   },
   headerRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 10
+    gap: moderateScale(10)
   },
   iconWrap: {
-    width: 38,
-    height: 38,
-    borderRadius: 10,
+    width: moderateScale(38),
+    height: moderateScale(38),
+    borderRadius: moderateScale(10),
     backgroundColor: "#DBEAFE",
     alignItems: "center",
     justifyContent: "center"
   },
   headerTitle: {
     color: "#0F172A",
-    fontSize: 23,
+    fontSize: fontScale(23),
     fontWeight: "800"
   },
   headerSubtitle: {
     color: "#64748B",
-    marginTop: 2,
+    marginTop: verticalScale(2),
     fontWeight: "600"
   },
   summaryCard: {
-    borderRadius: 14,
+    borderRadius: moderateScale(14),
     borderWidth: 1,
     borderColor: "#E2E8F0",
     backgroundColor: "white",
-    padding: 12,
-    gap: 8
+    padding: moderateScale(12),
+    gap: moderateScale(8)
   },
   sectionTitle: {
     color: "#0F172A",
-    fontSize: 18,
+    fontSize: fontScale(18),
     fontWeight: "800"
   },
   summaryRow: {
@@ -365,7 +366,7 @@ const styles = StyleSheet.create({
   totalRow: {
     borderTopWidth: 1,
     borderTopColor: "#E2E8F0",
-    paddingTop: 8
+    paddingTop: verticalScale(8)
   },
   totalLabel: {
     color: "#0F172A",
@@ -374,51 +375,51 @@ const styles = StyleSheet.create({
   totalValue: {
     color: "#059669",
     fontWeight: "900",
-    fontSize: 20
+    fontSize: fontScale(20)
   },
   paymentCard: {
-    borderRadius: 14,
+    borderRadius: moderateScale(14),
     borderWidth: 1,
     borderColor: "#E2E8F0",
     backgroundColor: "white",
-    padding: 12,
-    gap: 10
+    padding: moderateScale(12),
+    gap: moderateScale(10)
   },
   walletHint: {
     borderWidth: 1,
     borderColor: "#BFDBFE",
     backgroundColor: "#EFF6FF",
-    borderRadius: 10,
-    paddingHorizontal: 10,
-    paddingVertical: 8
+    borderRadius: moderateScale(10),
+    paddingHorizontal: moderateScale(10),
+    paddingVertical: moderateScale(8)
   },
   walletHintText: {
     color: "#1E40AF",
     fontWeight: "700"
   },
   laneCard: {
-    borderRadius: 14,
+    borderRadius: moderateScale(14),
     borderWidth: 1,
     borderColor: "#BFDBFE",
     backgroundColor: "#EFF6FF",
-    padding: 12,
-    gap: 8
+    padding: moderateScale(12),
+    gap: moderateScale(8)
   },
   laneTopRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    gap: 8
+    gap: moderateScale(8)
   },
   laneBadge: {
-    borderRadius: 999,
+    borderRadius: moderateScale(999),
     backgroundColor: "#1D4ED8",
-    paddingHorizontal: 10,
-    paddingVertical: 4
+    paddingHorizontal: moderateScale(10),
+    paddingVertical: moderateScale(4)
   },
   laneBadgeText: {
     color: "white",
-    fontSize: 11,
+    fontSize: fontScale(11),
     fontWeight: "800"
   },
   laneHint: {
@@ -426,24 +427,24 @@ const styles = StyleSheet.create({
     fontWeight: "600"
   },
   slotCard: {
-    borderRadius: 14,
+    borderRadius: moderateScale(14),
     borderWidth: 1,
     borderColor: "#E2E8F0",
     backgroundColor: "white",
-    padding: 12,
-    gap: 10
+    padding: moderateScale(12),
+    gap: moderateScale(10)
   },
   slotModeRow: {
     flexDirection: "row",
-    gap: 8
+    gap: moderateScale(8)
   },
   slotModeChip: {
     flex: 1,
-    borderRadius: 999,
+    borderRadius: moderateScale(999),
     borderWidth: 1,
     borderColor: "#CBD5E1",
     backgroundColor: "#F8FAFC",
-    paddingVertical: 9,
+    paddingVertical: moderateScale(9),
     alignItems: "center"
   },
   slotModeChipActive: {
@@ -462,15 +463,15 @@ const styles = StyleSheet.create({
     fontWeight: "600"
   },
   slotList: {
-    gap: 8
+    gap: moderateScale(8)
   },
   slotChip: {
-    borderRadius: 10,
+    borderRadius: moderateScale(10),
     borderWidth: 1,
     borderColor: "#CBD5E1",
     backgroundColor: "#F8FAFC",
-    paddingHorizontal: 10,
-    paddingVertical: 10
+    paddingHorizontal: moderateScale(10),
+    paddingVertical: moderateScale(10)
   },
   slotChipActive: {
     backgroundColor: "#DBEAFE",
@@ -486,12 +487,12 @@ const styles = StyleSheet.create({
   methodRow: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 8
+    gap: moderateScale(8)
   },
   methodChip: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 999,
+    paddingHorizontal: moderateScale(12),
+    paddingVertical: moderateScale(8),
+    borderRadius: moderateScale(999),
     borderWidth: 1,
     borderColor: "#CBD5E1",
     backgroundColor: "#F8FAFC"
@@ -509,8 +510,8 @@ const styles = StyleSheet.create({
   },
   placeBtn: {
     backgroundColor: "#0F172A",
-    borderRadius: 12,
-    paddingVertical: 12
+    borderRadius: moderateScale(12),
+    paddingVertical: moderateScale(12)
   },
   placeBtnDisabled: {
     backgroundColor: "#94A3B8"
@@ -519,12 +520,12 @@ const styles = StyleSheet.create({
     textAlign: "center",
     color: "white",
     fontWeight: "800",
-    fontSize: 15
+    fontSize: fontScale(15)
   },
   backBtn: {
     backgroundColor: "#E2E8F0",
-    borderRadius: 12,
-    paddingVertical: 12
+    borderRadius: moderateScale(12),
+    paddingVertical: moderateScale(12)
   },
   backBtnText: {
     color: "#0F172A",

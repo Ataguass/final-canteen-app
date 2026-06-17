@@ -4,6 +4,7 @@ import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useCart } from "../../hooks/useCart";
 import { CanteenHeader } from "../../components/CanteenHeader";
+import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../utils/responsive';
 
 const formatCurrency = (value: number): string => `₹ ${value.toFixed(2)}`;
 
@@ -37,7 +38,7 @@ export default function Screen() {
           </Pressable>
         </View>
       ) : (
-        <View style={{ gap: 12 }}>
+        <View style={{ gap: moderateScale(12) }}>
           {items.map((item) => (
             <View key={item.menuItemId} style={styles.itemCard}>
               <View style={styles.itemTopRow}>
@@ -128,56 +129,56 @@ const styles = StyleSheet.create({
     backgroundColor: "#EEF2F7"
   },
   content: {
-    padding: 16,
-    gap: 12,
-    paddingBottom: 28
+    padding: moderateScale(16),
+    gap: moderateScale(12),
+    paddingBottom: verticalScale(28)
   },
   emptyStateContainer: {
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 60,
-    paddingHorizontal: 20
+    paddingVertical: moderateScale(60),
+    paddingHorizontal: moderateScale(20)
   },
   emptyIconCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: moderateScale(80),
+    height: moderateScale(80),
+    borderRadius: moderateScale(40),
     backgroundColor: "#F1F5F9",
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 16
+    marginBottom: verticalScale(16)
   },
   emptyTitle: {
-    fontSize: 20,
+    fontSize: fontScale(20),
     fontWeight: "800",
     color: "#0F172A",
-    marginBottom: 8
+    marginBottom: verticalScale(8)
   },
   emptySub: {
-    fontSize: 15,
+    fontSize: fontScale(15),
     color: "#64748B",
     textAlign: "center",
-    marginBottom: 24,
+    marginBottom: verticalScale(24),
     lineHeight: 22
   },
   browseMenuBtn: {
     backgroundColor: "#0F172A",
-    paddingHorizontal: 24,
-    paddingVertical: 14,
-    borderRadius: 12
+    paddingHorizontal: moderateScale(24),
+    paddingVertical: moderateScale(14),
+    borderRadius: moderateScale(12)
   },
   browseMenuBtnText: {
     color: "white",
     fontWeight: "700",
-    fontSize: 16
+    fontSize: fontScale(16)
   },
   itemCard: {
     backgroundColor: "white",
-    borderRadius: 16,
+    borderRadius: moderateScale(16),
     borderWidth: 1,
     borderColor: "#E2E8F0",
-    padding: 16,
-    gap: 12
+    padding: moderateScale(16),
+    gap: moderateScale(12)
   },
   itemTopRow: {
     flexDirection: "row",
@@ -186,44 +187,44 @@ const styles = StyleSheet.create({
   },
   itemDetails: {
     flex: 1,
-    paddingRight: 10
+    paddingRight: moderateScale(10)
   },
   itemName: {
-    fontSize: 17,
+    fontSize: fontScale(17),
     fontWeight: "800",
     color: "#0F172A",
-    marginBottom: 4
+    marginBottom: verticalScale(4)
   },
   itemPrice: {
-    fontSize: 14,
+    fontSize: fontScale(14),
     fontWeight: "600",
     color: "#64748B"
   },
   removeBtn: {
-    padding: 6,
+    padding: moderateScale(6),
     backgroundColor: "#FEF2F2",
-    borderRadius: 8
+    borderRadius: moderateScale(8)
   },
   itemControlsRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginTop: 4
+    marginTop: verticalScale(4)
   },
   qtyControl: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#F1F5F9",
-    borderRadius: 8,
-    padding: 4
+    borderRadius: moderateScale(8),
+    padding: moderateScale(4)
   },
   qtyBtn: {
-    width: 30,
-    height: 30,
+    width: moderateScale(30),
+    height: moderateScale(30),
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "white",
-    borderRadius: 6,
+    borderRadius: moderateScale(6),
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
@@ -231,14 +232,14 @@ const styles = StyleSheet.create({
     elevation: 1
   },
   qtyText: {
-    fontSize: 15,
+    fontSize: fontScale(15),
     fontWeight: "700",
     color: "#0F172A",
-    width: 32,
+    width: moderateScale(32),
     textAlign: "center"
   },
   lineTotal: {
-    fontSize: 16,
+    fontSize: fontScale(16),
     fontWeight: "800",
     color: "#0F172A"
   },
@@ -246,61 +247,61 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#F8FAFC",
-    borderRadius: 8,
+    borderRadius: moderateScale(8),
     borderWidth: 1,
     borderColor: "#E2E8F0",
-    paddingHorizontal: 10,
-    marginTop: 4
+    paddingHorizontal: moderateScale(10),
+    marginTop: verticalScale(4)
   },
   noteInput: {
     flex: 1,
-    paddingVertical: 10,
-    paddingLeft: 8,
+    paddingVertical: moderateScale(10),
+    paddingLeft: moderateScale(8),
     color: "#0F172A",
-    fontSize: 14
+    fontSize: fontScale(14)
   },
   addMoreBtn: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 8,
-    paddingVertical: 14,
+    gap: moderateScale(8),
+    paddingVertical: moderateScale(14),
     backgroundColor: "#EFF6FF",
-    borderRadius: 12,
+    borderRadius: moderateScale(12),
     borderWidth: 1,
     borderColor: "#BFDBFE"
   },
   addMoreBtnText: {
     color: "#2563EB",
     fontWeight: "700",
-    fontSize: 15
+    fontSize: fontScale(15)
   },
   invoiceCard: {
     backgroundColor: "white",
-    borderRadius: 16,
+    borderRadius: moderateScale(16),
     borderWidth: 1,
     borderColor: "#E2E8F0",
-    padding: 16,
-    marginTop: 8
+    padding: moderateScale(16),
+    marginTop: verticalScale(8)
   },
   invoiceTitle: {
-    fontSize: 16,
+    fontSize: fontScale(16),
     fontWeight: "800",
     color: "#0F172A",
-    marginBottom: 12
+    marginBottom: verticalScale(12)
   },
   invoiceRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 10
+    marginBottom: verticalScale(10)
   },
   invoiceLabel: {
-    fontSize: 14,
+    fontSize: fontScale(14),
     color: "#64748B",
     fontWeight: "500"
   },
   invoiceValue: {
-    fontSize: 14,
+    fontSize: fontScale(14),
     color: "#0F172A",
     fontWeight: "600"
   },
@@ -308,7 +309,7 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: "#E2E8F0",
     borderStyle: "dashed",
-    marginVertical: 12
+    marginVertical: moderateScale(12)
   },
   invoiceTotalRow: {
     flexDirection: "row",
@@ -316,12 +317,12 @@ const styles = StyleSheet.create({
     alignItems: "center"
   },
   invoiceTotalLabel: {
-    fontSize: 16,
+    fontSize: fontScale(16),
     fontWeight: "800",
     color: "#0F172A"
   },
   invoiceTotalValue: {
-    fontSize: 18,
+    fontSize: fontScale(18),
     fontWeight: "900",
     color: "#2563EB"
   },
@@ -330,19 +331,19 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    paddingVertical: 16,
-    borderRadius: 16,
-    marginTop: 12,
-    gap: 8,
+    paddingVertical: moderateScale(16),
+    borderRadius: moderateScale(16),
+    marginTop: verticalScale(12),
+    gap: moderateScale(8),
     shadowColor: "#0F172A",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
-    shadowRadius: 8,
+    shadowRadius: moderateScale(8),
     elevation: 4
   },
   checkoutBtnText: {
     color: "white",
-    fontSize: 16,
+    fontSize: fontScale(16),
     fontWeight: "800"
   }
 });

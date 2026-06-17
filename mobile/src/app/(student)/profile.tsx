@@ -20,6 +20,7 @@ import { CanteenHeader } from "../../components/CanteenHeader";
 import { Order, orderService } from "../../services/orderService";
 import { MyProfile, userService } from "../../services/userService";
 import { WalletTransaction, walletService } from "../../services/walletService";
+import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../utils/responsive';
 
 const activeStatuses = new Set(["PENDING", "ACCEPTED", "PREPARING", "READY"]);
 const formatCurrency = (value: number): string => `₹ ${value.toFixed(2)}`;
@@ -621,68 +622,68 @@ const styles = StyleSheet.create({
     backgroundColor: "#F8FAFC"
   },
   content: {
-    padding: 16,
-    gap: 12,
-    paddingBottom: 28
+    padding: moderateScale(16),
+    gap: moderateScale(12),
+    paddingBottom: verticalScale(28)
   },
   heroCard: {
-    borderRadius: 20,
+    borderRadius: moderateScale(20),
     backgroundColor: "#0F172A",
-    padding: 20,
-    gap: 10,
+    padding: moderateScale(20),
+    gap: moderateScale(10),
     shadowColor: "#0F172A",
     shadowOpacity: 0.2,
-    shadowRadius: 15,
+    shadowRadius: moderateScale(15),
     shadowOffset: { width: 0, height: 8 },
     elevation: 8
   },
   heroTopRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 16
+    gap: moderateScale(16)
   },
   avatarCircle: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: moderateScale(56),
+    height: moderateScale(56),
+    borderRadius: moderateScale(28),
     backgroundColor: "#FF6B35",
     alignItems: "center",
     justifyContent: "center",
     shadowColor: "#FF6B35",
     shadowOpacity: 0.3,
-    shadowRadius: 8,
+    shadowRadius: moderateScale(8),
     shadowOffset: { width: 0, height: 4 },
     elevation: 4
   },
   avatarText: {
     color: "white",
     fontWeight: "900",
-    fontSize: 22
+    fontSize: fontScale(22)
   },
   heroName: {
     color: "white",
-    fontSize: 24,
+    fontSize: fontScale(24),
     fontWeight: "900",
-    marginBottom: 2
+    marginBottom: verticalScale(2)
   },
   heroRole: {
     color: "#94A3B8",
     fontWeight: "600",
-    fontSize: 14
+    fontSize: fontScale(14)
   },
   heroStatusRow: {
     flexDirection: "row",
-    gap: 8,
+    gap: moderateScale(8),
     flexWrap: "wrap"
   },
   statusChip: {
-    borderRadius: 999,
-    paddingHorizontal: 12,
-    paddingVertical: 6
+    borderRadius: moderateScale(999),
+    paddingHorizontal: moderateScale(12),
+    paddingVertical: moderateScale(6)
   },
   statusChipText: {
     fontWeight: "700",
-    fontSize: 12
+    fontSize: fontScale(12)
   },
   statusChipGreen: {
     backgroundColor: "#DCFCE7"
@@ -697,63 +698,63 @@ const styles = StyleSheet.create({
     backgroundColor: "#FEE2E2"
   },
   completionCard: {
-    borderRadius: 14,
+    borderRadius: moderateScale(14),
     borderWidth: 1,
     borderColor: "#E2E8F0",
     backgroundColor: "white",
-    padding: 12,
-    gap: 8
+    padding: moderateScale(12),
+    gap: moderateScale(8)
   },
   progressTrack: {
     width: "100%",
-    height: 10,
-    borderRadius: 999,
+    height: moderateScale(10),
+    borderRadius: moderateScale(999),
     backgroundColor: "#E2E8F0",
     overflow: "hidden"
   },
   progressFill: {
     height: "100%",
-    borderRadius: 999,
+    borderRadius: moderateScale(999),
     backgroundColor: "#FF6B35"
   },
   helperText: {
     color: "#64748B"
   },
   infoCard: {
-    borderRadius: 14,
+    borderRadius: moderateScale(14),
     borderWidth: 1,
     borderColor: "#E2E8F0",
     backgroundColor: "white",
-    padding: 12,
-    gap: 6
+    padding: moderateScale(12),
+    gap: moderateScale(6)
   },
   walletCard: {
-    borderRadius: 20,
+    borderRadius: moderateScale(20),
     backgroundColor: "white",
-    padding: 16,
-    gap: 12,
+    padding: moderateScale(16),
+    gap: moderateScale(12),
     shadowColor: "#0F172A",
     shadowOpacity: 0.05,
-    shadowRadius: 10,
+    shadowRadius: moderateScale(10),
     shadowOffset: { width: 0, height: 4 },
     elevation: 2
   },
   walletBalanceText: {
     color: "#059669",
     fontWeight: "900",
-    fontSize: 18
+    fontSize: fontScale(18)
   },
   walletTopupBtn: {
     backgroundColor: "#FF6B35",
-    borderRadius: 14,
-    paddingVertical: 14,
+    borderRadius: moderateScale(14),
+    paddingVertical: moderateScale(14),
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 8,
+    gap: moderateScale(8),
     shadowColor: "#FF6B35",
     shadowOpacity: 0.2,
-    shadowRadius: 8,
+    shadowRadius: moderateScale(8),
     shadowOffset: { width: 0, height: 4 },
     elevation: 4
   },
@@ -764,28 +765,28 @@ const styles = StyleSheet.create({
   walletTxnList: {
     borderWidth: 1,
     borderColor: "#E2E8F0",
-    borderRadius: 10,
+    borderRadius: moderateScale(10),
     overflow: "hidden"
   },
   walletTxnRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 10,
-    paddingVertical: 9,
+    paddingHorizontal: moderateScale(10),
+    paddingVertical: moderateScale(9),
     borderTopWidth: 1,
     borderTopColor: "#F1F5F9"
   },
   walletTxnType: {
     color: "#0F172A",
     fontWeight: "700",
-    fontSize: 12
+    fontSize: fontScale(12)
   },
   walletTxnDate: {
     color: "#64748B",
     fontWeight: "500",
-    marginTop: 2,
-    fontSize: 12
+    marginTop: verticalScale(2),
+    fontSize: fontScale(12)
   },
   walletTxnAmount: {
     fontWeight: "800"
@@ -803,7 +804,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     color: "#0F172A",
-    fontSize: 18,
+    fontSize: fontScale(18),
     fontWeight: "800"
   },
   sectionMeta: {
@@ -817,12 +818,12 @@ const styles = StyleSheet.create({
   statsRow: {
     flexDirection: "row",
     backgroundColor: "white",
-    borderRadius: 20,
-    padding: 16,
+    borderRadius: moderateScale(20),
+    padding: moderateScale(16),
     alignItems: "center",
     shadowColor: "#0F172A",
     shadowOpacity: 0.05,
-    shadowRadius: 10,
+    shadowRadius: moderateScale(10),
     shadowOffset: { width: 0, height: 4 },
     elevation: 2
   },
@@ -830,89 +831,89 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    gap: 12
+    gap: moderateScale(12)
   },
   statIconWrap: {
-    width: 40,
-    height: 40,
-    borderRadius: 10,
+    width: moderateScale(40),
+    height: moderateScale(40),
+    borderRadius: moderateScale(10),
     alignItems: "center",
     justifyContent: "center"
   },
   statLabel: {
     color: "#64748B",
-    fontSize: 12,
+    fontSize: fontScale(12),
     fontWeight: "600"
   },
   statValue: {
     color: "#0F172A",
-    fontSize: 16,
+    fontSize: fontScale(16),
     fontWeight: "800",
-    marginTop: 2
+    marginTop: verticalScale(2)
   },
   statDivider: {
     width: 1,
-    height: 30,
+    height: moderateScale(30),
     backgroundColor: "#E2E8F0",
-    marginHorizontal: 16
+    marginHorizontal: moderateScale(16)
   },
   menuSection: {
-    gap: 8,
-    marginTop: 4
+    gap: moderateScale(8),
+    marginTop: verticalScale(4)
   },
   sectionLabel: {
-    fontSize: 12,
+    fontSize: fontScale(12),
     fontWeight: "700",
     color: "#64748B",
-    marginLeft: 4,
+    marginLeft: moderateScale(4),
     letterSpacing: 0.5
   },
   menuCard: {
     backgroundColor: "white",
-    borderRadius: 20,
+    borderRadius: moderateScale(20),
     overflow: "hidden",
     shadowColor: "#0F172A",
     shadowOpacity: 0.05,
-    shadowRadius: 10,
+    shadowRadius: moderateScale(10),
     shadowOffset: { width: 0, height: 4 },
     elevation: 2
   },
   menuItem: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 16,
-    gap: 12
+    padding: moderateScale(16),
+    gap: moderateScale(12)
   },
   menuIcon: {
-    width: 32,
-    height: 32,
-    borderRadius: 8,
+    width: moderateScale(32),
+    height: moderateScale(32),
+    borderRadius: moderateScale(8),
     alignItems: "center",
     justifyContent: "center"
   },
   menuText: {
     flex: 1,
-    fontSize: 15,
+    fontSize: fontScale(15),
     fontWeight: "600",
     color: "#0F172A"
   },
   menuDivider: {
     height: 1,
     backgroundColor: "#F1F5F9",
-    marginLeft: 60
+    marginLeft: moderateScale(60)
   },
   logoutBtn: {
     backgroundColor: "#FFF1F2",
-    borderRadius: 20,
-    paddingVertical: 16,
-    marginTop: 8,
+    borderRadius: moderateScale(20),
+    paddingVertical: moderateScale(16),
+    marginTop: verticalScale(8),
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 8,
+    gap: moderateScale(8),
     shadowColor: "#DC2626",
     shadowOpacity: 0.1,
-    shadowRadius: 8,
+    shadowRadius: moderateScale(8),
     shadowOffset: { width: 0, height: 4 },
     elevation: 2
   },
@@ -920,52 +921,52 @@ const styles = StyleSheet.create({
     color: "#DC2626",
     textAlign: "center",
     fontWeight: "700",
-    fontSize: 16
+    fontSize: fontScale(16)
   },
   modalBackdrop: {
     flex: 1,
     justifyContent: "center",
     backgroundColor: "rgba(15, 23, 42, 0.6)",
-    padding: 20
+    padding: moderateScale(20)
   },
   modalCard: {
     backgroundColor: "white",
-    borderRadius: 28,
-    padding: 24,
-    gap: 16,
+    borderRadius: moderateScale(28),
+    padding: moderateScale(24),
+    gap: moderateScale(16),
     shadowColor: "#0F172A",
     shadowOpacity: 0.15,
-    shadowRadius: 20,
+    shadowRadius: moderateScale(20),
     shadowOffset: { width: 0, height: 10 },
     elevation: 10
   },
   modalTitle: {
     color: "#0F172A",
-    fontSize: 22,
+    fontSize: fontScale(22),
     fontWeight: "900",
     textAlign: "center",
-    marginBottom: 4
+    marginBottom: verticalScale(4)
   },
   modalInput: {
     borderWidth: 1.5,
     borderColor: "#E2E8F0",
     backgroundColor: "#F8FAFC",
-    borderRadius: 16,
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    fontSize: 16,
+    borderRadius: moderateScale(16),
+    paddingHorizontal: moderateScale(16),
+    paddingVertical: moderateScale(16),
+    fontSize: fontScale(16),
     color: "#0F172A",
     fontWeight: "500"
   },
   modalActions: {
     flexDirection: "row",
-    gap: 12,
-    marginTop: 8
+    gap: moderateScale(12),
+    marginTop: verticalScale(8)
   },
   modalActionBtn: {
     flex: 1,
-    borderRadius: 16,
-    paddingVertical: 16,
+    borderRadius: moderateScale(16),
+    paddingVertical: moderateScale(16),
     justifyContent: "center",
     alignItems: "center"
   },
@@ -973,7 +974,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FF6B35",
     shadowColor: "#FF6B35",
     shadowOpacity: 0.2,
-    shadowRadius: 8,
+    shadowRadius: moderateScale(8),
     shadowOffset: { width: 0, height: 4 },
     elevation: 4
   },
@@ -984,12 +985,12 @@ const styles = StyleSheet.create({
     color: "white",
     textAlign: "center",
     fontWeight: "800",
-    fontSize: 16
+    fontSize: fontScale(16)
   },
   modalActionSecondaryText: {
     color: "#64748B",
     textAlign: "center",
     fontWeight: "800",
-    fontSize: 16
+    fontSize: fontScale(16)
   }
 });

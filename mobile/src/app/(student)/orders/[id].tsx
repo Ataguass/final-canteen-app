@@ -7,6 +7,7 @@ import { useAuth } from "../../../hooks/useAuth";
 import { useOrderSocket } from "../../../hooks/useOrderSocket";
 import { Order, orderService } from "../../../services/orderService";
 import { CanteenHeader } from "../../../components/CanteenHeader";
+import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../../utils/responsive';
 
 const TIMELINE = ["PENDING", "ACCEPTED", "PREPARING", "READY", "COMPLETED"];
 
@@ -251,39 +252,39 @@ const styles = StyleSheet.create({
     backgroundColor: "#EEF2F7"
   },
   content: {
-    padding: 16,
-    gap: 16,
-    paddingBottom: 40
+    padding: moderateScale(16),
+    gap: moderateScale(16),
+    paddingBottom: verticalScale(40)
   },
   loadingWrap: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-    padding: 16,
-    gap: 12
+    padding: moderateScale(16),
+    gap: moderateScale(12)
   },
   loadingText: {
     color: "#64748B",
     fontWeight: "600",
-    fontSize: 16
+    fontSize: fontScale(16)
   },
   emptyTitle: {
     color: "#0F172A",
-    fontSize: 20,
+    fontSize: fontScale(20),
     fontWeight: "800"
   },
   emptySub: {
     color: "#64748B",
     textAlign: "center",
-    paddingHorizontal: 20
+    paddingHorizontal: moderateScale(20)
   },
   headerCard: {
-    borderRadius: 16,
+    borderRadius: moderateScale(16),
     backgroundColor: "white",
-    padding: 20,
+    padding: moderateScale(20),
     shadowColor: "#0F172A",
     shadowOpacity: 0.03,
-    shadowRadius: 8,
+    shadowRadius: moderateScale(8),
     shadowOffset: { width: 0, height: 2 },
     elevation: 2,
     borderWidth: 1,
@@ -293,64 +294,64 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 4
+    marginBottom: verticalScale(4)
   },
   orderNumberLabel: {
     color: "#64748B",
-    fontSize: 13,
+    fontSize: fontScale(13),
     fontWeight: "700",
     textTransform: "uppercase",
     letterSpacing: 0.5
   },
   orderNumberText: {
     color: "#0F172A",
-    fontSize: 28,
+    fontSize: fontScale(28),
     fontWeight: "900",
-    marginBottom: 4
+    marginBottom: verticalScale(4)
   },
   statusPill: {
     flexDirection: "row",
     alignItems: "center",
-    borderRadius: 999,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    gap: 6
+    borderRadius: moderateScale(999),
+    paddingHorizontal: moderateScale(10),
+    paddingVertical: moderateScale(4),
+    gap: moderateScale(6)
   },
   statusDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3
+    width: moderateScale(6),
+    height: moderateScale(6),
+    borderRadius: moderateScale(3)
   },
   statusPillText: {
     fontWeight: "800",
-    fontSize: 12,
+    fontSize: fontScale(12),
     textTransform: "uppercase",
     letterSpacing: 0.5
   },
   headerMeta: {
     color: "#475569",
     fontWeight: "600",
-    fontSize: 14
+    fontSize: fontScale(14)
   },
   headerTagRow: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 8,
-    marginTop: 12
+    gap: moderateScale(8),
+    marginTop: verticalScale(12)
   },
   headerTagPill: {
     flexDirection: "row",
     alignItems: "center",
-    borderRadius: 8,
+    borderRadius: moderateScale(8),
     backgroundColor: "#F1F5F9",
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    gap: 6
+    paddingHorizontal: moderateScale(10),
+    paddingVertical: moderateScale(6),
+    gap: moderateScale(6)
   },
   headerTagText: {
     color: "#334155",
     fontWeight: "700",
-    fontSize: 13
+    fontSize: fontScale(13)
   },
   headerTagPriority: {
     backgroundColor: "#F1F5F9"
@@ -361,17 +362,17 @@ const styles = StyleSheet.create({
   slotCard: {
     flexDirection: "row",
     alignItems: "center",
-    borderRadius: 16,
+    borderRadius: moderateScale(16),
     borderWidth: 1,
     borderColor: "#BBF7D0",
     backgroundColor: "#DCFCE7",
-    padding: 16,
-    gap: 12
+    padding: moderateScale(16),
+    gap: moderateScale(12)
   },
   slotIconWrap: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: moderateScale(48),
+    height: moderateScale(48),
+    borderRadius: moderateScale(24),
     backgroundColor: "#BBF7D0",
     alignItems: "center",
     justifyContent: "center"
@@ -379,31 +380,31 @@ const styles = StyleSheet.create({
   slotLabel: {
     color: "#14532D",
     fontWeight: "800",
-    fontSize: 16,
-    marginTop: 2
+    fontSize: fontScale(16),
+    marginTop: verticalScale(2)
   },
   slotMeta: {
     color: "#166534",
     fontWeight: "600",
-    fontSize: 13,
-    marginTop: 2
+    fontSize: fontScale(13),
+    marginTop: verticalScale(2)
   },
   cardTitle: {
     color: "#0F172A",
-    fontSize: 18,
+    fontSize: fontScale(18),
     fontWeight: "800",
-    marginBottom: 12
+    marginBottom: verticalScale(12)
   },
   summaryCard: {
-    borderRadius: 16,
+    borderRadius: moderateScale(16),
     borderWidth: 1,
     borderColor: "#E2E8F0",
     backgroundColor: "white",
-    padding: 16,
-    gap: 12,
+    padding: moderateScale(16),
+    gap: moderateScale(12),
     shadowColor: "#0F172A",
     shadowOpacity: 0.02,
-    shadowRadius: 8,
+    shadowRadius: moderateScale(8),
     shadowOffset: { width: 0, height: 2 },
     elevation: 1
   },
@@ -415,57 +416,57 @@ const styles = StyleSheet.create({
   summaryLabel: {
     color: "#64748B",
     fontWeight: "600",
-    fontSize: 15
+    fontSize: fontScale(15)
   },
   summaryValue: {
     color: "#0F172A",
     fontWeight: "700",
-    fontSize: 15
+    fontSize: fontScale(15)
   },
   summaryTotalRow: {
     borderTopWidth: 1,
     borderTopColor: "#E2E8F0",
-    paddingTop: 12,
-    marginTop: 4
+    paddingTop: verticalScale(12),
+    marginTop: verticalScale(4)
   },
   summaryTotalLabel: {
     color: "#0F172A",
     fontWeight: "800",
-    fontSize: 16
+    fontSize: fontScale(16)
   },
   summaryTotalValue: {
     color: "#059669",
     fontWeight: "900",
-    fontSize: 22
+    fontSize: fontScale(22)
   },
   timelineCard: {
-    borderRadius: 16,
+    borderRadius: moderateScale(16),
     borderWidth: 1,
     borderColor: "#E2E8F0",
     backgroundColor: "white",
-    padding: 16,
+    padding: moderateScale(16),
     shadowColor: "#0F172A",
     shadowOpacity: 0.02,
-    shadowRadius: 8,
+    shadowRadius: moderateScale(8),
     shadowOffset: { width: 0, height: 2 },
     elevation: 1
   },
   timelineContainer: {
-    marginTop: 4
+    marginTop: verticalScale(4)
   },
   timelineRow: {
     flexDirection: "row",
     alignItems: "stretch"
   },
   timelineGraphic: {
-    width: 24,
+    width: moderateScale(24),
     alignItems: "center",
-    marginRight: 12
+    marginRight: moderateScale(12)
   },
   timelineDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
+    width: moderateScale(12),
+    height: moderateScale(12),
+    borderRadius: moderateScale(6),
     backgroundColor: "#E2E8F0",
     borderWidth: 2,
     borderColor: "white",
@@ -479,11 +480,11 @@ const styles = StyleSheet.create({
     transform: [{ scale: 1.2 }]
   },
   timelineLine: {
-    width: 2,
+    width: moderateScale(2),
     flex: 1,
     backgroundColor: "#E2E8F0",
-    marginTop: -2,
-    marginBottom: -2,
+    marginTop: verticalScale(-2),
+    marginBottom: verticalScale(-2),
     zIndex: 1
   },
   timelineLineActive: {
@@ -491,13 +492,13 @@ const styles = StyleSheet.create({
   },
   timelineContent: {
     flex: 1,
-    paddingBottom: 20,
+    paddingBottom: verticalScale(20),
     justifyContent: "flex-start"
   },
   timelineText: {
     color: "#94A3B8",
     fontWeight: "600",
-    fontSize: 15,
+    fontSize: fontScale(15),
     lineHeight: 16
   },
   timelineTextActive: {
@@ -506,76 +507,76 @@ const styles = StyleSheet.create({
   timelineTextCurrent: {
     color: "#0F172A",
     fontWeight: "800",
-    fontSize: 16
+    fontSize: fontScale(16)
   },
   itemsCard: {
-    borderRadius: 16,
+    borderRadius: moderateScale(16),
     borderWidth: 1,
     borderColor: "#E2E8F0",
     backgroundColor: "white",
-    padding: 16,
+    padding: moderateScale(16),
     shadowColor: "#0F172A",
     shadowOpacity: 0.02,
-    shadowRadius: 8,
+    shadowRadius: moderateScale(8),
     shadowOffset: { width: 0, height: 2 },
     elevation: 1
   },
   itemRowCard: {
     flexDirection: "row",
     alignItems: "flex-start",
-    gap: 12,
-    paddingVertical: 8
+    gap: moderateScale(12),
+    paddingVertical: moderateScale(8)
   },
   itemQuantityWrap: {
     backgroundColor: "#F1F5F9",
-    borderRadius: 6,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    minWidth: 36,
+    borderRadius: moderateScale(6),
+    paddingHorizontal: moderateScale(8),
+    paddingVertical: moderateScale(4),
+    minWidth: moderateScale(36),
     alignItems: "center"
   },
   itemQuantityText: {
     color: "#0F172A",
     fontWeight: "800",
-    fontSize: 14
+    fontSize: fontScale(14)
   },
   itemDetails: {
     flex: 1,
-    gap: 2
+    gap: moderateScale(2)
   },
   itemName: {
     color: "#0F172A",
     fontWeight: "700",
-    fontSize: 15
+    fontSize: fontScale(15)
   },
   itemLineTotal: {
     color: "#0F172A",
     fontWeight: "800",
-    fontSize: 16
+    fontSize: fontScale(16)
   },
   itemMeta: {
     color: "#64748B",
     fontWeight: "600",
-    fontSize: 13
+    fontSize: fontScale(13)
   },
   noteRow: {
     flexDirection: "row",
     alignItems: "flex-start",
     backgroundColor: "#F8FAFC",
-    padding: 8,
-    borderRadius: 8,
-    marginTop: 6,
-    gap: 6
+    padding: moderateScale(8),
+    borderRadius: moderateScale(8),
+    marginTop: verticalScale(6),
+    gap: moderateScale(6)
   },
   noteText: {
     color: "#475569",
     flex: 1,
-    fontSize: 13,
+    fontSize: fontScale(13),
     fontStyle: "italic"
   },
   divider: {
     height: 1,
     backgroundColor: "#E2E8F0",
-    marginVertical: 4
+    marginVertical: moderateScale(4)
   }
 });

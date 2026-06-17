@@ -5,6 +5,7 @@ import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from "react-nati
 import { useAuth } from "../../../hooks/useAuth";
 import { useOrderSocket } from "../../../hooks/useOrderSocket";
 import { Order, orderService } from "../../../services/orderService";
+import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../../utils/responsive';
 
 const statusActions = ["ACCEPTED", "PREPARING", "READY", "COMPLETED", "CANCELLED"] as const;
 
@@ -243,30 +244,30 @@ const styles = StyleSheet.create({
   loadingText: {
     color: "#64748B",
     fontWeight: "600",
-    fontSize: 16
+    fontSize: fontScale(16)
   },
   errorText: {
     color: "#0F172A",
     fontWeight: "800",
-    fontSize: 18
+    fontSize: fontScale(18)
   },
   screen: {
     flex: 1,
     backgroundColor: "#F8FAFC"
   },
   content: {
-    padding: 16,
-    gap: 16,
-    paddingBottom: 40
+    padding: moderateScale(16),
+    gap: moderateScale(16),
+    paddingBottom: verticalScale(40)
   },
   headerCard: {
     backgroundColor: "white",
-    borderRadius: 20,
-    padding: 16,
-    gap: 16,
+    borderRadius: moderateScale(20),
+    padding: moderateScale(16),
+    gap: moderateScale(16),
     shadowColor: "#000",
     shadowOpacity: 0.04,
-    shadowRadius: 10,
+    shadowRadius: moderateScale(10),
     shadowOffset: { width: 0, height: 4 },
     elevation: 2
   },
@@ -278,74 +279,74 @@ const styles = StyleSheet.create({
   headerLabel: {
     color: "#64748B",
     fontWeight: "700",
-    fontSize: 12
+    fontSize: fontScale(12)
   },
   headerNumber: {
     color: "#0F172A",
-    fontSize: 28,
+    fontSize: fontScale(28),
     fontWeight: "900",
-    marginTop: 2
+    marginTop: verticalScale(2)
   },
   largeStatusPill: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 999
+    paddingHorizontal: moderateScale(14),
+    paddingVertical: moderateScale(8),
+    borderRadius: moderateScale(999)
   },
   largeStatusText: {
     fontWeight: "900",
-    fontSize: 13,
+    fontSize: fontScale(13),
     letterSpacing: 0.5
   },
   infoGridRow: {
     flexDirection: "row",
-    gap: 10
+    gap: moderateScale(10)
   },
   infoGridBox: {
     flex: 1,
-    borderRadius: 16,
-    padding: 14
+    borderRadius: moderateScale(16),
+    padding: moderateScale(14)
   },
   infoGridLabel: {
-    fontSize: 12,
+    fontSize: fontScale(12),
     fontWeight: "800"
   },
   infoGridValue: {
     color: "#0F172A",
     fontWeight: "900",
-    fontSize: 16,
-    marginTop: 4
+    fontSize: fontScale(16),
+    marginTop: verticalScale(4)
   },
   infoGridSubValue: {
     color: "#475569",
     fontWeight: "600",
-    fontSize: 12,
-    marginTop: 2
+    fontSize: fontScale(12),
+    marginTop: verticalScale(2)
   },
   sectionCard: {
     backgroundColor: "white",
-    borderRadius: 20,
-    padding: 16,
-    gap: 16,
+    borderRadius: moderateScale(20),
+    padding: moderateScale(16),
+    gap: moderateScale(16),
     shadowColor: "#000",
     shadowOpacity: 0.04,
-    shadowRadius: 10,
+    shadowRadius: moderateScale(10),
     shadowOffset: { width: 0, height: 4 },
     elevation: 2
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: fontScale(18),
     fontWeight: "900",
     color: "#0F172A"
   },
   statusActionGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 10
+    gap: moderateScale(10)
   },
   statusActionButton: {
-    borderRadius: 12,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
+    borderRadius: moderateScale(12),
+    paddingVertical: moderateScale(12),
+    paddingHorizontal: moderateScale(16),
     borderWidth: 1
   },
   statusActionButtonSelected: {
@@ -358,7 +359,7 @@ const styles = StyleSheet.create({
   },
   statusActionText: {
     fontWeight: "800",
-    fontSize: 13
+    fontSize: fontScale(13)
   },
   statusActionTextSelected: {
     color: "white"
@@ -370,18 +371,18 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 8,
-    borderRadius: 14,
-    paddingVertical: 14,
+    gap: moderateScale(8),
+    borderRadius: moderateScale(14),
+    paddingVertical: moderateScale(14),
     backgroundColor: "#F8FAFC",
     borderWidth: 1,
     borderColor: "#E2E8F0",
-    marginTop: 4
+    marginTop: verticalScale(4)
   },
   refreshButtonLargeText: {
     color: "#475569",
     fontWeight: "800",
-    fontSize: 14
+    fontSize: fontScale(14)
   },
   itemsList: {
     gap: 0
@@ -390,7 +391,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start",
-    paddingVertical: 12
+    paddingVertical: moderateScale(12)
   },
   itemRowBorder: {
     borderBottomWidth: 1,
@@ -398,29 +399,29 @@ const styles = StyleSheet.create({
   },
   itemRowLeft: {
     flex: 1,
-    paddingRight: 16,
-    gap: 4
+    paddingRight: moderateScale(16),
+    gap: moderateScale(4)
   },
   itemName: {
     color: "#0F172A",
     fontWeight: "800",
-    fontSize: 16
+    fontSize: fontScale(16)
   },
   itemMeta: {
     color: "#64748B",
     fontWeight: "600",
-    fontSize: 13
+    fontSize: fontScale(13)
   },
   itemNote: {
     color: "#D97706",
     fontWeight: "600",
-    fontSize: 12,
-    marginTop: 2
+    fontSize: fontScale(12),
+    marginTop: verticalScale(2)
   },
   itemRowTotal: {
     color: "#0F172A",
     fontWeight: "900",
-    fontSize: 16
+    fontSize: fontScale(16)
   },
   billRow: {
     flexDirection: "row",
@@ -430,30 +431,30 @@ const styles = StyleSheet.create({
   billLabel: {
     color: "#64748B",
     fontWeight: "600",
-    fontSize: 14
+    fontSize: fontScale(14)
   },
   billValue: {
     color: "#0F172A",
     fontWeight: "800",
-    fontSize: 15
+    fontSize: fontScale(15)
   },
   grandTotalRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingTop: 16,
+    paddingTop: verticalScale(16),
     borderTopWidth: 1,
     borderColor: "#E2E8F0",
-    marginTop: 4
+    marginTop: verticalScale(4)
   },
   grandTotalLabel: {
     color: "#0F172A",
     fontWeight: "900",
-    fontSize: 18
+    fontSize: fontScale(18)
   },
   grandTotalValue: {
     color: "#1D4ED8",
     fontWeight: "900",
-    fontSize: 22
+    fontSize: fontScale(22)
   }
 });

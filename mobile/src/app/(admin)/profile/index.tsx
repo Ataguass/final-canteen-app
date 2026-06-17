@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Alert, ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { useAuth } from "../../../hooks/useAuth";
 import { userService } from "../../../services/userService";
+import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../../utils/responsive';
 
 type ActionCard = {
   title: string;
@@ -186,7 +187,7 @@ export default function Screen() {
             setEditEmail(user?.email ?? "");
             setEditModalVisible(true);
           }}
-          style={{ position: "absolute", top: 16, right: 16, zIndex: 10, padding: 4 }}
+          style={{ position: "absolute", top: 16, right: 16, zIndex: 10, padding: moderateScale(4) }}
         >
           <Ionicons name="pencil-outline" size={20} color="#64748B" />
         </Pressable>
@@ -198,13 +199,13 @@ export default function Screen() {
           <Text style={styles.heroName}>{user?.name ?? "Admin"}</Text>
           <Text style={styles.heroRole}>{user?.role ?? "Admin Role"}</Text>
           
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginTop: 4 }}>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: moderateScale(6), marginTop: verticalScale(4) }}>
              <Ionicons name="call-outline" size={14} color="#64748B" />
-             <Text style={{ fontSize: 13, color: "#64748B", fontWeight: "500" }}>{user?.phone || "No phone added"}</Text>
+             <Text style={{ fontSize: fontScale(13), color: "#64748B", fontWeight: "500" }}>{user?.phone || "No phone added"}</Text>
           </View>
-          <View style={{ flexDirection: "row", alignItems: "center", gap: 6, marginTop: 2 }}>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: moderateScale(6), marginTop: verticalScale(2) }}>
              <Ionicons name="mail-outline" size={14} color="#64748B" />
-             <Text style={{ fontSize: 13, color: "#64748B", fontWeight: "500" }}>{user?.email || "No email added"}</Text>
+             <Text style={{ fontSize: fontScale(13), color: "#64748B", fontWeight: "500" }}>{user?.email || "No email added"}</Text>
           </View>
 
           <View style={styles.tenantPill}>
@@ -319,7 +320,7 @@ export default function Screen() {
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Change Password</Text>
-              <Pressable onPress={() => setModalVisible(false)} style={{ padding: 4 }}>
+              <Pressable onPress={() => setModalVisible(false)} style={{ padding: moderateScale(4) }}>
                 <Ionicons name="close" size={24} color="#64748B" />
               </Pressable>
             </View>
@@ -364,7 +365,7 @@ export default function Screen() {
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Edit Profile</Text>
-              <Pressable onPress={() => setEditModalVisible(false)} style={{ padding: 4 }}>
+              <Pressable onPress={() => setEditModalVisible(false)} style={{ padding: moderateScale(4) }}>
                 <Ionicons name="close" size={24} color="#64748B" />
               </Pressable>
             </View>
@@ -421,170 +422,170 @@ const styles = StyleSheet.create({
     backgroundColor: "#F8FAFC"
   },
   content: {
-    padding: 16,
-    gap: 24,
-    paddingBottom: 40
+    padding: moderateScale(16),
+    gap: moderateScale(24),
+    paddingBottom: verticalScale(40)
   },
   heroCard: {
     backgroundColor: "white",
-    borderRadius: 24,
-    padding: 20,
+    borderRadius: moderateScale(24),
+    padding: moderateScale(20),
     flexDirection: "row",
     alignItems: "center",
-    gap: 16,
+    gap: moderateScale(16),
     overflow: "hidden",
     shadowColor: "#000",
     shadowOpacity: 0.04,
-    shadowRadius: 10,
+    shadowRadius: moderateScale(10),
     shadowOffset: { width: 0, height: 4 },
     elevation: 2
   },
   heroDecoCircle: {
     position: "absolute",
-    right: -40,
-    top: -40,
-    width: 140,
-    height: 140,
-    borderRadius: 70,
+    right: moderateScale(-40),
+    top: verticalScale(-40),
+    width: moderateScale(140),
+    height: moderateScale(140),
+    borderRadius: moderateScale(70),
     backgroundColor: "rgba(37, 99, 235, 0.04)"
   },
   heroAvatarWrap: {
-    width: 64,
-    height: 64,
-    borderRadius: 20,
+    width: moderateScale(64),
+    height: moderateScale(64),
+    borderRadius: moderateScale(20),
     backgroundColor: "#1D4ED8",
     alignItems: "center",
     justifyContent: "center",
     shadowColor: "#1D4ED8",
     shadowOpacity: 0.3,
-    shadowRadius: 8,
+    shadowRadius: moderateScale(8),
     shadowOffset: { width: 0, height: 4 },
     elevation: 4
   },
   heroAvatarText: {
     color: "white",
-    fontSize: 28,
+    fontSize: fontScale(28),
     fontWeight: "900"
   },
   heroTextWrap: {
     flex: 1,
-    gap: 4
+    gap: moderateScale(4)
   },
   heroName: {
-    fontSize: 22,
+    fontSize: fontScale(22),
     fontWeight: "900",
     color: "#0F172A"
   },
   heroRole: {
-    fontSize: 14,
+    fontSize: fontScale(14),
     fontWeight: "600",
     color: "#64748B"
   },
   tenantPill: {
     backgroundColor: "#F1F5F9",
     alignSelf: "flex-start",
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-    marginTop: 2
+    paddingHorizontal: moderateScale(8),
+    paddingVertical: moderateScale(4),
+    borderRadius: moderateScale(6),
+    marginTop: verticalScale(2)
   },
   tenantPillText: {
-    fontSize: 11,
+    fontSize: fontScale(11),
     fontWeight: "700",
     color: "#475569"
   },
   sectionWrap: {
-    gap: 12
+    gap: moderateScale(12)
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: fontScale(18),
     fontWeight: "900",
     color: "#0F172A",
-    marginLeft: 4
+    marginLeft: moderateScale(4)
   },
   logoutButton: {
     backgroundColor: "#DC2626",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 10,
-    borderRadius: 20,
-    paddingVertical: 18,
-    marginTop: 10,
+    gap: moderateScale(10),
+    borderRadius: moderateScale(20),
+    paddingVertical: moderateScale(18),
+    marginTop: verticalScale(10),
     shadowColor: "#DC2626",
     shadowOpacity: 0.25,
-    shadowRadius: 10,
+    shadowRadius: moderateScale(10),
     shadowOffset: { width: 0, height: 4 },
     elevation: 4
   },
   logoutText: {
     color: "white",
-    fontSize: 16,
+    fontSize: fontScale(16),
     fontWeight: "900",
     letterSpacing: 0.5
   },
   listWrap: {
     backgroundColor: "white",
-    borderRadius: 20,
+    borderRadius: moderateScale(20),
     overflow: "hidden",
     shadowColor: "#000",
     shadowOpacity: 0.03,
-    shadowRadius: 8,
+    shadowRadius: moderateScale(8),
     shadowOffset: { width: 0, height: 4 },
     elevation: 1
   },
   listItem: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 16,
-    gap: 14
+    padding: moderateScale(16),
+    gap: moderateScale(14)
   },
   listItemBorder: {
     borderBottomWidth: 1,
     borderColor: "#F1F5F9"
   },
   iconWrapSmall: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
+    width: moderateScale(36),
+    height: moderateScale(36),
+    borderRadius: moderateScale(10),
     alignItems: "center",
     justifyContent: "center"
   },
   listItemTextWrap: {
     flex: 1,
-    gap: 2
+    gap: moderateScale(2)
   },
   listItemTitle: {
-    fontSize: 15,
+    fontSize: fontScale(15),
     fontWeight: "800",
     color: "#0F172A"
   },
   listItemSubtitle: {
-    fontSize: 12,
+    fontSize: fontScale(12),
     fontWeight: "500",
     color: "#64748B"
   },
   appVersion: {
     textAlign: "center",
     color: "#94A3B8",
-    fontSize: 12,
+    fontSize: fontScale(12),
     fontWeight: "600",
-    marginTop: 4
+    marginTop: verticalScale(4)
   },
   modalOverlay: {
     flex: 1,
     backgroundColor: "rgba(15,23,42,0.4)",
     justifyContent: "center",
-    padding: 20
+    padding: moderateScale(20)
   },
   modalContent: {
     backgroundColor: "white",
-    borderRadius: 24,
-    padding: 24,
-    gap: 20,
+    borderRadius: moderateScale(24),
+    padding: moderateScale(24),
+    gap: moderateScale(20),
     shadowColor: "#000",
     shadowOpacity: 0.1,
-    shadowRadius: 20,
+    shadowRadius: moderateScale(20),
     shadowOffset: { width: 0, height: 10 },
     elevation: 10
   },
@@ -594,38 +595,38 @@ const styles = StyleSheet.create({
     alignItems: "center"
   },
   modalTitle: {
-    fontSize: 20,
+    fontSize: fontScale(20),
     fontWeight: "900",
     color: "#0F172A"
   },
   modalBody: {
-    gap: 12
+    gap: moderateScale(12)
   },
   inputLabel: {
-    fontSize: 13,
+    fontSize: fontScale(13),
     fontWeight: "700",
     color: "#475569",
-    marginBottom: -4
+    marginBottom: verticalScale(-4)
   },
   textInput: {
     borderWidth: 1,
     borderColor: "#E2E8F0",
-    borderRadius: 12,
-    padding: 14,
-    fontSize: 15,
+    borderRadius: moderateScale(12),
+    padding: moderateScale(14),
+    fontSize: fontScale(15),
     color: "#0F172A",
     backgroundColor: "#F8FAFC"
   },
   submitBtn: {
     backgroundColor: "#1D4ED8",
-    borderRadius: 14,
-    paddingVertical: 16,
+    borderRadius: moderateScale(14),
+    paddingVertical: moderateScale(16),
     alignItems: "center",
     justifyContent: "center"
   },
   submitBtnText: {
     color: "white",
-    fontSize: 16,
+    fontSize: fontScale(16),
     fontWeight: "800"
   }
 });

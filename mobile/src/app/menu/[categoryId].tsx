@@ -17,6 +17,7 @@ import { useAuth } from "../../hooks/useAuth";
 import { useCart } from "../../hooks/useCart";
 import { useToast } from "../../components/Toast";
 import { menuService } from "../../services/menuService";
+import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../utils/responsive';
 
 type Category = {
   id: string;
@@ -97,7 +98,7 @@ export default function Screen() {
           <Ionicons name="chevron-back" size={24} color="#0F172A" />
         </Pressable>
         <Text style={styles.topNavTitle}>Category</Text>
-        <View style={{ width: 40 }} />
+        <View style={{ width: moderateScale(40) }} />
       </View>
     <ScrollView
       style={{ flex: 1 }}
@@ -227,13 +228,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingBottom: 10
+    paddingHorizontal: moderateScale(16),
+    paddingBottom: verticalScale(10)
   },
   backBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: moderateScale(40),
+    height: moderateScale(40),
+    borderRadius: moderateScale(20),
     backgroundColor: "#FFFFFF",
     alignItems: "center",
     justifyContent: "center",
@@ -241,102 +242,102 @@ const styles = StyleSheet.create({
     borderColor: "#E2E8F0"
   },
   topNavTitle: {
-    fontSize: 18,
+    fontSize: fontScale(18),
     fontWeight: "900",
     color: "#0F172A"
   },
   content: {
-    padding: 16,
-    gap: 12,
-    paddingBottom: 24
+    padding: moderateScale(16),
+    gap: moderateScale(12),
+    paddingBottom: verticalScale(24)
   },
   headerCard: {
-    borderRadius: 20,
+    borderRadius: moderateScale(20),
     backgroundColor: "white",
     shadowColor: "#0F172A",
     shadowOpacity: 0.05,
-    shadowRadius: 12,
+    shadowRadius: moderateScale(12),
     shadowOffset: { width: 0, height: 6 },
     elevation: 3,
-    marginBottom: 8
+    marginBottom: verticalScale(8)
   },
   heroBg: {
     width: "100%",
-    minHeight: 180,
+    minHeight: moderateScale(180),
     justifyContent: "flex-end"
   },
   heroBgImage: {
-    borderRadius: 20
+    borderRadius: moderateScale(20)
   },
   heroOverlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: "rgba(15, 23, 42, 0.45)",
-    borderRadius: 20,
-    padding: 18,
-    gap: 12,
+    borderRadius: moderateScale(20),
+    padding: moderateScale(18),
+    gap: moderateScale(12),
     justifyContent: "flex-end"
   },
   heroNoImage: {
-    padding: 18,
-    gap: 12,
-    borderRadius: 20
+    padding: moderateScale(18),
+    gap: moderateScale(12),
+    borderRadius: moderateScale(20)
   },
   headerTopRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-start",
-    gap: 10
+    gap: moderateScale(10)
   },
   headerTitleWrap: {
     flex: 1,
-    gap: 4
+    gap: moderateScale(4)
   },
   headerTitle: {
     color: "#0F172A",
-    fontSize: 26,
+    fontSize: fontScale(26),
     fontWeight: "900",
   },
   headerTitleOverlay: {
     color: "white",
-    fontSize: 26,
+    fontSize: fontScale(26),
     fontWeight: "900",
     textShadowColor: "rgba(0,0,0,0.3)",
     textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 4
+    textShadowRadius: moderateScale(4)
   },
   headerSubtitle: {
     color: "#64748B",
     fontWeight: "600",
-    fontSize: 14
+    fontSize: fontScale(14)
   },
   headerSubtitleOverlay: {
     color: "rgba(255,255,255,0.85)",
     fontWeight: "600",
-    fontSize: 14
+    fontSize: fontScale(14)
   },
   itemCountChip: {
-    borderRadius: 999,
+    borderRadius: moderateScale(999),
     backgroundColor: "#F1F5F9",
-    paddingHorizontal: 12,
-    paddingVertical: 6
+    paddingHorizontal: moderateScale(12),
+    paddingVertical: moderateScale(6)
   },
   itemCountChipOverlay: {
-    borderRadius: 999,
+    borderRadius: moderateScale(999),
     backgroundColor: "rgba(255,255,255,0.2)",
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingHorizontal: moderateScale(12),
+    paddingVertical: moderateScale(6),
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.3)"
   },
   itemCountChipText: {
     color: "#0F172A",
     fontWeight: "800",
-    fontSize: 12
+    fontSize: fontScale(12)
   },
   itemCountChipTextOverlay: {
     color: "white",
     fontWeight: "800",
-    fontSize: 12
+    fontSize: fontScale(12)
   },
   categoryDescription: {
     color: "#475569",
@@ -347,18 +348,18 @@ const styles = StyleSheet.create({
     lineHeight: 20
   },
   emptyCard: {
-    borderRadius: 14,
+    borderRadius: moderateScale(14),
     borderWidth: 1,
     borderColor: "#CBD5E1",
     backgroundColor: "#F8FAFC",
-    padding: 18,
+    padding: moderateScale(18),
     alignItems: "center",
-    gap: 6
+    gap: moderateScale(6)
   },
   emptyTitle: {
     color: "#0F172A",
     fontWeight: "800",
-    fontSize: 18
+    fontSize: fontScale(18)
   },
   emptySub: {
     color: "#64748B",
@@ -371,7 +372,7 @@ const styles = StyleSheet.create({
   },
   listHeaderTitle: {
     color: "#0F172A",
-    fontSize: 17,
+    fontSize: fontScale(17),
     fontWeight: "800"
   },
   listHeaderMeta: {
@@ -385,54 +386,54 @@ const styles = StyleSheet.create({
     alignItems: "flex-start"
   },
   itemCard: {
-    borderRadius: 16,
+    borderRadius: moderateScale(16),
     backgroundColor: "white",
     overflow: "hidden",
-    marginBottom: 14,
+    marginBottom: verticalScale(14),
     shadowColor: "#0F172A",
     shadowOpacity: 0.06,
-    shadowRadius: 10,
+    shadowRadius: moderateScale(10),
     shadowOffset: { width: 0, height: 4 },
     elevation: 3
   },
   itemTapArea: {
-    gap: 6
+    gap: moderateScale(6)
   },
   itemImage: {
     width: "100%",
-    height: 106,
+    height: moderateScale(106),
     backgroundColor: "#F1F5F9"
   },
   itemImageFallback: {
     width: "100%",
-    height: 106,
+    height: moderateScale(106),
     backgroundColor: "#F1F5F9",
     alignItems: "center",
     justifyContent: "center"
   },
   itemBody: {
-    padding: 10,
-    gap: 6
+    padding: moderateScale(10),
+    gap: moderateScale(6)
   },
   itemNameRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    gap: 8
+    gap: moderateScale(8)
   },
   itemName: {
     color: "#0F172A",
     fontWeight: "800",
-    fontSize: 16,
+    fontSize: fontScale(16),
     flex: 1
   },
   itemDescription: {
     color: "#64748B",
-    fontSize: 12
+    fontSize: fontScale(12)
   },
   itemDescriptionMuted: {
     color: "#94A3B8",
-    fontSize: 12,
+    fontSize: fontScale(12),
     fontWeight: "600"
   },
   itemPrice: {
@@ -441,29 +442,29 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFF7ED",
     borderWidth: 1,
     borderColor: "#FED7AA",
-    borderRadius: 999,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    fontSize: 12
+    borderRadius: moderateScale(999),
+    paddingHorizontal: moderateScale(8),
+    paddingVertical: moderateScale(3),
+    fontSize: fontScale(12)
   },
   categoryPill: {
     alignSelf: "flex-start",
-    borderRadius: 999,
+    borderRadius: moderateScale(999),
     backgroundColor: "#F1F5F9",
-    paddingHorizontal: 8,
-    paddingVertical: 3
+    paddingHorizontal: moderateScale(8),
+    paddingVertical: moderateScale(3)
   },
   categoryPillText: {
     color: "#475569",
     fontWeight: "700",
-    fontSize: 12
+    fontSize: fontScale(12)
   },
   addBtn: {
-    marginHorizontal: 10,
-    marginBottom: 10,
-    borderRadius: 10,
+    marginHorizontal: moderateScale(10),
+    marginBottom: verticalScale(10),
+    borderRadius: moderateScale(10),
     backgroundColor: "#FF6B35",
-    paddingVertical: 10
+    paddingVertical: moderateScale(10)
   },
   addBtnDisabled: {
     backgroundColor: "#9CA3AF"

@@ -5,6 +5,7 @@ import { File, Paths } from "expo-file-system";
 import * as DocumentPicker from "expo-document-picker";
 import { useAuth } from "../../../hooks/useAuth";
 import { backupService, type BackupFile } from "../../../services/backupService";
+import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../../utils/responsive';
 
 const formatBytes = (bytes: number): string => {
   if (!Number.isFinite(bytes) || bytes <= 0) return "0 B";
@@ -210,7 +211,7 @@ export default function Screen() {
         </Text>
       </View>
 
-      <View style={{ flexDirection: "row", gap: 12 }}>
+      <View style={{ flexDirection: "row", gap: moderateScale(12) }}>
         <Pressable
           onPress={onCreateBackup}
           disabled={creating || uploading}
@@ -250,7 +251,7 @@ export default function Screen() {
           const busy = activeBackupId === item.id;
           return (
             <View key={item.id} style={styles.backupCard}>
-              <View style={{ gap: 4 }}>
+              <View style={{ gap: moderateScale(4) }}>
                 <Text style={styles.backupId}>{item.id}</Text>
                 <Text style={styles.metaText}>Created: {formatDate(item.createdAt)}</Text>
                 <Text style={styles.metaText}>Size: {formatBytes(item.sizeBytes)}</Text>
@@ -297,15 +298,15 @@ const styles = StyleSheet.create({
     backgroundColor: "#EEF2F7"
   },
   content: {
-    padding: 16,
-    gap: 12,
-    paddingBottom: 24
+    padding: moderateScale(16),
+    gap: moderateScale(12),
+    paddingBottom: verticalScale(24)
   },
   centerScreen: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    gap: 8,
+    gap: moderateScale(8),
     backgroundColor: "#EEF2F7"
   },
   centerTitle: {
@@ -316,35 +317,35 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
     borderColor: "#E2E8F0",
-    borderRadius: 14,
-    padding: 14,
+    borderRadius: moderateScale(14),
+    padding: moderateScale(14),
     flexDirection: "row",
     alignItems: "center",
-    gap: 10,
+    gap: moderateScale(10),
     shadowColor: "#000",
     shadowOpacity: 0.03,
-    shadowRadius: 8,
+    shadowRadius: moderateScale(8),
     shadowOffset: { width: 0, height: 2 },
     elevation: 1
   },
   infoText: {
     flex: 1,
     color: "#475569",
-    fontSize: 13,
+    fontSize: fontScale(13),
     fontWeight: "500",
     lineHeight: 18
   },
   primaryButton: {
-    borderRadius: 16,
-    paddingVertical: 14,
+    borderRadius: moderateScale(16),
+    paddingVertical: moderateScale(14),
     backgroundColor: "#0F172A",
     alignItems: "center",
     justifyContent: "center",
     flexDirection: "row",
-    gap: 8,
+    gap: moderateScale(8),
     shadowColor: "#000",
     shadowOpacity: 0.08,
-    shadowRadius: 10,
+    shadowRadius: moderateScale(10),
     shadowOffset: { width: 0, height: 4 },
     elevation: 3
   },
@@ -356,13 +357,13 @@ const styles = StyleSheet.create({
     opacity: 0.6
   },
   listHeader: {
-    marginTop: 2,
+    marginTop: verticalScale(2),
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center"
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: fontScale(18),
     fontWeight: "800",
     color: "#0F172A"
   },
@@ -373,36 +374,36 @@ const styles = StyleSheet.create({
   emptyCard: {
     borderWidth: 1,
     borderColor: "#E2E8F0",
-    borderRadius: 20,
+    borderRadius: moderateScale(20),
     backgroundColor: "#FFFFFF",
-    padding: 32,
+    padding: moderateScale(32),
     alignItems: "center",
     justifyContent: "center",
-    gap: 10,
-    marginTop: 10,
+    gap: moderateScale(10),
+    marginTop: verticalScale(10),
     shadowColor: "#000",
     shadowOpacity: 0.02,
-    shadowRadius: 10,
+    shadowRadius: moderateScale(10),
     shadowOffset: { width: 0, height: 4 },
     elevation: 1
   },
   emptyIconCircle: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
+    width: moderateScale(72),
+    height: moderateScale(72),
+    borderRadius: moderateScale(36),
     backgroundColor: "#F8FAFC",
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 4
+    marginBottom: verticalScale(4)
   },
   emptyTitle: {
     color: "#0F172A",
-    fontSize: 18,
+    fontSize: fontScale(18),
     fontWeight: "800"
   },
   emptyText: {
     color: "#64748B",
-    fontSize: 14,
+    fontSize: fontScale(14),
     fontWeight: "500",
     textAlign: "center"
   },
@@ -410,37 +411,37 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#E2E8F0",
     backgroundColor: "#FFFFFF",
-    borderRadius: 16,
-    padding: 16,
-    gap: 14,
+    borderRadius: moderateScale(16),
+    padding: moderateScale(16),
+    gap: moderateScale(14),
     shadowColor: "#000",
     shadowOpacity: 0.04,
-    shadowRadius: 10,
+    shadowRadius: moderateScale(10),
     shadowOffset: { width: 0, height: 4 },
     elevation: 2
   },
   backupId: {
     color: "#0F172A",
     fontWeight: "800",
-    fontSize: 14
+    fontSize: fontScale(14)
   },
   metaText: {
     color: "#64748B",
-    fontSize: 12,
+    fontSize: fontScale(12),
     fontWeight: "600"
   },
   rowButtons: {
     flexDirection: "row",
-    gap: 8
+    gap: moderateScale(8)
   },
   smallButton: {
     flex: 1,
-    borderRadius: 10,
-    paddingVertical: 10,
+    borderRadius: moderateScale(10),
+    paddingVertical: moderateScale(10),
     alignItems: "center",
     justifyContent: "center",
     flexDirection: "row",
-    gap: 6
+    gap: moderateScale(6)
   },
   restoreButton: {
     backgroundColor: "#2563EB"
@@ -453,15 +454,15 @@ const styles = StyleSheet.create({
     fontWeight: "700"
   },
   downloadButton: {
-    borderRadius: 10,
+    borderRadius: moderateScale(10),
     borderWidth: 1,
     borderColor: "#CBD5E1",
     backgroundColor: "#F8FAFC",
-    paddingVertical: 10,
+    paddingVertical: moderateScale(10),
     alignItems: "center",
     justifyContent: "center",
     flexDirection: "row",
-    gap: 6
+    gap: moderateScale(6)
   },
   downloadText: {
     color: "#0F172A",

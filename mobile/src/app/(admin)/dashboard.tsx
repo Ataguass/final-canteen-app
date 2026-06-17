@@ -7,6 +7,7 @@ import { useAuth } from "../../hooks/useAuth";
 import { menuService } from "../../services/menuService";
 import { orderService, type Order } from "../../services/orderService";
 import { userService, type ManagedUser } from "../../services/userService";
+import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../utils/responsive';
 
 type MenuItem = {
   id: string;
@@ -272,9 +273,9 @@ export default function Screen() {
         }
       >
         {/* Overview Header */}
-        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 12, paddingHorizontal: 4 }}>
-          <Text style={{ fontSize: 18, fontWeight: "900", color: "#0F172A" }}>Overview</Text>
-          <Text style={{ fontSize: 13, fontWeight: "600", color: "#64748B", marginBottom: 2 }}>
+        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end", marginBottom: verticalScale(12), paddingHorizontal: moderateScale(4) }}>
+          <Text style={{ fontSize: fontScale(18), fontWeight: "900", color: "#0F172A" }}>Overview</Text>
+          <Text style={{ fontSize: fontScale(13), fontWeight: "600", color: "#64748B", marginBottom: verticalScale(2) }}>
             {new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "short" })}
           </Text>
         </View>
@@ -537,58 +538,58 @@ const styles = StyleSheet.create({
     backgroundColor: "#EEF2F7"
   },
   content: {
-    padding: 16,
-    gap: 24,
-    paddingBottom: 40
+    padding: moderateScale(16),
+    gap: moderateScale(24),
+    paddingBottom: verticalScale(40)
   },
   kpiGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",
-    gap: 12
+    gap: moderateScale(12)
   },
   kpiCard: {
     width: "48%",
-    borderRadius: 16,
+    borderRadius: moderateScale(16),
     borderWidth: 1,
     borderColor: "#E2E8F0",
     backgroundColor: "white",
-    padding: 14,
+    padding: moderateScale(14),
     shadowColor: "#0F172A",
     shadowOpacity: 0.03,
-    shadowRadius: 8,
+    shadowRadius: moderateScale(8),
     shadowOffset: { width: 0, height: 2 },
     elevation: 2
   },
   kpiIconWrap: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
+    width: moderateScale(38),
+    height: moderateScale(38),
+    borderRadius: moderateScale(12),
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 10
+    marginBottom: verticalScale(10)
   },
   kpiTitle: {
     color: "#64748B",
-    fontSize: 12,
+    fontSize: fontScale(12),
     fontWeight: "700"
   },
   kpiValue: {
     color: "#0F172A",
-    fontSize: 22,
+    fontSize: fontScale(22),
     fontWeight: "900",
-    marginVertical: 2
+    marginVertical: moderateScale(2)
   },
   kpiNote: {
     color: "#94A3B8",
-    fontSize: 11,
+    fontSize: fontScale(11),
     fontWeight: "500"
   },
   sectionWrap: {
-    gap: 12
+    gap: moderateScale(12)
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: fontScale(18),
     fontWeight: "800",
     color: "#0F172A"
   },
@@ -598,123 +599,123 @@ const styles = StyleSheet.create({
     alignItems: "center"
   },
   viewAllBtn: {
-    paddingHorizontal: 8,
-    paddingVertical: 4
+    paddingHorizontal: moderateScale(8),
+    paddingVertical: moderateScale(4)
   },
   viewAllText: {
     color: "#2563EB",
     fontWeight: "700",
-    fontSize: 14
+    fontSize: fontScale(14)
   },
   quickGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 10
+    gap: moderateScale(10)
   },
   quickCard: {
     width: "23%",
     backgroundColor: "white",
-    borderRadius: 16,
-    paddingVertical: 14,
-    paddingHorizontal: 6,
+    borderRadius: moderateScale(16),
+    paddingVertical: moderateScale(14),
+    paddingHorizontal: moderateScale(6),
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 1,
     borderColor: "#E2E8F0",
     shadowColor: "#0F172A",
     shadowOpacity: 0.02,
-    shadowRadius: 6,
+    shadowRadius: moderateScale(6),
     shadowOffset: { width: 0, height: 2 },
     elevation: 1,
-    gap: 8
+    gap: moderateScale(8)
   },
   quickIconWrap: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: moderateScale(44),
+    height: moderateScale(44),
+    borderRadius: moderateScale(22),
     alignItems: "center",
     justifyContent: "center"
   },
   quickLabel: {
     color: "#334155",
-    fontSize: 11,
+    fontSize: fontScale(11),
     fontWeight: "700",
     textAlign: "center"
   },
   card: {
-    borderRadius: 16,
+    borderRadius: moderateScale(16),
     borderWidth: 1,
     borderColor: "#E2E8F0",
     backgroundColor: "white",
-    padding: 16,
+    padding: moderateScale(16),
     shadowColor: "#0F172A",
     shadowOpacity: 0.03,
-    shadowRadius: 8,
+    shadowRadius: moderateScale(8),
     shadowOffset: { width: 0, height: 2 },
     elevation: 2
   },
   cardHeader: {
-    fontSize: 16,
+    fontSize: fontScale(16),
     fontWeight: "800",
     color: "#0F172A",
-    marginBottom: 12
+    marginBottom: verticalScale(12)
   },
   chartHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    padding: 16,
-    paddingBottom: 8
+    padding: moderateScale(16),
+    paddingBottom: verticalScale(8)
   },
   chartTitle: {
-    fontSize: 16,
+    fontSize: fontScale(16),
     fontWeight: "800",
     color: "#0F172A"
   },
   chartSubtitle: {
     color: "#64748B",
-    fontSize: 13,
+    fontSize: fontScale(13),
     fontWeight: "500",
-    marginTop: 2
+    marginTop: verticalScale(2)
   },
   chartPill: {
     backgroundColor: "#F1F5F9",
-    borderRadius: 999,
-    paddingHorizontal: 12,
-    paddingVertical: 6
+    borderRadius: moderateScale(999),
+    paddingHorizontal: moderateScale(12),
+    paddingVertical: moderateScale(6)
   },
   chartPillText: {
     color: "#0F172A",
     fontWeight: "800",
-    fontSize: 14
+    fontSize: fontScale(14)
   },
   chartSummaryRow: {
     flexDirection: "row",
-    gap: 8,
-    paddingHorizontal: 16,
-    paddingBottom: 16
+    gap: moderateScale(8),
+    paddingHorizontal: moderateScale(16),
+    paddingBottom: verticalScale(16)
   },
   chartSummaryBox: {
     flex: 1,
     backgroundColor: "#F8FAFC",
-    borderRadius: 12,
-    padding: 10,
+    borderRadius: moderateScale(12),
+    padding: moderateScale(10),
     borderWidth: 1,
     borderColor: "#F1F5F9"
   },
   chartSummaryLabel: {
     color: "#64748B",
-    fontSize: 11,
+    fontSize: fontScale(11),
     fontWeight: "600"
   },
   chartSummaryValue: {
     color: "#0F172A",
-    fontSize: 15,
+    fontSize: fontScale(15),
     fontWeight: "800",
-    marginTop: 2
+    marginTop: verticalScale(2)
   },
   chartArea: {
-    height: 180,
+    height: moderateScale(180),
     backgroundColor: "#FAFAFA",
     borderTopWidth: 1,
     borderTopColor: "#E2E8F0"
@@ -729,8 +730,8 @@ const styles = StyleSheet.create({
   },
   chartSegment: {
     position: "absolute",
-    height: 4,
-    borderRadius: 2,
+    height: moderateScale(4),
+    borderRadius: moderateScale(2),
     backgroundColor: "#3B82F6",
     transformOrigin: "left center" as any // React native 0.73+ supports this
   },
@@ -739,9 +740,9 @@ const styles = StyleSheet.create({
     alignItems: "center"
   },
   chartPoint: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
+    width: moderateScale(12),
+    height: moderateScale(12),
+    borderRadius: moderateScale(6),
     backgroundColor: "white",
     borderWidth: 3,
     borderColor: "#2563EB",
@@ -749,42 +750,42 @@ const styles = StyleSheet.create({
   },
   chartPointTooltip: {
     position: "absolute",
-    top: -24,
+    top: verticalScale(-24),
     backgroundColor: "#0F172A",
-    borderRadius: 6,
-    paddingHorizontal: 6,
-    paddingVertical: 2
+    borderRadius: moderateScale(6),
+    paddingHorizontal: moderateScale(6),
+    paddingVertical: moderateScale(2)
   },
   chartPointText: {
     color: "white",
-    fontSize: 10,
+    fontSize: fontScale(10),
     fontWeight: "800"
   },
   chartXAxis: {
     position: "absolute",
     left: 0,
     right: 0,
-    bottom: 8,
+    bottom: verticalScale(8),
     flexDirection: "row",
     justifyContent: "space-around"
   },
   chartXLabel: {
     color: "#94A3B8",
-    fontSize: 10,
+    fontSize: fontScale(10),
     fontWeight: "600"
   },
   multiCardRow: {
     flexDirection: "row",
-    gap: 12
+    gap: moderateScale(12)
   },
   flexCard: {
     flex: 1
   },
   statusList: {
-    gap: 12
+    gap: moderateScale(12)
   },
   statusRow: {
-    gap: 6
+    gap: moderateScale(6)
   },
   statusRowTop: {
     flexDirection: "row",
@@ -793,103 +794,103 @@ const styles = StyleSheet.create({
   statusRowLabel: {
     color: "#475569",
     fontWeight: "600",
-    fontSize: 12
+    fontSize: fontScale(12)
   },
   statusRowValue: {
     color: "#0F172A",
     fontWeight: "800",
-    fontSize: 13
+    fontSize: fontScale(13)
   },
   statusBarTrack: {
-    height: 6,
+    height: moderateScale(6),
     backgroundColor: "#F1F5F9",
-    borderRadius: 3,
+    borderRadius: moderateScale(3),
     overflow: "hidden"
   },
   statusBarFill: {
-    height: 6,
-    borderRadius: 3
+    height: moderateScale(6),
+    borderRadius: moderateScale(3)
   },
   teamGrid: {
-    gap: 8
+    gap: moderateScale(8)
   },
   teamBox: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderRadius: 10
+    paddingHorizontal: moderateScale(12),
+    paddingVertical: moderateScale(10),
+    borderRadius: moderateScale(10)
   },
   teamBoxLabel: {
     fontWeight: "700",
-    fontSize: 13
+    fontSize: fontScale(13)
   },
   teamBoxValue: {
     fontWeight: "800",
-    fontSize: 16
+    fontSize: fontScale(16)
   },
   actionBtn: {
     backgroundColor: "#0F172A",
-    borderRadius: 10,
-    paddingVertical: 10,
+    borderRadius: moderateScale(10),
+    paddingVertical: moderateScale(10),
     alignItems: "center",
-    marginTop: 12
+    marginTop: verticalScale(12)
   },
   actionBtnText: {
     color: "white",
     fontWeight: "800",
-    fontSize: 13
+    fontSize: fontScale(13)
   },
   inventoryGrid: {
     flexDirection: "row",
-    gap: 8
+    gap: moderateScale(8)
   },
   inventoryBox: {
     flex: 1,
-    borderRadius: 12,
-    padding: 12,
+    borderRadius: moderateScale(12),
+    padding: moderateScale(12),
     alignItems: "center"
   },
   inventoryLabel: {
-    fontSize: 11,
+    fontSize: fontScale(11),
     fontWeight: "700"
   },
   inventoryValue: {
-    fontSize: 24,
+    fontSize: fontScale(24),
     fontWeight: "900",
-    marginTop: 4
+    marginTop: verticalScale(4)
   },
   inventoryList: {
-    marginTop: 12,
+    marginTop: verticalScale(12),
     backgroundColor: "#FFFBEB",
-    borderRadius: 10,
-    padding: 10,
-    gap: 6
+    borderRadius: moderateScale(10),
+    padding: moderateScale(10),
+    gap: moderateScale(6)
   },
   inventoryListItem: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6
+    gap: moderateScale(6)
   },
   inventoryListText: {
     color: "#92400E",
-    fontSize: 13,
+    fontSize: fontScale(13),
     fontWeight: "600"
   },
   orderList: {
-    gap: 12
+    gap: moderateScale(12)
   },
   orderCard: {
-    borderRadius: 16,
+    borderRadius: moderateScale(16),
     borderWidth: 1,
     borderColor: "#E2E8F0",
     backgroundColor: "white",
-    padding: 16,
-    gap: 10,
+    padding: moderateScale(16),
+    gap: moderateScale(10),
     shadowColor: "#0F172A",
     shadowOpacity: 0.02,
-    shadowRadius: 8,
+    shadowRadius: moderateScale(8),
     shadowOffset: { width: 0, height: 2 },
     elevation: 1
   },
@@ -900,36 +901,36 @@ const styles = StyleSheet.create({
   },
   orderNumber: {
     color: "#0F172A",
-    fontSize: 16,
+    fontSize: fontScale(16),
     fontWeight: "800"
   },
   orderStatusPill: {
     flexDirection: "row",
     alignItems: "center",
-    borderRadius: 999,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    gap: 4
+    borderRadius: moderateScale(999),
+    paddingHorizontal: moderateScale(8),
+    paddingVertical: moderateScale(4),
+    gap: moderateScale(4)
   },
   orderStatusDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3
+    width: moderateScale(6),
+    height: moderateScale(6),
+    borderRadius: moderateScale(3)
   },
   orderStatusText: {
     fontWeight: "800",
-    fontSize: 11,
+    fontSize: fontScale(11),
     textTransform: "uppercase"
   },
   orderDate: {
     color: "#64748B",
-    fontSize: 13,
+    fontSize: fontScale(13),
     fontWeight: "600"
   },
   orderDivider: {
     height: 1,
     backgroundColor: "#F1F5F9",
-    marginVertical: 2
+    marginVertical: moderateScale(2)
   },
   orderBottomRow: {
     flexDirection: "row",
@@ -938,17 +939,17 @@ const styles = StyleSheet.create({
   },
   orderMeta: {
     color: "#64748B",
-    fontSize: 13,
+    fontSize: fontScale(13),
     fontWeight: "600"
   },
   orderTotal: {
     color: "#0F172A",
-    fontSize: 16,
+    fontSize: fontScale(16),
     fontWeight: "800"
   },
   emptyText: {
     color: "#64748B",
     textAlign: "center",
-    padding: 16
+    padding: moderateScale(16)
   }
 });

@@ -5,6 +5,7 @@ import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View, Refres
 import { useAuth } from "../../../hooks/useAuth";
 import { useOrderSocket } from "../../../hooks/useOrderSocket";
 import { Order, orderService } from "../../../services/orderService";
+import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../../utils/responsive';
 
 type StatusFilter =
   | "ALL"
@@ -159,7 +160,7 @@ export default function Screen() {
               style={styles.searchInput}
             />
             {query ? (
-              <Pressable onPress={() => setQuery("")} style={{ padding: 4 }}>
+              <Pressable onPress={() => setQuery("")} style={{ padding: moderateScale(4) }}>
                 <Ionicons name="close-circle" size={18} color="#94A3B8" />
               </Pressable>
             ) : null}
@@ -195,9 +196,9 @@ export default function Screen() {
           {filteredOrders.length > 3 && (
             <Pressable 
               onPress={() => router.push("/(admin)/orders/all")} 
-              style={{ paddingHorizontal: 12, paddingVertical: 6, backgroundColor: "#E2E8F0", borderRadius: 8 }}
+              style={{ paddingHorizontal: moderateScale(12), paddingVertical: verticalScale(6), backgroundColor: "#E2E8F0", borderRadius: moderateScale(8) }}
             >
-              <Text style={{ fontSize: 13, fontWeight: "700", color: "#0F172A" }}>
+              <Text style={{ fontSize: fontScale(13), fontWeight: "700", color: "#0F172A" }}>
                 View All
               </Text>
             </Pressable>
@@ -278,9 +279,9 @@ const styles = StyleSheet.create({
     flex: 1
   },
   content: {
-    padding: 16,
-    gap: 20,
-    paddingBottom: 40
+    padding: moderateScale(16),
+    gap: moderateScale(20),
+    paddingBottom: verticalScale(40)
   },
   headerRow: {
     flexDirection: "row",
@@ -288,73 +289,73 @@ const styles = StyleSheet.create({
     alignItems: "center"
   },
   pageTitle: {
-    fontSize: 24,
+    fontSize: fontScale(24),
     fontWeight: "900",
     color: "#0F172A"
   },
   lastUpdatedText: {
     color: "#64748B",
-    fontSize: 13,
+    fontSize: fontScale(13),
     fontWeight: "500",
-    marginTop: 2
+    marginTop: verticalScale(2)
   },
   statsGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 12
+    gap: moderateScale(12)
   },
   statCard: {
     width: "48%",
     backgroundColor: "white",
-    borderRadius: 16,
-    padding: 14,
+    borderRadius: moderateScale(16),
+    padding: moderateScale(14),
     shadowColor: "#000",
     shadowOpacity: 0.04,
-    shadowRadius: 10,
+    shadowRadius: moderateScale(10),
     shadowOffset: { width: 0, height: 4 },
     elevation: 2
   },
   statLabel: {
     color: "#64748B",
     fontWeight: "700",
-    fontSize: 12
+    fontSize: fontScale(12)
   },
   statValue: {
     fontWeight: "900",
-    fontSize: 24,
-    marginTop: 6
+    fontSize: fontScale(24),
+    marginTop: verticalScale(6)
   },
   filterSection: {
-    gap: 12
+    gap: moderateScale(12)
   },
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "white",
-    borderRadius: 16,
-    paddingHorizontal: 14,
-    height: 50,
+    borderRadius: moderateScale(16),
+    paddingHorizontal: moderateScale(14),
+    height: moderateScale(50),
     shadowColor: "#000",
     shadowOpacity: 0.03,
-    shadowRadius: 8,
+    shadowRadius: moderateScale(8),
     shadowOffset: { width: 0, height: 2 },
     elevation: 1
   },
   searchInput: {
     flex: 1,
     height: "100%",
-    marginLeft: 10,
-    fontSize: 15,
+    marginLeft: moderateScale(10),
+    fontSize: fontScale(15),
     fontWeight: "500",
     color: "#0F172A"
   },
   filterScroll: {
-    gap: 8
+    gap: moderateScale(8)
   },
   filterChip: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 999,
+    paddingHorizontal: moderateScale(16),
+    paddingVertical: moderateScale(10),
+    borderRadius: moderateScale(999),
     borderWidth: 1,
     justifyContent: "center",
     alignItems: "center"
@@ -369,7 +370,7 @@ const styles = StyleSheet.create({
   },
   filterChipText: {
     fontWeight: "800",
-    fontSize: 13
+    fontSize: fontScale(13)
   },
   filterChipTextActive: {
     color: "white"
@@ -381,25 +382,25 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginTop: 4
+    marginTop: verticalScale(4)
   },
   listTitle: {
-    fontSize: 18,
+    fontSize: fontScale(18),
     fontWeight: "900",
     color: "#0F172A"
   },
   listSubtitle: {
     color: "#64748B",
     fontWeight: "700",
-    fontSize: 13
+    fontSize: fontScale(13)
   },
   emptyCard: {
     backgroundColor: "white",
-    borderRadius: 20,
-    padding: 30,
+    borderRadius: moderateScale(20),
+    padding: moderateScale(30),
     alignItems: "center",
     justifyContent: "center",
-    gap: 12,
+    gap: moderateScale(12),
     borderWidth: 1,
     borderColor: "#E2E8F0",
     borderStyle: "dashed"
@@ -407,19 +408,19 @@ const styles = StyleSheet.create({
   emptyText: {
     color: "#64748B",
     fontWeight: "600",
-    fontSize: 15
+    fontSize: fontScale(15)
   },
   orderList: {
-    gap: 12
+    gap: moderateScale(12)
   },
   orderCard: {
     backgroundColor: "white",
-    borderRadius: 20,
-    padding: 16,
-    gap: 12,
+    borderRadius: moderateScale(20),
+    padding: moderateScale(16),
+    gap: moderateScale(12),
     shadowColor: "#000",
     shadowOpacity: 0.04,
-    shadowRadius: 10,
+    shadowRadius: moderateScale(10),
     shadowOffset: { width: 0, height: 4 },
     elevation: 2
   },
@@ -429,57 +430,57 @@ const styles = StyleSheet.create({
     alignItems: "flex-start"
   },
   orderNumber: {
-    fontSize: 18,
+    fontSize: fontScale(18),
     fontWeight: "900",
     color: "#0F172A"
   },
   orderDate: {
     color: "#64748B",
-    fontSize: 12,
+    fontSize: fontScale(12),
     fontWeight: "500",
-    marginTop: 2
+    marginTop: verticalScale(2)
   },
   statusPill: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 999
+    paddingHorizontal: moderateScale(12),
+    paddingVertical: moderateScale(6),
+    borderRadius: moderateScale(999)
   },
   statusText: {
     fontWeight: "800",
-    fontSize: 11,
+    fontSize: fontScale(11),
     letterSpacing: 0.5
   },
   laneTagsRow: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 6,
-    marginTop: 2
+    gap: moderateScale(6),
+    marginTop: verticalScale(2)
   },
   tagPill: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6
+    paddingHorizontal: moderateScale(8),
+    paddingVertical: moderateScale(4),
+    borderRadius: moderateScale(6)
   },
   tagText: {
-    fontSize: 11,
+    fontSize: fontScale(11),
     fontWeight: "800"
   },
   orderCardBottom: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingTop: 12,
+    paddingTop: verticalScale(12),
     borderTopWidth: 1,
     borderColor: "#F1F5F9"
   },
   orderItemsText: {
     color: "#475569",
     fontWeight: "600",
-    fontSize: 13
+    fontSize: fontScale(13)
   },
   orderTotalText: {
     color: "#0F172A",
     fontWeight: "900",
-    fontSize: 18
+    fontSize: fontScale(18)
   }
 });

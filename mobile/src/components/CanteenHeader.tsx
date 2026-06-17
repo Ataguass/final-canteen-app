@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useAuth } from '../hooks/useAuth';
 import { useCart } from '../hooks/useCart';
+import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../utils/responsive';
 
 type CanteenHeaderProps = {
   showBackButton?: boolean;
@@ -75,42 +76,42 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: verticalScale(8),
   },
   headerLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: moderateScale(8),
   },
   backButton: {
-    padding: 4,
-    marginRight: 4,
+    padding: moderateScale(4),
+    marginRight: moderateScale(4),
   },
   locationTitle: {
-    fontSize: 18,
+    fontSize: fontScale(18),
     fontWeight: '800',
     color: '#0F172A',
     flexDirection: 'row',
     alignItems: 'center',
   },
   locationSubtitle: {
-    fontSize: 13,
+    fontSize: fontScale(13),
     color: '#64748B',
     fontWeight: '500',
   },
   headerRight: {
     flexDirection: 'row',
-    gap: 12,
+    gap: moderateScale(12),
     alignItems: 'center',
   },
   iconButton: {
-    padding: 4,
+    padding: moderateScale(4),
     position: 'relative',
   },
   avatarCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: moderateScale(36),
+    height: moderateScale(36),
+    borderRadius: moderateScale(18),
     backgroundColor: '#DBEAFE',
     alignItems: 'center',
     justifyContent: 'center',
@@ -118,16 +119,16 @@ const styles = StyleSheet.create({
   avatarText: {
     color: '#1D4ED8',
     fontWeight: '700',
-    fontSize: 16,
+    fontSize: fontScale(16),
   },
   cartBadge: {
     position: 'absolute',
     top: 0,
     right: 0,
     backgroundColor: '#EF4444',
-    width: 18,
-    height: 18,
-    borderRadius: 9,
+    width: moderateScale(18),
+    height: moderateScale(18),
+    borderRadius: moderateScale(9),
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
@@ -135,7 +136,7 @@ const styles = StyleSheet.create({
   },
   cartBadgeText: {
     color: 'white',
-    fontSize: 10,
+    fontSize: fontScale(10),
     fontWeight: '800',
   },
 });

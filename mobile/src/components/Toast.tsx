@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useRef, ReactNode, useCallb
 import { Animated, StyleSheet, Text, View, Platform, Dimensions } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../utils/responsive';
 
 export type ToastType = "success" | "error" | "info";
 
@@ -107,24 +108,24 @@ export const ToastProvider = ({ children }: { children: ReactNode }) => {
 const styles = StyleSheet.create({
   toastContainer: {
     position: "absolute",
-    left: 20,
-    right: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    borderRadius: 16,
+    left: moderateScale(20),
+    right: moderateScale(20),
+    paddingHorizontal: moderateScale(16),
+    paddingVertical: moderateScale(14),
+    borderRadius: moderateScale(16),
     flexDirection: "row",
     alignItems: "center",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.15,
-    shadowRadius: 12,
+    shadowRadius: moderateScale(12),
     elevation: 6,
     borderWidth: 1,
     zIndex: 9999,
   },
   message: {
-    marginLeft: 10,
-    fontSize: 15,
+    marginLeft: moderateScale(10),
+    fontSize: fontScale(15),
     fontWeight: "700",
     flex: 1,
   },

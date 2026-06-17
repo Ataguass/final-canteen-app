@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Alert, Pressable, Text, TextInput, View, StyleSheet, KeyboardAvoidingView, Platform, SafeAreaView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
+import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../utils/responsive';
 
 const BRAND_COLOR = "#080d2b";
 
@@ -89,49 +90,49 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     justifyContent: 'center',
-    paddingHorizontal: 24,
+    paddingHorizontal: moderateScale(24),
   },
   header: {
     alignItems: 'center',
-    marginBottom: 40,
+    marginBottom: verticalScale(40),
     position: 'relative',
   },
   backButton: {
     position: 'absolute',
     left: 0,
     top: 0,
-    padding: 8,
+    padding: moderateScale(8),
   },
   iconContainer: {
-    width: 64,
-    height: 64,
+    width: moderateScale(64),
+    height: moderateScale(64),
     backgroundColor: BRAND_COLOR,
-    borderRadius: 20,
+    borderRadius: moderateScale(20),
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 20,
+    marginBottom: verticalScale(20),
     elevation: 8,
     shadowColor: BRAND_COLOR,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.3,
-    shadowRadius: 16,
+    shadowRadius: moderateScale(16),
   },
   title: {
-    fontSize: 28,
+    fontSize: fontScale(28),
     fontWeight: '800',
     color: '#1c1c1e',
-    marginBottom: 8,
+    marginBottom: verticalScale(8),
     letterSpacing: -0.5,
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: fontScale(16),
     color: '#8e8e93',
     textAlign: 'center',
     lineHeight: 24,
-    paddingHorizontal: 20,
+    paddingHorizontal: moderateScale(20),
   },
   form: {
-    gap: 16,
+    gap: moderateScale(16),
   },
   inputContainer: {
     flexDirection: 'row',
@@ -139,35 +140,35 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
     borderWidth: 1,
     borderColor: '#e5e5ea',
-    borderRadius: 16,
-    paddingHorizontal: 16,
-    height: 56,
+    borderRadius: moderateScale(16),
+    paddingHorizontal: moderateScale(16),
+    height: moderateScale(56),
   },
   inputIcon: {
-    marginRight: 12,
+    marginRight: moderateScale(12),
   },
   input: {
     flex: 1,
-    fontSize: 16,
+    fontSize: fontScale(16),
     color: '#1c1c1e',
     height: '100%',
   },
   primaryButton: {
     backgroundColor: BRAND_COLOR,
-    height: 56,
-    borderRadius: 16,
+    height: moderateScale(56),
+    borderRadius: moderateScale(16),
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 8,
+    marginTop: verticalScale(8),
     elevation: 8,
     shadowColor: BRAND_COLOR,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.3,
-    shadowRadius: 16,
+    shadowRadius: moderateScale(16),
   },
   primaryButtonText: {
     color: '#ffffff',
-    fontSize: 16,
+    fontSize: fontScale(16),
     fontWeight: '700',
   }
 });

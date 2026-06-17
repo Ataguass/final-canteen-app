@@ -19,6 +19,7 @@ import { useAuth } from "../../hooks/useAuth";
 import { useCart } from "../../hooks/useCart";
 import { useToast } from "../../components/Toast";
 import { menuService } from "../../services/menuService";
+import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../utils/responsive';
 
 type SpeechRecognitionModule = {
   requestPermissionsAsync: () => Promise<{ granted?: boolean }>;
@@ -436,46 +437,46 @@ const styles = StyleSheet.create({
     backgroundColor: "#F8FAFC"
   },
   content: {
-    padding: 16,
-    gap: 14,
-    paddingBottom: 28
+    padding: moderateScale(16),
+    gap: moderateScale(14),
+    paddingBottom: verticalScale(28)
   },
   searchBarCard: {
     borderWidth: 1,
     borderColor: "#E2E8F0",
     backgroundColor: "#FFFFFF",
-    borderRadius: 24,
-    minHeight: 56,
-    paddingHorizontal: 12,
+    borderRadius: moderateScale(24),
+    minHeight: moderateScale(56),
+    paddingHorizontal: moderateScale(12),
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
+    gap: moderateScale(8),
     shadowColor: "#0F172A",
     shadowOpacity: 0.04,
-    shadowRadius: 8,
+    shadowRadius: moderateScale(8),
     shadowOffset: { width: 0, height: 3 },
     elevation: 1
   },
   iconButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 10,
+    width: moderateScale(32),
+    height: moderateScale(32),
+    borderRadius: moderateScale(10),
     alignItems: "center",
     justifyContent: "center"
   },
   searchInput: {
     flex: 1,
     color: "#0F172A",
-    fontSize: 18,
+    fontSize: fontScale(18),
     fontWeight: "700",
-    paddingVertical: 10
+    paddingVertical: moderateScale(10)
   },
   discoverySection: {
-    gap: 12
+    gap: moderateScale(12)
   },
   discoveryTitle: {
     color: "#64748B",
-    fontSize: 14,
+    fontSize: fontScale(14),
     fontWeight: "800",
     letterSpacing: 1,
     textTransform: "uppercase"
@@ -488,14 +489,14 @@ const styles = StyleSheet.create({
   },
   discoveryItem: {
     width: "31.5%",
-    marginBottom: 14,
+    marginBottom: verticalScale(14),
     alignItems: "center",
-    gap: 6
+    gap: moderateScale(6)
   },
   discoveryImageWrap: {
     width: "100%",
     aspectRatio: 1,
-    borderRadius: 999,
+    borderRadius: moderateScale(999),
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
     borderColor: "#E2E8F0",
@@ -514,41 +515,41 @@ const styles = StyleSheet.create({
   discoveryName: {
     color: "#1F2937",
     fontWeight: "700",
-    fontSize: 14,
+    fontSize: fontScale(14),
     textAlign: "center"
   },
   suggestionCard: {
-    borderRadius: 14,
+    borderRadius: moderateScale(14),
     borderWidth: 1,
     borderColor: "#E2E8F0",
     backgroundColor: "#FFFFFF",
-    padding: 11,
-    gap: 8
+    padding: moderateScale(11),
+    gap: moderateScale(8)
   },
   suggestionTitle: {
     color: "#0F172A",
     fontWeight: "800"
   },
   suggestionChipRow: {
-    gap: 8,
-    paddingRight: 8
+    gap: moderateScale(8),
+    paddingRight: moderateScale(8)
   },
   suggestionChip: {
-    borderRadius: 999,
+    borderRadius: moderateScale(999),
     borderWidth: 1,
     borderColor: "#CBD5E1",
     backgroundColor: "#F8FAFC",
-    paddingVertical: 7,
-    paddingHorizontal: 11,
+    paddingVertical: moderateScale(7),
+    paddingHorizontal: moderateScale(11),
     flexDirection: "row",
     alignItems: "center",
-    gap: 5,
-    maxWidth: 170
+    gap: moderateScale(5),
+    maxWidth: moderateScale(170)
   },
   suggestionChipText: {
     color: "#334155",
     fontWeight: "700",
-    fontSize: 12
+    fontSize: fontScale(12)
   },
   noSuggestionText: {
     color: "#94A3B8",
@@ -561,7 +562,7 @@ const styles = StyleSheet.create({
   },
   resultTitle: {
     color: "#0F172A",
-    fontSize: 21,
+    fontSize: fontScale(21),
     fontWeight: "800"
   },
   resultMeta: {
@@ -577,39 +578,39 @@ const styles = StyleSheet.create({
   itemCard: {
     borderWidth: 1,
     borderColor: "#E2E8F0",
-    borderRadius: 14,
-    padding: 10,
+    borderRadius: moderateScale(14),
+    padding: moderateScale(10),
     backgroundColor: "#FFFFFF",
-    marginBottom: 10
+    marginBottom: verticalScale(10)
   },
   itemTapArea: {
-    gap: 6
+    gap: moderateScale(6)
   },
   itemImage: {
     width: "100%",
-    borderRadius: 10,
+    borderRadius: moderateScale(10),
     backgroundColor: "#E2E8F0"
   },
   itemImageFallback: {
     width: "100%",
-    borderRadius: 10,
+    borderRadius: moderateScale(10),
     backgroundColor: "#F1F5F9",
     alignItems: "center",
     justifyContent: "center"
   },
   itemBody: {
-    gap: 6
+    gap: moderateScale(6)
   },
   itemNameRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    gap: 8
+    gap: moderateScale(8)
   },
   itemName: {
     color: "#0F172A",
     fontWeight: "800",
-    fontSize: 16,
+    fontSize: fontScale(16),
     flex: 1
   },
   itemPrice: {
@@ -618,30 +619,30 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFF7ED",
     borderWidth: 1,
     borderColor: "#FED7AA",
-    borderRadius: 999,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    fontSize: 12
+    borderRadius: moderateScale(999),
+    paddingHorizontal: moderateScale(8),
+    paddingVertical: moderateScale(3),
+    fontSize: fontScale(12)
   },
   categoryPill: {
     alignSelf: "flex-start",
-    borderRadius: 999,
+    borderRadius: moderateScale(999),
     backgroundColor: "#EEF2FF",
-    paddingHorizontal: 8,
-    paddingVertical: 3
+    paddingHorizontal: moderateScale(8),
+    paddingVertical: moderateScale(3)
   },
   categoryPillText: {
     color: "#3730A3",
     fontWeight: "700",
-    fontSize: 12
+    fontSize: fontScale(12)
   },
   itemDescription: {
     color: "#475569",
-    fontSize: 12
+    fontSize: fontScale(12)
   },
   itemDescriptionMuted: {
     color: "#94A3B8",
-    fontSize: 12,
+    fontSize: fontScale(12),
     fontWeight: "600"
   },
   itemStock: {
@@ -654,10 +655,10 @@ const styles = StyleSheet.create({
     color: "#B91C1C"
   },
   addBtn: {
-    marginTop: 8,
-    borderRadius: 10,
+    marginTop: verticalScale(8),
+    borderRadius: moderateScale(10),
     backgroundColor: "#FF6B35",
-    paddingVertical: 10
+    paddingVertical: moderateScale(10)
   },
   addBtnDisabled: {
     backgroundColor: "#9CA3AF"
@@ -668,14 +669,14 @@ const styles = StyleSheet.create({
     fontWeight: "800"
   },
   emptyCard: {
-    borderRadius: 12,
+    borderRadius: moderateScale(12),
     borderWidth: 1,
     borderColor: "#CBD5E1",
     backgroundColor: "#F8FAFC",
-    padding: 14,
+    padding: moderateScale(14),
     flexDirection: "row",
     alignItems: "center",
-    gap: 8
+    gap: moderateScale(8)
   },
   emptyText: {
     color: "#64748B",

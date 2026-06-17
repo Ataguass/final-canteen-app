@@ -5,6 +5,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Animated, { FadeIn, FadeInDown, SlideInDown, withRepeat, withTiming, withSequence, useSharedValue, Easing } from "react-native-reanimated";
 import { useContext, useEffect } from "react";
 import { OnboardingContext } from "../_layout";
+import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../utils/responsive';
 
 const { width } = Dimensions.get('window');
 
@@ -66,19 +67,19 @@ export default function WelcomeScreen() {
 
           <Animated.View style={[styles.floatingBadge, styles.badgeTopRight, { transform: [{ translateY: floatY2 }] }]}>
             <View style={[styles.iconBox, { backgroundColor: '#e2722b' }]}>
-              <Text style={{ fontSize: 32 }}>🥗</Text>
+              <Text style={{ fontSize: fontScale(32) }}>🥗</Text>
             </View>
           </Animated.View>
 
           <Animated.View style={[styles.floatingBadge, styles.badgeBottomLeft, { transform: [{ translateY: floatY3 }] }]}>
             <View style={[styles.iconBox, { backgroundColor: '#9e1c2e' }]}>
-              <Text style={{ fontSize: 32 }}>🍕</Text>
+              <Text style={{ fontSize: fontScale(32) }}>🍕</Text>
             </View>
           </Animated.View>
 
           <Animated.View style={[styles.floatingBadge, styles.badgeBottomRight, { transform: [{ translateY: floatY1 }] }]}>
             <View style={[styles.iconBox, { backgroundColor: '#1b1b1b' }]}>
-              <Text style={{ fontSize: 32 }}>🍔</Text>
+              <Text style={{ fontSize: fontScale(32) }}>🍔</Text>
             </View>
           </Animated.View>
         </Animated.View>
@@ -119,23 +120,23 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 24,
-    height: 60,
+    paddingHorizontal: moderateScale(24),
+    height: moderateScale(60),
     zIndex: 20,
   },
   headerLeft: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: moderateScale(8),
   },
   headerTitle: {
-    fontSize: 18,
+    fontSize: fontScale(18),
     fontWeight: '800',
     color: BRAND_COLOR,
     letterSpacing: -0.5,
   },
   skipText: {
-    fontSize: 16,
+    fontSize: fontScale(16),
     fontWeight: '600',
     color: '#8e8e93',
   },
@@ -143,9 +144,9 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 24,
-    paddingTop: 10,
-    paddingBottom: 100,
+    paddingHorizontal: moderateScale(24),
+    paddingTop: verticalScale(10),
+    paddingBottom: verticalScale(100),
     zIndex: 10,
   },
   illustrationContainer: {
@@ -154,7 +155,7 @@ const styles = StyleSheet.create({
     height: width * 0.8,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 40,
+    marginBottom: verticalScale(40),
   },
   centerCircle: {
     width: width * 0.55,
@@ -173,19 +174,19 @@ const styles = StyleSheet.create({
   },
   floatingBadge: {
     position: 'absolute',
-    padding: 6,
+    padding: moderateScale(6),
     backgroundColor: '#ffffff',
-    borderRadius: 32,
+    borderRadius: moderateScale(32),
     elevation: 8,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.15,
-    shadowRadius: 16,
+    shadowRadius: moderateScale(16),
   },
   iconBox: {
-    width: 64,
-    height: 64,
-    borderRadius: 26,
+    width: moderateScale(64),
+    height: moderateScale(64),
+    borderRadius: moderateScale(26),
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
@@ -211,12 +212,12 @@ const styles = StyleSheet.create({
   },
   textContent: {
     alignItems: 'center',
-    paddingHorizontal: 8,
-    gap: 16,
+    paddingHorizontal: moderateScale(8),
+    gap: moderateScale(16),
     width: '100%',
   },
   title: {
-    fontSize: 34,
+    fontSize: fontScale(34),
     fontWeight: '800',
     color: '#1c1c1e',
     textAlign: 'center',
@@ -224,40 +225,40 @@ const styles = StyleSheet.create({
     letterSpacing: -1,
   },
   subtitle: {
-    fontSize: 17,
+    fontSize: fontScale(17),
     color: '#6e6e73',
     textAlign: 'center',
     lineHeight: 26,
-    maxWidth: 320,
-    marginTop: 4,
+    maxWidth: moderateScale(320),
+    marginTop: verticalScale(4),
   },
   progressIndicators: {
     flexDirection: 'row',
-    gap: 10,
-    marginTop: 40,
+    gap: moderateScale(10),
+    marginTop: verticalScale(40),
   },
   dot: {
-    height: 8,
-    width: 8,
-    borderRadius: 4,
+    height: moderateScale(8),
+    width: moderateScale(8),
+    borderRadius: moderateScale(4),
     backgroundColor: '#d1d1d6',
   },
   activeDot: {
-    width: 24,
+    width: moderateScale(24),
     backgroundColor: BRAND_COLOR,
   },
   footer: {
     position: 'absolute',
     bottom: Platform.OS === 'ios' ? 40 : 24,
-    left: 24,
-    right: 24,
+    left: moderateScale(24),
+    right: moderateScale(24),
     zIndex: 20,
   },
   nextButton: {
     width: '100%',
-    height: 56,
+    height: moderateScale(56),
     backgroundColor: BRAND_COLOR,
-    borderRadius: 16,
+    borderRadius: moderateScale(16),
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -265,12 +266,12 @@ const styles = StyleSheet.create({
     shadowColor: BRAND_COLOR,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.3,
-    shadowRadius: 16,
-    gap: 8,
+    shadowRadius: moderateScale(16),
+    gap: moderateScale(8),
   },
   nextButtonText: {
     color: '#ffffff',
-    fontSize: 18,
+    fontSize: fontScale(18),
     fontWeight: '700',
   },
 });

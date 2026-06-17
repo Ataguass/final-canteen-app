@@ -5,6 +5,7 @@ import * as ImageManipulator from "expo-image-manipulator";
 import * as ImagePicker from "expo-image-picker";
 import { useAuth } from "../../../hooks/useAuth";
 import { tenantService, type InvoiceSettings } from "../../../services/tenantService";
+import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../../utils/responsive';
 
 type ToggleField =
   | "invoiceShowLogo"
@@ -241,57 +242,57 @@ export default function Screen() {
         <View style={styles.sectionCard}>
           <Text style={styles.sectionTitle}>Branding</Text>
 
-          <View style={{ alignItems: "center", paddingVertical: 8 }}>
+          <View style={{ alignItems: "center", paddingVertical: verticalScale(8) }}>
             {logoUrl ? (
               <View style={{ position: "relative" }}>
-                <View style={{ width: 100, height: 100, borderRadius: 20, backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#E2E8F0", overflow: "hidden", alignItems: "center", justifyContent: "center" }}>
-                  <Image source={{ uri: logoUrl }} resizeMode="contain" style={{ width: 90, height: 90 }} />
+                <View style={{ width: moderateScale(100), height: moderateScale(100), borderRadius: moderateScale(20), backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#E2E8F0", overflow: "hidden", alignItems: "center", justifyContent: "center" }}>
+                  <Image source={{ uri: logoUrl }} resizeMode="contain" style={{ width: moderateScale(90), height: moderateScale(90) }} />
                 </View>
                 <Pressable
                   onPress={removeLogo}
                   disabled={uploadingLogo}
-                  style={{ position: "absolute", bottom: -6, right: -6, backgroundColor: "#EF4444", borderRadius: 14, width: 28, height: 28, alignItems: "center", justifyContent: "center", borderWidth: 2, borderColor: "white" }}
+                  style={{ position: "absolute", bottom: -6, right: -6, backgroundColor: "#EF4444", borderRadius: moderateScale(14), width: moderateScale(28), height: moderateScale(28), alignItems: "center", justifyContent: "center", borderWidth: 2, borderColor: "white" }}
                 >
                   <Ionicons name="trash" size={14} color="white" />
                 </Pressable>
               </View>
             ) : (
-              <View style={{ width: 100, height: 100, borderRadius: 20, backgroundColor: "#F8FAFC", borderWidth: 1, borderColor: "#E2E8F0", borderStyle: "dashed", alignItems: "center", justifyContent: "center" }}>
+              <View style={{ width: moderateScale(100), height: moderateScale(100), borderRadius: moderateScale(20), backgroundColor: "#F8FAFC", borderWidth: 1, borderColor: "#E2E8F0", borderStyle: "dashed", alignItems: "center", justifyContent: "center" }}>
                 <Ionicons name="image-outline" size={32} color="#94A3B8" />
               </View>
             )}
 
-            <View style={{ flexDirection: "row", gap: 8, marginTop: 16 }}>
+            <View style={{ flexDirection: "row", gap: moderateScale(8), marginTop: verticalScale(16) }}>
               <Pressable
                 onPress={() => pickAndUploadLogo("fit")}
                 disabled={uploadingLogo}
-                style={{ backgroundColor: "#F1F5F9", paddingHorizontal: 16, paddingVertical: 8, borderRadius: 999, borderWidth: 1, borderColor: "#E2E8F0" }}
+                style={{ backgroundColor: "#F1F5F9", paddingHorizontal: moderateScale(16), paddingVertical: verticalScale(8), borderRadius: moderateScale(999), borderWidth: 1, borderColor: "#E2E8F0" }}
               >
-                <Text style={{ color: "#0F172A", fontWeight: "700", fontSize: 13 }}>{uploadingLogo ? "..." : "Upload Fit"}</Text>
+                <Text style={{ color: "#0F172A", fontWeight: "700", fontSize: fontScale(13) }}>{uploadingLogo ? "..." : "Upload Fit"}</Text>
               </Pressable>
               <Pressable
                 onPress={() => pickAndUploadLogo("square")}
                 disabled={uploadingLogo}
-                style={{ backgroundColor: "#F1F5F9", paddingHorizontal: 16, paddingVertical: 8, borderRadius: 999, borderWidth: 1, borderColor: "#E2E8F0" }}
+                style={{ backgroundColor: "#F1F5F9", paddingHorizontal: moderateScale(16), paddingVertical: verticalScale(8), borderRadius: moderateScale(999), borderWidth: 1, borderColor: "#E2E8F0" }}
               >
-                <Text style={{ color: "#0F172A", fontWeight: "700", fontSize: 13 }}>{uploadingLogo ? "..." : "Upload Square"}</Text>
+                <Text style={{ color: "#0F172A", fontWeight: "700", fontSize: fontScale(13) }}>{uploadingLogo ? "..." : "Upload Square"}</Text>
               </Pressable>
             </View>
             
-            <Text style={{ color: "#64748B", fontSize: 11, marginTop: 12, textAlign: "center", fontWeight: "500" }}>
+            <Text style={{ color: "#64748B", fontSize: fontScale(11), marginTop: verticalScale(12), textAlign: "center", fontWeight: "500" }}>
               Recommended: 500x500 px. Max size 1MB.
             </Text>
           </View>
 
-          <View style={{ marginTop: 4 }}>
-            <Text style={{ color: "#64748B", fontSize: 11, fontWeight: "700", textTransform: "uppercase", marginBottom: 6, marginLeft: 2 }}>Or enter logo URL</Text>
+          <View style={{ marginTop: verticalScale(4) }}>
+            <Text style={{ color: "#64748B", fontSize: fontScale(11), fontWeight: "700", textTransform: "uppercase", marginBottom: verticalScale(6), marginLeft: moderateScale(2) }}>Or enter logo URL</Text>
             <TextInput
               value={logoUrl}
               onChangeText={setLogoUrl}
               placeholder="https://your-domain.com/logo.png"
               autoCapitalize="none"
               autoCorrect={false}
-              style={{ backgroundColor: "#F8FAFC", borderWidth: 1, borderColor: "#E2E8F0", borderRadius: 12, padding: 10, fontSize: 13, color: "#0F172A", fontWeight: "500" }}
+              style={{ backgroundColor: "#F8FAFC", borderWidth: 1, borderColor: "#E2E8F0", borderRadius: moderateScale(12), padding: moderateScale(10), fontSize: fontScale(13), color: "#0F172A", fontWeight: "500" }}
             />
           </View>
         </View>
@@ -354,15 +355,15 @@ const styles = StyleSheet.create({
     flex: 1
   },
   content: {
-    padding: 16,
-    gap: 12,
-    paddingBottom: 26
+    padding: moderateScale(16),
+    gap: moderateScale(12),
+    paddingBottom: verticalScale(26)
   },
   centerScreen: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    gap: 8,
+    gap: moderateScale(8),
     backgroundColor: "#EEF2F7"
   },
   centerTitle: {
@@ -371,56 +372,56 @@ const styles = StyleSheet.create({
   },
   heroCard: {
     backgroundColor: "#F8FAFC",
-    borderRadius: 18,
+    borderRadius: moderateScale(18),
     borderWidth: 1,
     borderColor: "#E2E8F0",
-    padding: 14,
+    padding: moderateScale(14),
     flexDirection: "row",
     alignItems: "center",
-    gap: 12,
+    gap: moderateScale(12),
     shadowColor: "#0F172A",
     shadowOpacity: 0.06,
-    shadowRadius: 10,
+    shadowRadius: moderateScale(10),
     shadowOffset: { width: 0, height: 4 },
     elevation: 2
   },
   heroIconWrap: {
-    width: 42,
-    height: 42,
-    borderRadius: 12,
+    width: moderateScale(42),
+    height: moderateScale(42),
+    borderRadius: moderateScale(12),
     backgroundColor: "#DBEAFE",
     alignItems: "center",
     justifyContent: "center"
   },
   heroTextWrap: {
     flex: 1,
-    gap: 2
+    gap: moderateScale(2)
   },
   heroTitle: {
-    fontSize: 22,
+    fontSize: fontScale(22),
     fontWeight: "800",
     color: "#0F172A"
   },
   heroSubtitle: {
     color: "#64748B",
-    fontSize: 13,
+    fontSize: fontScale(13),
     fontWeight: "500"
   },
   sectionCard: {
     backgroundColor: "white",
     borderWidth: 1,
     borderColor: "#E2E8F0",
-    borderRadius: 16,
-    padding: 16,
-    gap: 12,
+    borderRadius: moderateScale(16),
+    padding: moderateScale(16),
+    gap: moderateScale(12),
     shadowColor: "#0F172A",
     shadowOpacity: 0.04,
-    shadowRadius: 8,
+    shadowRadius: moderateScale(8),
     shadowOffset: { width: 0, height: 3 },
     elevation: 2
   },
   sectionTitle: {
-    fontSize: 19,
+    fontSize: fontScale(19),
     fontWeight: "800",
     color: "#0F172A"
   },
@@ -435,12 +436,12 @@ const styles = StyleSheet.create({
   input: {
     borderWidth: 1,
     borderColor: "#CBD5E1",
-    borderRadius: 12,
-    padding: 11,
+    borderRadius: moderateScale(12),
+    padding: moderateScale(11),
     backgroundColor: "#FFFFFF"
   },
   multilineInput: {
-    minHeight: 84,
+    minHeight: moderateScale(84),
     textAlignVertical: "top"
   },
   buttonText: {
@@ -452,29 +453,29 @@ const styles = StyleSheet.create({
     opacity: 0.6
   },
   toggleListContainer: {
-    marginTop: 4,
+    marginTop: verticalScale(4),
     borderWidth: 1,
     borderColor: "#E2E8F0",
-    borderRadius: 16,
+    borderRadius: moderateScale(16),
     backgroundColor: "#F8FAFC",
     overflow: "hidden"
   },
   toggleRow: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 14,
-    paddingHorizontal: 14,
+    paddingVertical: moderateScale(14),
+    paddingHorizontal: moderateScale(14),
     borderBottomWidth: 1,
     borderBottomColor: "#E2E8F0",
-    gap: 12
+    gap: moderateScale(12)
   },
   toggleRowLast: {
     borderBottomWidth: 0
   },
   toggleIconWrap: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
+    width: moderateScale(38),
+    height: moderateScale(38),
+    borderRadius: moderateScale(12),
     backgroundColor: "white",
     alignItems: "center",
     justifyContent: "center",
@@ -484,12 +485,12 @@ const styles = StyleSheet.create({
   toggleTextWrap: {
     flex: 1,
     justifyContent: "center",
-    gap: 2
+    gap: moderateScale(2)
   },
   toggleTitle: {
     color: "#0F172A",
     fontWeight: "800",
-    fontSize: 15
+    fontSize: fontScale(15)
   },
   toggleTitleDisabled: {
     color: "#64748B",
@@ -497,18 +498,18 @@ const styles = StyleSheet.create({
   },
   toggleHint: {
     color: "#64748B",
-    fontSize: 12,
+    fontSize: fontScale(12),
     fontWeight: "500"
   },
   saveButton: {
-    marginTop: 2,
+    marginTop: verticalScale(2),
     backgroundColor: "#0F172A",
-    borderRadius: 12,
-    padding: 13,
+    borderRadius: moderateScale(12),
+    padding: moderateScale(13),
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 8
+    gap: moderateScale(8)
   },
   saveButtonText: {
     color: "white",

@@ -10,6 +10,7 @@ import {
   View
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../utils/responsive';
 
 export default function SettingsScreen() {
   const router = useRouter();
@@ -24,7 +25,7 @@ export default function SettingsScreen() {
           <Ionicons name="chevron-back" size={24} color="#0F172A" />
         </Pressable>
         <Text style={styles.topNavTitle}>Settings</Text>
-        <View style={{ width: 40 }} />
+        <View style={{ width: moderateScale(40) }} />
       </View>
 
       <ScrollView
@@ -94,51 +95,51 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingBottom: 10
+    paddingHorizontal: moderateScale(16),
+    paddingBottom: verticalScale(10)
   },
   backBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: moderateScale(40),
+    height: moderateScale(40),
+    borderRadius: moderateScale(20),
     backgroundColor: "#FFFFFF",
     alignItems: "center",
     justifyContent: "center",
     shadowColor: "#0F172A",
     shadowOpacity: 0.05,
-    shadowRadius: 10,
+    shadowRadius: moderateScale(10),
     shadowOffset: { width: 0, height: 4 },
     elevation: 2
   },
   topNavTitle: {
-    fontSize: 18,
+    fontSize: fontScale(18),
     fontWeight: "900",
     color: "#0F172A"
   },
   content: {
-    padding: 16,
-    paddingBottom: 40,
-    gap: 24
+    padding: moderateScale(16),
+    paddingBottom: verticalScale(40),
+    gap: moderateScale(24)
   },
   section: {
-    gap: 12
+    gap: moderateScale(12)
   },
   sectionTitle: {
-    fontSize: 14,
+    fontSize: fontScale(14),
     fontWeight: "800",
     color: "#64748B",
     textTransform: "uppercase",
     letterSpacing: 1,
-    marginLeft: 4
+    marginLeft: moderateScale(4)
   },
   card: {
     backgroundColor: "white",
-    borderRadius: 16,
+    borderRadius: moderateScale(16),
     borderWidth: 1,
     borderColor: "#E2E8F0",
     shadowColor: "#0F172A",
     shadowOpacity: 0.03,
-    shadowRadius: 8,
+    shadowRadius: moderateScale(8),
     shadowOffset: { width: 0, height: 2 },
     elevation: 1,
     overflow: "hidden"
@@ -147,48 +148,48 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    padding: 16
+    padding: moderateScale(16)
   },
   rowLeft: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12
+    gap: moderateScale(12)
   },
   iconWrap: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
+    width: moderateScale(36),
+    height: moderateScale(36),
+    borderRadius: moderateScale(10),
     alignItems: "center",
     justifyContent: "center"
   },
   rowTitle: {
-    fontSize: 15,
+    fontSize: fontScale(15),
     fontWeight: "700",
     color: "#0F172A"
   },
   rowSubtitle: {
-    fontSize: 12,
+    fontSize: fontScale(12),
     color: "#64748B",
-    marginTop: 2
+    marginTop: verticalScale(2)
   },
   divider: {
     height: 1,
     backgroundColor: "#F1F5F9",
-    marginLeft: 64
+    marginLeft: moderateScale(64)
   },
   actionRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    padding: 16
+    padding: moderateScale(16)
   },
   actionText: {
-    fontSize: 15,
+    fontSize: fontScale(15),
     fontWeight: "700",
     color: "#0F172A"
   },
   dangerText: {
-    fontSize: 15,
+    fontSize: fontScale(15),
     fontWeight: "700",
     color: "#DC2626"
   }

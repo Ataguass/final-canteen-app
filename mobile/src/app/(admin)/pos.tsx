@@ -23,6 +23,7 @@ import { offlineOrderQueue } from "../../services/offlineOrderQueue";
 import { orderService, type Order } from "../../services/orderService";
 import { tenantService, type InvoiceSettings } from "../../services/tenantService";
 import { PaymentMethod, PaymentStatus } from "../../services/types";
+import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../utils/responsive';
 
 type MenuItem = {
   id: string;
@@ -1018,30 +1019,30 @@ const styles = StyleSheet.create({
     flex: 1
   },
   content: {
-    padding: 16,
-    gap: 16,
-    paddingBottom: 200
+    padding: moderateScale(16),
+    gap: moderateScale(16),
+    paddingBottom: verticalScale(200)
   },
   statusCard: {
     backgroundColor: "white",
-    borderRadius: 20,
-    padding: 16,
-    gap: 16,
+    borderRadius: moderateScale(20),
+    padding: moderateScale(16),
+    gap: moderateScale(16),
     shadowColor: "#000",
     shadowOpacity: 0.04,
-    shadowRadius: 10,
+    shadowRadius: moderateScale(10),
     shadowOffset: { width: 0, height: 4 },
     elevation: 2
   },
   statsRow: {
     flexDirection: "row",
-    gap: 10
+    gap: moderateScale(10)
   },
   statPill: {
     flex: 1,
-    borderRadius: 16,
-    paddingVertical: 12,
-    paddingHorizontal: 14,
+    borderRadius: moderateScale(16),
+    paddingVertical: moderateScale(12),
+    paddingHorizontal: moderateScale(14),
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between"
@@ -1054,27 +1055,27 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     color: "#475569",
-    fontSize: 13,
+    fontSize: fontScale(13),
     fontWeight: "700"
   },
   statValue: {
     color: "#0F172A",
-    fontSize: 22,
+    fontSize: fontScale(22),
     fontWeight: "900"
   },
   topActionsRow: {
     flexDirection: "row",
-    gap: 12,
+    gap: moderateScale(12),
     alignItems: "center"
   },
   topActionButton: {
-    borderRadius: 14,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
+    borderRadius: moderateScale(14),
+    paddingVertical: moderateScale(12),
+    paddingHorizontal: moderateScale(16),
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 8,
+    gap: moderateScale(8),
     flex: 1
   },
   topActionButtonPrimary: {
@@ -1091,16 +1092,16 @@ const styles = StyleSheet.create({
   topActionText: {
     color: "white",
     fontWeight: "700",
-    fontSize: 15
+    fontSize: fontScale(15)
   },
   topActionTextDark: {
     color: "#0F172A",
     fontWeight: "700",
-    fontSize: 15
+    fontSize: fontScale(15)
   },
   sectionCard: {
     backgroundColor: "transparent",
-    gap: 12
+    gap: moderateScale(12)
   },
   sectionHeaderRow: {
     flexDirection: "row",
@@ -1108,23 +1109,23 @@ const styles = StyleSheet.create({
     alignItems: "center"
   },
   sectionTitle: {
-    fontSize: 20,
+    fontSize: fontScale(20),
     fontWeight: "800",
     color: "#0F172A",
-    marginLeft: 4
+    marginLeft: moderateScale(4)
   },
   helperText: {
     color: "#64748B",
     fontWeight: "600",
-    marginRight: 4
+    marginRight: moderateScale(4)
   },
   errorCard: {
     borderWidth: 1,
     borderColor: "#FCA5A5",
     backgroundColor: "#FEF2F2",
-    borderRadius: 16,
-    padding: 14,
-    gap: 10
+    borderRadius: moderateScale(16),
+    padding: moderateScale(14),
+    gap: moderateScale(10)
   },
   errorText: {
     color: "#991B1B",
@@ -1133,22 +1134,22 @@ const styles = StyleSheet.create({
   retryButton: {
     alignSelf: "flex-start",
     backgroundColor: "#991B1B",
-    borderRadius: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 8
+    borderRadius: moderateScale(10),
+    paddingHorizontal: moderateScale(14),
+    paddingVertical: moderateScale(8)
   },
   retryButtonText: {
     color: "white",
     fontWeight: "800"
   },
   categoryRow: {
-    gap: 8,
-    paddingRight: 16
+    gap: moderateScale(8),
+    paddingRight: moderateScale(16)
   },
   categoryChip: {
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 999,
+    paddingVertical: moderateScale(10),
+    paddingHorizontal: moderateScale(20),
+    borderRadius: moderateScale(999),
     backgroundColor: "white",
     borderWidth: 1,
     borderColor: "#E2E8F0"
@@ -1160,7 +1161,7 @@ const styles = StyleSheet.create({
   categoryChipText: {
     color: "#475569",
     fontWeight: "700",
-    fontSize: 15
+    fontSize: fontScale(15)
   },
   categoryChipTextActive: {
     color: "white"
@@ -1173,20 +1174,20 @@ const styles = StyleSheet.create({
   },
   itemCard: {
     backgroundColor: "white",
-    borderRadius: 20,
-    padding: 12,
-    gap: 10,
-    marginBottom: 12,
+    borderRadius: moderateScale(20),
+    padding: moderateScale(12),
+    gap: moderateScale(10),
+    marginBottom: verticalScale(12),
     shadowColor: "#000",
     shadowOpacity: 0.05,
-    shadowRadius: 10,
+    shadowRadius: moderateScale(10),
     shadowOffset: { width: 0, height: 4 },
     elevation: 2
   },
   itemImage: {
     width: "100%",
-    height: 110,
-    borderRadius: 14,
+    height: moderateScale(110),
+    borderRadius: moderateScale(14),
     backgroundColor: "#F1F5F9"
   },
   itemHeaderRow: {
@@ -1196,33 +1197,33 @@ const styles = StyleSheet.create({
   },
   itemTextWrap: {
     flex: 1,
-    gap: 4
+    gap: moderateScale(4)
   },
   itemName: {
-    fontSize: 16,
+    fontSize: fontScale(16),
     fontWeight: "800",
     color: "#0F172A"
   },
   itemDescription: {
     color: "#64748B",
     fontWeight: "500",
-    fontSize: 13
+    fontSize: fontScale(13)
   },
   itemPrice: {
     color: "#FF6B35",
     fontWeight: "800",
-    fontSize: 16
+    fontSize: fontScale(16)
   },
   itemFooterRow: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginTop: 4
+    marginTop: verticalScale(4)
   },
   stockPill: {
-    borderRadius: 999,
-    paddingVertical: 4,
-    paddingHorizontal: 8
+    borderRadius: moderateScale(999),
+    paddingVertical: moderateScale(4),
+    paddingHorizontal: moderateScale(8)
   },
   stockPillNormal: {
     backgroundColor: "#ECFDF5"
@@ -1231,7 +1232,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FEF2F2"
   },
   stockText: {
-    fontSize: 11,
+    fontSize: fontScale(11),
     fontWeight: "800"
   },
   stockTextNormal: {
@@ -1244,46 +1245,46 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#F1F5F9",
-    borderRadius: 999,
-    padding: 4,
-    gap: 8
+    borderRadius: moderateScale(999),
+    padding: moderateScale(4),
+    gap: moderateScale(8)
   },
   stepperButton: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    width: moderateScale(28),
+    height: moderateScale(28),
+    borderRadius: moderateScale(14),
     backgroundColor: "white",
     alignItems: "center",
     justifyContent: "center",
     shadowColor: "#000",
     shadowOpacity: 0.05,
-    shadowRadius: 2,
+    shadowRadius: moderateScale(2),
     shadowOffset: { width: 0, height: 1 },
     elevation: 1
   },
   stepperValue: {
     fontWeight: "800",
     color: "#0F172A",
-    fontSize: 14,
-    minWidth: 16,
+    fontSize: fontScale(14),
+    minWidth: moderateScale(16),
     textAlign: "center"
   },
   emptyState: {
-    borderRadius: 20,
+    borderRadius: moderateScale(20),
     backgroundColor: "white",
-    padding: 32,
+    padding: moderateScale(32),
     alignItems: "center",
-    gap: 12,
+    gap: moderateScale(12),
     shadowColor: "#000",
     shadowOpacity: 0.03,
-    shadowRadius: 8,
+    shadowRadius: moderateScale(8),
     shadowOffset: { width: 0, height: 2 },
     elevation: 1
   },
   emptyStateText: {
     color: "#64748B",
     fontWeight: "600",
-    fontSize: 16
+    fontSize: fontScale(16)
   },
   checkoutBar: {
     position: "absolute",
@@ -1291,15 +1292,15 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     backgroundColor: "white",
-    borderTopLeftRadius: 32,
-    borderTopRightRadius: 32,
-    paddingTop: 20,
-    paddingBottom: 28,
-    paddingHorizontal: 20,
-    gap: 16,
+    borderTopLeftRadius: moderateScale(32),
+    borderTopRightRadius: moderateScale(32),
+    paddingTop: verticalScale(20),
+    paddingBottom: verticalScale(28),
+    paddingHorizontal: moderateScale(20),
+    gap: moderateScale(16),
     shadowColor: "#0F172A",
     shadowOpacity: 0.15,
-    shadowRadius: 20,
+    shadowRadius: moderateScale(20),
     shadowOffset: { width: 0, height: -10 },
     elevation: 20
   },
@@ -1311,24 +1312,24 @@ const styles = StyleSheet.create({
   selectedProductsRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 12
+    gap: moderateScale(12)
   },
   cartIconBadge: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: moderateScale(44),
+    height: moderateScale(44),
+    borderRadius: moderateScale(22),
     backgroundColor: "#FF6B35",
     alignItems: "center",
     justifyContent: "center"
   },
   cartCountCircle: {
     position: "absolute",
-    top: -4,
-    right: -4,
+    top: verticalScale(-4),
+    right: moderateScale(-4),
     backgroundColor: "#EF4444",
-    width: 20,
-    height: 20,
-    borderRadius: 10,
+    width: moderateScale(20),
+    height: moderateScale(20),
+    borderRadius: moderateScale(10),
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 2,
@@ -1336,67 +1337,67 @@ const styles = StyleSheet.create({
   },
   cartCountText: {
     color: "white",
-    fontSize: 10,
+    fontSize: fontScale(10),
     fontWeight: "900"
   },
   selectedProductsTitle: {
     fontWeight: "800",
     color: "#0F172A",
-    fontSize: 17
+    fontSize: fontScale(17)
   },
   selectedProductsHint: {
     color: "#64748B",
-    marginTop: 2,
+    marginTop: verticalScale(2),
     fontWeight: "600",
-    fontSize: 12
+    fontSize: fontScale(12)
   },
   checkoutTotals: {
     alignItems: "flex-end"
   },
   totalText: {
     color: "#0F172A",
-    fontSize: 26,
+    fontSize: fontScale(26),
     fontWeight: "900"
   },
   checkoutActions: {
     flexDirection: "row",
-    gap: 12
+    gap: moderateScale(12)
   },
   actionButton: {
-    borderRadius: 16,
-    padding: 14,
+    borderRadius: moderateScale(16),
+    padding: moderateScale(14),
     alignItems: "center",
     justifyContent: "center",
     flexDirection: "row",
-    gap: 8,
+    gap: moderateScale(8),
     backgroundColor: "#F1F5F9"
   },
   holdButton: {
     flex: 1
   },
   resetButton: {
-    width: 56,
+    width: moderateScale(56),
     backgroundColor: "#FEF2F2"
   },
   payButton: {
     flex: 2,
     backgroundColor: "#10B981",
-    borderRadius: 16,
-    padding: 14,
+    borderRadius: moderateScale(16),
+    padding: moderateScale(14),
     alignItems: "center",
     justifyContent: "center",
     flexDirection: "row",
-    gap: 10
+    gap: moderateScale(10)
   },
   payButtonText: {
     color: "white",
-    fontSize: 18,
+    fontSize: fontScale(18),
     fontWeight: "900"
   },
   actionButtonTextDark: {
     color: "#0F172A",
     fontWeight: "800",
-    fontSize: 15
+    fontSize: fontScale(15)
   },
   disabledButton: {
     opacity: 0.5
@@ -1405,29 +1406,29 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "rgba(15,23,42,0.6)",
     justifyContent: "center",
-    padding: 16
+    padding: moderateScale(16)
   },
   modalCard: {
     backgroundColor: "white",
-    borderRadius: 24,
-    padding: 20,
-    gap: 16,
+    borderRadius: moderateScale(24),
+    padding: moderateScale(20),
+    gap: moderateScale(16),
     maxHeight: "85%",
     shadowColor: "#000",
     shadowOpacity: 0.2,
-    shadowRadius: 24,
+    shadowRadius: moderateScale(24),
     shadowOffset: { width: 0, height: 10 },
     elevation: 10
   },
   paymentModalCard: {
     backgroundColor: "white",
-    borderRadius: 24,
-    padding: 20,
-    gap: 16,
+    borderRadius: moderateScale(24),
+    padding: moderateScale(20),
+    gap: moderateScale(16),
     maxHeight: "92%",
     shadowColor: "#000",
     shadowOpacity: 0.2,
-    shadowRadius: 24,
+    shadowRadius: moderateScale(24),
     shadowOffset: { width: 0, height: 10 },
     elevation: 10
   },
@@ -1437,83 +1438,83 @@ const styles = StyleSheet.create({
     justifyContent: "space-between"
   },
   modalTitle: {
-    fontSize: 22,
+    fontSize: fontScale(22),
     fontWeight: "900",
     color: "#0F172A"
   },
   modalCloseButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: moderateScale(36),
+    height: moderateScale(36),
+    borderRadius: moderateScale(18),
     backgroundColor: "#F1F5F9",
     alignItems: "center",
     justifyContent: "center"
   },
   modalScrollContent: {
-    gap: 16,
-    paddingBottom: 20
+    gap: moderateScale(16),
+    paddingBottom: verticalScale(20)
   },
   modalFooter: {
-    paddingTop: 10
+    paddingTop: verticalScale(10)
   },
   orderSummaryHero: {
     backgroundColor: "#F1F5F9",
-    borderRadius: 16,
-    padding: 12,
+    borderRadius: moderateScale(16),
+    padding: moderateScale(12),
     flexDirection: "row",
-    gap: 10
+    gap: moderateScale(10)
   },
   orderSummaryMetric: {
     flex: 1,
     backgroundColor: "white",
-    borderRadius: 12,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
+    borderRadius: moderateScale(12),
+    paddingVertical: moderateScale(10),
+    paddingHorizontal: moderateScale(12),
     shadowColor: "#000",
     shadowOpacity: 0.02,
-    shadowRadius: 4,
+    shadowRadius: moderateScale(4),
     shadowOffset: { width: 0, height: 2 },
     elevation: 1
   },
   orderSummaryMetricLabel: {
-    fontSize: 12,
+    fontSize: fontScale(12),
     color: "#64748B",
     fontWeight: "700"
   },
   orderSummaryMetricValue: {
-    marginTop: 4,
+    marginTop: verticalScale(4),
     color: "#0F172A",
     fontWeight: "900",
-    fontSize: 16
+    fontSize: fontScale(16)
   },
   tableWrap: {
     borderWidth: 1,
     borderColor: "#E2E8F0",
-    borderRadius: 16,
+    borderRadius: moderateScale(16),
     overflow: "hidden"
   },
   tableHeaderRow: {
     flexDirection: "row",
     backgroundColor: "#F8FAFC",
-    paddingVertical: 12,
-    paddingHorizontal: 14,
+    paddingVertical: moderateScale(12),
+    paddingHorizontal: moderateScale(14),
     borderBottomWidth: 1,
     borderBottomColor: "#E2E8F0"
   },
   tableHeaderText: {
     fontWeight: "800",
     color: "#475569",
-    fontSize: 12
+    fontSize: fontScale(12)
   },
   tableBodyRow: {
     flexDirection: "row",
-    paddingVertical: 14,
-    paddingHorizontal: 14,
+    paddingVertical: moderateScale(14),
+    paddingHorizontal: moderateScale(14),
     borderBottomWidth: 1,
     borderBottomColor: "#F1F5F9"
   },
   emptyTableText: {
-    padding: 20,
+    padding: moderateScale(20),
     textAlign: "center",
     color: "#94A3B8",
     fontWeight: "700"
@@ -1521,41 +1522,41 @@ const styles = StyleSheet.create({
   inputLabel: {
     fontWeight: "800",
     color: "#0F172A",
-    fontSize: 14,
-    marginBottom: -4
+    fontSize: fontScale(14),
+    marginBottom: verticalScale(-4)
   },
   input: {
     borderWidth: 1,
     borderColor: "#E2E8F0",
-    borderRadius: 14,
-    padding: 14,
+    borderRadius: moderateScale(14),
+    padding: moderateScale(14),
     backgroundColor: "#F8FAFC",
-    fontSize: 15,
+    fontSize: fontScale(15),
     fontWeight: "600",
     color: "#0F172A"
   },
   adjustmentsCard: {
     backgroundColor: "white",
-    borderRadius: 16,
+    borderRadius: moderateScale(16),
     borderWidth: 1,
     borderColor: "#E2E8F0",
-    padding: 16,
-    gap: 16
+    padding: moderateScale(16),
+    gap: moderateScale(16)
   },
   adjustmentsTitle: {
     color: "#0F172A",
     fontWeight: "800",
-    fontSize: 16
+    fontSize: fontScale(16)
   },
   noteInput: {
-    minHeight: 80,
+    minHeight: moderateScale(80),
     textAlignVertical: "top"
   },
   paymentAmountBanner: {
     backgroundColor: "#ECFDF5",
-    borderRadius: 16,
-    paddingVertical: 16,
-    paddingHorizontal: 16,
+    borderRadius: moderateScale(16),
+    paddingVertical: moderateScale(16),
+    paddingHorizontal: moderateScale(16),
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center"
@@ -1563,48 +1564,48 @@ const styles = StyleSheet.create({
   paymentAmountLabel: {
     color: "#065F46",
     fontWeight: "800",
-    fontSize: 15
+    fontSize: fontScale(15)
   },
   paymentAmountValue: {
     color: "#059669",
     fontWeight: "900",
-    fontSize: 26
+    fontSize: fontScale(26)
   },
   discountRow: {
-    gap: 10
+    gap: moderateScale(10)
   },
   chipRow: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 10
+    gap: moderateScale(10)
   },
   chipGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 10
+    gap: moderateScale(10)
   },
   segmentButton: {
     borderWidth: 1,
     borderColor: "#E2E8F0",
     backgroundColor: "white",
-    borderRadius: 999,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
+    borderRadius: moderateScale(999),
+    paddingVertical: moderateScale(10),
+    paddingHorizontal: moderateScale(16),
     flexDirection: "row",
     alignItems: "center",
-    gap: 8
+    gap: moderateScale(8)
   },
   gridSegmentButton: {
     borderWidth: 1,
     borderColor: "#E2E8F0",
     backgroundColor: "white",
-    borderRadius: 16,
-    paddingVertical: 14,
-    paddingHorizontal: 16,
+    borderRadius: moderateScale(16),
+    paddingVertical: moderateScale(14),
+    paddingHorizontal: moderateScale(16),
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 8,
+    gap: moderateScale(8),
     flexBasis: "48%"
   },
   segmentButtonActive: {
@@ -1614,7 +1615,7 @@ const styles = StyleSheet.create({
   segmentButtonText: {
     color: "#475569",
     fontWeight: "700",
-    fontSize: 14
+    fontSize: fontScale(14)
   },
   segmentButtonTextActive: {
     color: "white"
@@ -1622,26 +1623,26 @@ const styles = StyleSheet.create({
   doneButton: {
     flexDirection: "row",
     backgroundColor: "#FF6B35",
-    borderRadius: 12,
-    padding: 16,
+    borderRadius: moderateScale(12),
+    padding: moderateScale(16),
     alignItems: "center"
   },
   doneButtonText: {
     color: "white",
-    fontSize: 16,
+    fontSize: fontScale(16),
     fontWeight: "900"
   },
   paymentSummaryCard: {
     backgroundColor: "#F8FAFC",
-    borderRadius: 16,
-    padding: 16,
-    gap: 12
+    borderRadius: moderateScale(16),
+    padding: moderateScale(16),
+    gap: moderateScale(12)
   },
   paymentSummaryTitle: {
     color: "#0F172A",
     fontWeight: "900",
-    fontSize: 16,
-    marginBottom: 4
+    fontSize: fontScale(16),
+    marginBottom: verticalScale(4)
   },
   paymentSummaryRow: {
     flexDirection: "row",
@@ -1649,29 +1650,29 @@ const styles = StyleSheet.create({
     alignItems: "center"
   },
   paymentSummaryRowBorder: {
-    paddingTop: 12,
+    paddingTop: verticalScale(12),
     borderTopWidth: 1,
     borderTopColor: "#E2E8F0"
   },
   paymentSummaryLabel: {
     color: "#64748B",
     fontWeight: "700",
-    fontSize: 14
+    fontSize: fontScale(14)
   },
   paymentSummaryValue: {
     color: "#0F172A",
     fontWeight: "800",
-    fontSize: 14
+    fontSize: fontScale(14)
   },
   paymentActionsPrimaryRow: {
     flexDirection: "row",
-    gap: 12,
-    paddingTop: 8
+    gap: moderateScale(12),
+    paddingTop: verticalScale(8)
   },
   paymentActionButton: {
     flex: 1,
-    borderRadius: 16,
-    paddingVertical: 16,
+    borderRadius: moderateScale(16),
+    paddingVertical: moderateScale(16),
     alignItems: "center",
     justifyContent: "center"
   },
@@ -1684,11 +1685,11 @@ const styles = StyleSheet.create({
   paymentActionText: {
     color: "white",
     fontWeight: "900",
-    fontSize: 15
+    fontSize: fontScale(15)
   },
   paymentActionTextSecondary: {
     color: "#0F172A",
     fontWeight: "900",
-    fontSize: 15
+    fontSize: fontScale(15)
   }
 });

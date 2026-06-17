@@ -7,6 +7,7 @@ import { useAuth } from "../../hooks/useAuth";
 import { authService } from "../../services/authService";
 import { Ionicons } from "@expo/vector-icons";
 import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
+import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../utils/responsive';
 
 const BRAND_COLOR = "#080d2b";
 
@@ -225,7 +226,7 @@ export default function RegisterScreen() {
                     name="school" 
                     size={24} 
                     color={selectedTenant?.id === item.id ? BRAND_COLOR : "#8e8e93"} 
-                    style={{ marginRight: 16 }}
+                    style={{ marginRight: moderateScale(16) }}
                   />
                   <Text style={[styles.tenantOptionText, selectedTenant?.id === item.id && styles.tenantOptionTextSelected]}>
                     {item.name}
@@ -251,49 +252,49 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     flexGrow: 1,
-    paddingHorizontal: 24,
-    paddingTop: 40,
-    paddingBottom: 40,
+    paddingHorizontal: moderateScale(24),
+    paddingTop: verticalScale(40),
+    paddingBottom: verticalScale(40),
   },
   header: {
     alignItems: 'center',
-    marginBottom: 40,
+    marginBottom: verticalScale(40),
     position: 'relative',
   },
   backButton: {
     position: 'absolute',
     left: 0,
     top: 0,
-    padding: 8,
+    padding: moderateScale(8),
   },
   logoContainer: {
-    width: 64,
-    height: 64,
+    width: moderateScale(64),
+    height: moderateScale(64),
     backgroundColor: BRAND_COLOR,
-    borderRadius: 20,
+    borderRadius: moderateScale(20),
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 20,
+    marginBottom: verticalScale(20),
     elevation: 8,
     shadowColor: BRAND_COLOR,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.3,
-    shadowRadius: 16,
+    shadowRadius: moderateScale(16),
   },
   title: {
-    fontSize: 28,
+    fontSize: fontScale(28),
     fontWeight: '800',
     color: '#1c1c1e',
-    marginBottom: 8,
+    marginBottom: verticalScale(8),
     letterSpacing: -0.5,
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: fontScale(16),
     color: '#8e8e93',
     textAlign: 'center',
   },
   form: {
-    gap: 16,
+    gap: moderateScale(16),
   },
   inputContainer: {
     flexDirection: 'row',
@@ -301,57 +302,57 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
     borderWidth: 1,
     borderColor: '#e5e5ea',
-    borderRadius: 16,
-    paddingHorizontal: 16,
-    height: 56,
+    borderRadius: moderateScale(16),
+    paddingHorizontal: moderateScale(16),
+    height: moderateScale(56),
   },
   inputIcon: {
-    marginRight: 12,
+    marginRight: moderateScale(12),
   },
   input: {
     flex: 1,
-    fontSize: 16,
+    fontSize: fontScale(16),
     color: '#1c1c1e',
     height: '100%',
   },
   inputText: {
     flex: 1,
-    fontSize: 16,
+    fontSize: fontScale(16),
     color: '#1c1c1e',
   },
   eyeIcon: {
-    padding: 8,
+    padding: moderateScale(8),
   },
   registerButton: {
     backgroundColor: BRAND_COLOR,
-    height: 56,
-    borderRadius: 16,
+    height: moderateScale(56),
+    borderRadius: moderateScale(16),
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 16,
+    marginTop: verticalScale(16),
     elevation: 8,
     shadowColor: BRAND_COLOR,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.3,
-    shadowRadius: 16,
+    shadowRadius: moderateScale(16),
   },
   registerButtonText: {
     color: '#ffffff',
-    fontSize: 16,
+    fontSize: fontScale(16),
     fontWeight: '700',
   },
   footer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: 32,
+    marginTop: verticalScale(32),
   },
   footerText: {
     color: '#8e8e93',
-    fontSize: 15,
+    fontSize: fontScale(15),
   },
   loginLink: {
     color: BRAND_COLOR,
-    fontSize: 15,
+    fontSize: fontScale(15),
     fontWeight: '700',
   },
   modalOverlay: {
@@ -361,41 +362,41 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     backgroundColor: '#ffffff',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
+    borderTopLeftRadius: moderateScale(24),
+    borderTopRightRadius: moderateScale(24),
     maxHeight: '80%',
   },
   modalHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 24,
-    paddingVertical: 20,
+    paddingHorizontal: moderateScale(24),
+    paddingVertical: moderateScale(20),
     borderBottomWidth: 1,
     borderBottomColor: '#f3f4f5',
   },
   modalTitle: {
-    fontSize: 20,
+    fontSize: fontScale(20),
     fontWeight: '700',
     color: '#1c1c1e',
   },
   closeModalButton: {
-    padding: 4,
+    padding: moderateScale(4),
   },
   tenantOption: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 16,
-    paddingHorizontal: 8,
+    paddingVertical: moderateScale(16),
+    paddingHorizontal: moderateScale(8),
     borderBottomWidth: 1,
     borderBottomColor: '#f3f4f5',
   },
   tenantOptionSelected: {
     backgroundColor: 'rgba(8, 13, 43, 0.04)',
-    borderRadius: 12,
+    borderRadius: moderateScale(12),
   },
   tenantOptionText: {
-    fontSize: 16,
+    fontSize: fontScale(16),
     color: '#1c1c1e',
     fontWeight: '500',
   },
@@ -406,6 +407,6 @@ const styles = StyleSheet.create({
   emptyText: {
     textAlign: 'center',
     color: '#8e8e93',
-    padding: 24,
+    padding: moderateScale(24),
   }
 });

@@ -4,6 +4,7 @@ import { Alert, Pressable, Text, TextInput, View, StyleSheet, KeyboardAvoidingVi
 import { useAuth } from "../../hooks/useAuth";
 import { Ionicons } from "@expo/vector-icons";
 import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
+import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../utils/responsive';
 
 const BRAND_COLOR = "#080d2b";
 
@@ -44,7 +45,7 @@ export default function LoginScreen() {
           <View style={styles.logoContainer}>
             <Image 
               source={require("../../assets/images/canteen_logo_final.png")} 
-              style={{ width: "100%", height: "100%", borderRadius: 24 }} 
+              style={{ width: "100%", height: "100%", borderRadius: moderateScale(24) }} 
               resizeMode="contain" 
             />
           </View>
@@ -117,7 +118,7 @@ export default function LoginScreen() {
 
         <Animated.View entering={FadeInUp.delay(500).springify()} style={styles.footer}>
           {!isAdminLogin && (
-            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16 }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: verticalScale(16) }}>
               <Text style={styles.footerText}>New student? </Text>
               <Link href="/(auth)/register" asChild>
                 <Pressable>
@@ -145,41 +146,41 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     justifyContent: 'center',
-    paddingHorizontal: 24,
+    paddingHorizontal: moderateScale(24),
   },
   header: {
     alignItems: 'center',
-    marginBottom: 40,
+    marginBottom: verticalScale(40),
   },
   logoContainer: {
-    width: 80,
-    height: 80,
+    width: moderateScale(80),
+    height: moderateScale(80),
     backgroundColor: '#ffffff',
-    borderRadius: 24,
+    borderRadius: moderateScale(24),
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 24,
+    marginBottom: verticalScale(24),
     elevation: 8,
     shadowColor: BRAND_COLOR,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.3,
-    shadowRadius: 16,
+    shadowRadius: moderateScale(16),
     overflow: 'hidden'
   },
   title: {
-    fontSize: 28,
+    fontSize: fontScale(28),
     fontWeight: '800',
     color: '#1c1c1e',
-    marginBottom: 8,
+    marginBottom: verticalScale(8),
     letterSpacing: -0.5,
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: fontScale(16),
     color: '#8e8e93',
     textAlign: 'center',
   },
   form: {
-    gap: 16,
+    gap: moderateScale(16),
   },
   inputContainer: {
     flexDirection: 'row',
@@ -187,62 +188,62 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
     borderWidth: 1,
     borderColor: '#e5e5ea',
-    borderRadius: 16,
-    paddingHorizontal: 16,
-    height: 56,
+    borderRadius: moderateScale(16),
+    paddingHorizontal: moderateScale(16),
+    height: moderateScale(56),
   },
   inputIcon: {
-    marginRight: 12,
+    marginRight: moderateScale(12),
   },
   input: {
     flex: 1,
-    fontSize: 16,
+    fontSize: fontScale(16),
     color: '#1c1c1e',
     height: '100%',
   },
   eyeIcon: {
-    padding: 8,
+    padding: moderateScale(8),
   },
   forgotPassword: {
     alignSelf: 'flex-end',
-    marginBottom: 8,
+    marginBottom: verticalScale(8),
   },
   forgotPasswordText: {
     color: BRAND_COLOR,
-    fontSize: 14,
+    fontSize: fontScale(14),
     fontWeight: '600',
   },
   loginButton: {
     backgroundColor: BRAND_COLOR,
-    height: 56,
-    borderRadius: 16,
+    height: moderateScale(56),
+    borderRadius: moderateScale(16),
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 8,
+    marginTop: verticalScale(8),
     elevation: 8,
     shadowColor: BRAND_COLOR,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.3,
-    shadowRadius: 16,
+    shadowRadius: moderateScale(16),
   },
   loginButtonText: {
     color: '#ffffff',
-    fontSize: 16,
+    fontSize: fontScale(16),
     fontWeight: '700',
   },
   footer: {
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 32,
+    marginTop: verticalScale(32),
   },
   footerText: {
     color: '#8e8e93',
-    fontSize: 15,
+    fontSize: fontScale(15),
   },
   registerLink: {
     color: BRAND_COLOR,
-    fontSize: 15,
+    fontSize: fontScale(15),
     fontWeight: '700',
   }
 });

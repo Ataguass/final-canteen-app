@@ -15,6 +15,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "../../../hooks/useAuth";
 import { useCart } from "../../../hooks/useCart";
 import { menuService } from "../../../services/menuService";
+import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../../utils/responsive';
 
 const formatCurrency = (value: number): string => `₹ ${value.toFixed(2)}`;
 
@@ -76,7 +77,7 @@ export default function Screen() {
           <Ionicons name="chevron-back" size={24} color="#0F172A" />
         </Pressable>
         <Text style={styles.topNavTitle}>Item Details</Text>
-        <View style={{ width: 40 }} />
+        <View style={{ width: moderateScale(40) }} />
       </View>
     <ScrollView
       style={{ flex: 1 }}
@@ -195,13 +196,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 16,
-    paddingBottom: 10
+    paddingHorizontal: moderateScale(16),
+    paddingBottom: verticalScale(10)
   },
   backBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: moderateScale(40),
+    height: moderateScale(40),
+    borderRadius: moderateScale(20),
     backgroundColor: "#FFFFFF",
     alignItems: "center",
     justifyContent: "center",
@@ -209,57 +210,57 @@ const styles = StyleSheet.create({
     borderColor: "#E2E8F0"
   },
   topNavTitle: {
-    fontSize: 16,
+    fontSize: fontScale(16),
     fontWeight: "700",
     color: "#0F172A"
   },
   content: {
-    padding: 16,
-    gap: 12,
-    paddingBottom: 24
+    padding: moderateScale(16),
+    gap: moderateScale(12),
+    paddingBottom: verticalScale(24)
   },
   loadingWrap: {
     flex: 1,
     backgroundColor: "#EEF2F7",
     alignItems: "center",
     justifyContent: "center",
-    padding: 16
+    padding: moderateScale(16)
   },
   loadingText: {
     color: "#475569",
     fontWeight: "600"
   },
   heroCard: {
-    borderRadius: 16,
+    borderRadius: moderateScale(16),
     borderWidth: 1,
     borderColor: "#E2E8F0",
     backgroundColor: "white",
     overflow: "hidden",
     shadowColor: "#0F172A",
     shadowOpacity: 0.04,
-    shadowRadius: 8,
+    shadowRadius: moderateScale(8),
     shadowOffset: { width: 0, height: 3 },
     elevation: 1
   },
   heroContent: {
-    padding: 12,
-    gap: 8
+    padding: moderateScale(12),
+    gap: moderateScale(8)
   },
   itemName: {
     color: "#0F172A",
     fontWeight: "800",
-    fontSize: 23
+    fontSize: fontScale(23)
   },
   badgeRow: {
     flexDirection: "row",
-    gap: 8,
+    gap: moderateScale(8),
     alignItems: "center",
     flexWrap: "wrap"
   },
   priceBadge: {
-    borderRadius: 999,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    borderRadius: moderateScale(999),
+    paddingHorizontal: moderateScale(10),
+    paddingVertical: moderateScale(5),
     borderWidth: 1,
     borderColor: "#FED7AA",
     backgroundColor: "#FFF7ED"
@@ -269,13 +270,13 @@ const styles = StyleSheet.create({
     fontWeight: "800"
   },
   stockBadge: {
-    borderRadius: 999,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    borderRadius: moderateScale(999),
+    paddingHorizontal: moderateScale(10),
+    paddingVertical: moderateScale(5),
     borderWidth: 1,
     flexDirection: "row",
     alignItems: "center",
-    gap: 4
+    gap: moderateScale(4)
   },
   stockBadgeIn: {
     borderColor: "#BBF7D0",
@@ -287,45 +288,45 @@ const styles = StyleSheet.create({
   },
   stockBadgeText: {
     fontWeight: "700",
-    fontSize: 12
+    fontSize: fontScale(12)
   },
   itemPrice: {
-    marginTop: 2,
+    marginTop: verticalScale(2),
     color: "#0F172A",
     fontWeight: "800",
-    fontSize: 18
+    fontSize: fontScale(18)
   },
   itemImage: {
     width: "100%",
-    height: 220,
+    height: moderateScale(220),
     backgroundColor: "#F1F5F9"
   },
   itemImageFallback: {
     width: "100%",
-    height: 220,
+    height: moderateScale(220),
     backgroundColor: "#F1F5F9",
     alignItems: "center",
     justifyContent: "center"
   },
   infoCard: {
-    borderRadius: 14,
+    borderRadius: moderateScale(14),
     borderWidth: 1,
     borderColor: "#E2E8F0",
     backgroundColor: "white",
-    padding: 12,
-    gap: 8
+    padding: moderateScale(12),
+    gap: moderateScale(8)
   },
   configCard: {
-    borderRadius: 14,
+    borderRadius: moderateScale(14),
     borderWidth: 1,
     borderColor: "#E2E8F0",
     backgroundColor: "white",
-    padding: 12,
-    gap: 10
+    padding: moderateScale(12),
+    gap: moderateScale(10)
   },
   cardTitle: {
     color: "#0F172A",
-    fontSize: 18,
+    fontSize: fontScale(18),
     fontWeight: "800"
   },
   itemDescription: {
@@ -335,7 +336,7 @@ const styles = StyleSheet.create({
   stockRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6
+    gap: moderateScale(6)
   },
   stockText: {
     fontWeight: "700"
@@ -347,7 +348,7 @@ const styles = StyleSheet.create({
     color: "#B91C1C"
   },
   quantityRow: {
-    gap: 8
+    gap: moderateScale(8)
   },
   fieldLabel: {
     color: "#334155",
@@ -356,12 +357,12 @@ const styles = StyleSheet.create({
   qtyControl: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8
+    gap: moderateScale(8)
   },
   qtyBtn: {
-    width: 42,
-    height: 42,
-    borderRadius: 12,
+    width: moderateScale(42),
+    height: moderateScale(42),
+    borderRadius: moderateScale(12),
     borderWidth: 1,
     borderColor: "#CBD5E1",
     backgroundColor: "#F8FAFC",
@@ -374,36 +375,36 @@ const styles = StyleSheet.create({
   },
   qtyBtnText: {
     color: "#0F172A",
-    fontSize: 20,
+    fontSize: fontScale(20),
     fontWeight: "800"
   },
   qtyInput: {
-    width: 72,
-    borderRadius: 12,
+    width: moderateScale(72),
+    borderRadius: moderateScale(12),
     borderWidth: 1,
     borderColor: "#CBD5E1",
     backgroundColor: "#F8FAFC",
     textAlign: "center",
     color: "#0F172A",
     fontWeight: "700",
-    paddingVertical: 10
+    paddingVertical: moderateScale(10)
   },
   noteInput: {
     borderWidth: 1,
     borderColor: "#CBD5E1",
-    borderRadius: 12,
+    borderRadius: moderateScale(12),
     backgroundColor: "#F8FAFC",
-    paddingHorizontal: 10,
-    paddingVertical: 10,
+    paddingHorizontal: moderateScale(10),
+    paddingVertical: moderateScale(10),
     color: "#0F172A",
-    minHeight: 84
+    minHeight: moderateScale(84)
   },
   totalCard: {
-    borderRadius: 14,
+    borderRadius: moderateScale(14),
     borderWidth: 1,
     borderColor: "#E2E8F0",
     backgroundColor: "white",
-    padding: 12,
+    padding: moderateScale(12),
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center"
@@ -414,13 +415,13 @@ const styles = StyleSheet.create({
   },
   totalValue: {
     color: "#059669",
-    fontSize: 22,
+    fontSize: fontScale(22),
     fontWeight: "900"
   },
   addBtn: {
     backgroundColor: "#FF6B35",
-    borderRadius: 12,
-    paddingVertical: 13
+    borderRadius: moderateScale(12),
+    paddingVertical: moderateScale(13)
   },
   addBtnDisabled: {
     backgroundColor: "#94A3B8"
@@ -429,6 +430,6 @@ const styles = StyleSheet.create({
     color: "white",
     textAlign: "center",
     fontWeight: "800",
-    fontSize: 15
+    fontSize: fontScale(15)
   }
 });

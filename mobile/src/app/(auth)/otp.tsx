@@ -4,6 +4,7 @@ import { Alert, Pressable, Text, TextInput, View, StyleSheet, KeyboardAvoidingVi
 import { useAuth } from "../../hooks/useAuth";
 import { Ionicons } from "@expo/vector-icons";
 import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
+import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../utils/responsive';
 
 const BRAND_COLOR = "#080d2b";
 const OTP_LENGTH = 6;
@@ -161,42 +162,42 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     justifyContent: 'center',
-    paddingHorizontal: 24,
+    paddingHorizontal: moderateScale(24),
   },
   header: {
     alignItems: 'center',
-    marginBottom: 40,
+    marginBottom: verticalScale(40),
     position: 'relative',
   },
   backButton: {
     position: 'absolute',
     left: 0,
     top: 0,
-    padding: 8,
+    padding: moderateScale(8),
   },
   iconContainer: {
-    width: 64,
-    height: 64,
+    width: moderateScale(64),
+    height: moderateScale(64),
     backgroundColor: BRAND_COLOR,
-    borderRadius: 20,
+    borderRadius: moderateScale(20),
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 20,
+    marginBottom: verticalScale(20),
     elevation: 8,
     shadowColor: BRAND_COLOR,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.3,
-    shadowRadius: 16,
+    shadowRadius: moderateScale(16),
   },
   title: {
-    fontSize: 28,
+    fontSize: fontScale(28),
     fontWeight: '800',
     color: '#1c1c1e',
-    marginBottom: 8,
+    marginBottom: verticalScale(8),
     letterSpacing: -0.5,
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: fontScale(16),
     color: '#8e8e93',
     textAlign: 'center',
     lineHeight: 24,
@@ -206,17 +207,17 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   form: {
-    gap: 24,
+    gap: moderateScale(24),
   },
   otpContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingHorizontal: 10,
+    paddingHorizontal: moderateScale(10),
   },
   otpBox: {
-    width: 45,
-    height: 55,
-    borderRadius: 12,
+    width: moderateScale(45),
+    height: moderateScale(55),
+    borderRadius: moderateScale(12),
     borderWidth: 1.5,
     borderColor: '#e5e5ea',
     backgroundColor: '#ffffff',
@@ -232,7 +233,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
   },
   otpText: {
-    fontSize: 24,
+    fontSize: fontScale(24),
     fontWeight: '700',
     color: '#1c1c1e',
   },
@@ -244,34 +245,34 @@ const styles = StyleSheet.create({
   },
   primaryButton: {
     backgroundColor: BRAND_COLOR,
-    height: 56,
-    borderRadius: 16,
+    height: moderateScale(56),
+    borderRadius: moderateScale(16),
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 8,
+    marginTop: verticalScale(8),
     elevation: 8,
     shadowColor: BRAND_COLOR,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.3,
-    shadowRadius: 16,
+    shadowRadius: moderateScale(16),
   },
   primaryButtonText: {
     color: '#ffffff',
-    fontSize: 16,
+    fontSize: fontScale(16),
     fontWeight: '700',
   },
   footer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: 32,
+    marginTop: verticalScale(32),
   },
   footerText: {
     color: '#8e8e93',
-    fontSize: 15,
+    fontSize: fontScale(15),
   },
   resendLink: {
     color: BRAND_COLOR,
-    fontSize: 15,
+    fontSize: fontScale(15),
     fontWeight: '700',
   }
 });
