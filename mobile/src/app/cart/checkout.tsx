@@ -67,8 +67,9 @@ const generatePickupSlots = (count = 8): PickupSlot[] => {
 };
 
 export default function Screen() {
-  const { colors, isDark } = useTheme();
-  const styles = createStyles(colors);
+  const theme = useTheme();
+  const { colors, isDark } = theme;
+  const styles = createStyles(theme);
   const router = useRouter();
   const { user, accessToken } = useAuth();
   const { items, subtotal, clearCart } = useCart();
@@ -300,7 +301,7 @@ export default function Screen() {
   );
 }
 
-const createStyles = (colors: any) => StyleSheet.create({
+const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => ({
   screen: {
     flex: 1,
     backgroundColor: colors.background
@@ -326,7 +327,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     width: moderateScale(38),
     height: moderateScale(38),
     borderRadius: moderateScale(10),
-    backgroundColor: "#DBEAFE",
+    backgroundColor: isDark ? "rgba(37, 99, 235, 0.2)" : "#DBEAFE",
     alignItems: "center",
     justifyContent: "center"
   },
@@ -376,7 +377,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     fontWeight: "800"
   },
   totalValue: {
-    color: "#059669",
+    color: isDark ? "#10B981" : "#059669",
     fontWeight: "900",
     fontSize: fontScale(20)
   },
@@ -390,21 +391,21 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   walletHint: {
     borderWidth: 1,
-    borderColor: "#BFDBFE",
-    backgroundColor: "#EFF6FF",
+    borderColor: isDark ? colors.border : "#BFDBFE",
+    backgroundColor: isDark ? colors.surfaceAlt : "#EFF6FF",
     borderRadius: moderateScale(10),
     paddingHorizontal: moderateScale(10),
     paddingVertical: moderateScale(8)
   },
   walletHintText: {
-    color: "#1E40AF",
+    color: isDark ? "#60A5FA" : "#1E40AF",
     fontWeight: "700"
   },
   laneCard: {
     borderRadius: moderateScale(14),
     borderWidth: 1,
-    borderColor: "#BFDBFE",
-    backgroundColor: "#EFF6FF",
+    borderColor: isDark ? colors.border : "#BFDBFE",
+    backgroundColor: isDark ? colors.surfaceAlt : "#EFF6FF",
     padding: moderateScale(12),
     gap: moderateScale(8)
   },
@@ -416,7 +417,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   laneBadge: {
     borderRadius: moderateScale(999),
-    backgroundColor: "#1D4ED8",
+    backgroundColor: colors.accent,
     paddingHorizontal: moderateScale(10),
     paddingVertical: moderateScale(4)
   },
@@ -426,7 +427,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     fontWeight: "800"
   },
   laneHint: {
-    color: "#1E40AF",
+    color: isDark ? "#93C5FD" : "#1E40AF",
     fontWeight: "600"
   },
   slotCard: {
@@ -451,15 +452,15 @@ const createStyles = (colors: any) => StyleSheet.create({
     alignItems: "center"
   },
   slotModeChipActive: {
-    backgroundColor: "#0F172A",
-    borderColor: "#0F172A"
+    backgroundColor: colors.text,
+    borderColor: colors.text
   },
   slotModeText: {
     color: colors.text,
     fontWeight: "700"
   },
   slotModeTextActive: {
-    color: "white"
+    color: colors.background
   },
   slotHint: {
     color: colors.textSecondary,
@@ -477,15 +478,15 @@ const createStyles = (colors: any) => StyleSheet.create({
     paddingVertical: moderateScale(10)
   },
   slotChipActive: {
-    backgroundColor: "#DBEAFE",
-    borderColor: "#60A5FA"
+    backgroundColor: isDark ? "rgba(59, 130, 246, 0.2)" : "#DBEAFE",
+    borderColor: colors.accent
   },
   slotChipText: {
     color: colors.text,
     fontWeight: "700"
   },
   slotChipTextActive: {
-    color: "#1E3A8A"
+    color: isDark ? "#93C5FD" : "#1E3A8A"
   },
   methodRow: {
     flexDirection: "row",
@@ -501,8 +502,8 @@ const createStyles = (colors: any) => StyleSheet.create({
     backgroundColor: colors.background
   },
   methodChipActive: {
-    backgroundColor: "#1D4ED8",
-    borderColor: "#1D4ED8"
+    backgroundColor: colors.accent,
+    borderColor: colors.accent
   },
   methodChipText: {
     color: colors.text,
@@ -512,21 +513,21 @@ const createStyles = (colors: any) => StyleSheet.create({
     color: "white"
   },
   placeBtn: {
-    backgroundColor: "#0F172A",
+    backgroundColor: colors.text,
     borderRadius: moderateScale(12),
     paddingVertical: moderateScale(12)
   },
   placeBtnDisabled: {
-    backgroundColor: "#94A3B8"
+    backgroundColor: colors.textMuted
   },
   placeBtnText: {
     textAlign: "center",
-    color: "white",
+    color: colors.background,
     fontWeight: "800",
     fontSize: fontScale(15)
   },
   backBtn: {
-    backgroundColor: "#E2E8F0",
+    backgroundColor: isDark ? colors.surfaceAlt : "#E2E8F0",
     borderRadius: moderateScale(12),
     paddingVertical: moderateScale(12)
   },

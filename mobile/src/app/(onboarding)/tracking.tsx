@@ -26,8 +26,8 @@ export default function TrackingScreen() {
       {/* Header */}
       <Animated.View entering={FadeInDown.delay(100).springify()} style={styles.header}>
         <View style={styles.headerLeft}>
-          <Ionicons name="school-outline" size={24} color={BRAND_COLOR} />
-          <Text style={styles.headerTitle}>Canteen Management</Text>
+          <Ionicons name="school-outline" size={24} color={isDark ? colors.text : BRAND_COLOR} />
+          <Text style={[styles.headerTitle, isDark && { color: colors.text }]}>Canteen Management</Text>
         </View>
         <TouchableOpacity onPress={handleFinish} activeOpacity={0.6}>
           <Text style={styles.skipText}>Skip</Text>
@@ -49,7 +49,7 @@ export default function TrackingScreen() {
         {/* Text */}
         <Animated.View entering={FadeInDown.delay(500).springify()} style={styles.textContent}>
           <Text style={styles.title}>
-            Manage Your <Text style={styles.titleHighlight}>Canteen Life</Text>
+            Manage Your <Text style={[styles.titleHighlight, isDark && { color: colors.text }]}>Canteen Life</Text>
           </Text>
           <Text style={styles.subtitle}>
             Streamline your food journey and stay organized with ease.
@@ -75,7 +75,7 @@ export default function TrackingScreen() {
   );
 }
 
-const createStyles = (colors: any) => StyleSheet.create({
+const createStyles = (colors: any) => ({
   container: {
     flex: 1,
     backgroundColor: colors.background,
@@ -156,7 +156,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   subtitle: {
     fontSize: fontScale(17),
-    color: '#6e6e73',
+    color: colors.textSecondary,
     textAlign: 'center',
     lineHeight: 26,
     maxWidth: moderateScale(320),
@@ -171,7 +171,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     height: moderateScale(8),
     width: moderateScale(8),
     borderRadius: moderateScale(4),
-    backgroundColor: '#d1d1d6',
+    backgroundColor: colors.border,
   },
   activeDot: {
     width: moderateScale(24),

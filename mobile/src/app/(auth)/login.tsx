@@ -10,8 +10,9 @@ import { useTheme } from '../../hooks/useTheme';
 const BRAND_COLOR = "#080d2b";
 
 export default function LoginScreen() {
-  const { colors, isDark } = useTheme();
-  const styles = createStyles(colors);
+  const theme = useTheme();
+  const { colors, isDark } = theme;
+  const styles = createStyles(theme);
   const router = useRouter();
   const { login } = useAuth();
   const [phone, setPhone] = useState("");
@@ -141,7 +142,7 @@ export default function LoginScreen() {
   );
 }
 
-const createStyles = (colors: any) => StyleSheet.create({
+const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => ({
   container: {
     flex: 1,
     backgroundColor: colors.background,
@@ -164,7 +165,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     justifyContent: 'center',
     marginBottom: verticalScale(24),
     elevation: 8,
-    shadowColor: BRAND_COLOR,
+    shadowColor: isDark ? colors.text : BRAND_COLOR,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.3,
     shadowRadius: moderateScale(16),
@@ -212,19 +213,19 @@ const createStyles = (colors: any) => StyleSheet.create({
     marginBottom: verticalScale(8),
   },
   forgotPasswordText: {
-    color: BRAND_COLOR,
+    color: isDark ? colors.text : BRAND_COLOR,
     fontSize: fontScale(14),
     fontWeight: '600',
   },
   loginButton: {
-    backgroundColor: BRAND_COLOR,
+    backgroundColor: isDark ? colors.primary : BRAND_COLOR,
     height: moderateScale(56),
     borderRadius: moderateScale(16),
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: verticalScale(8),
     elevation: 8,
-    shadowColor: BRAND_COLOR,
+    shadowColor: isDark ? colors.primary : BRAND_COLOR,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.3,
     shadowRadius: moderateScale(16),
@@ -245,7 +246,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     fontSize: fontScale(15),
   },
   registerLink: {
-    color: BRAND_COLOR,
+    color: isDark ? colors.text : BRAND_COLOR,
     fontSize: fontScale(15),
     fontWeight: '700',
   }

@@ -29,8 +29,9 @@ const faqs = [
 ];
 
 export default function SupportScreen() {
-  const { colors, isDark } = useTheme();
-  const styles = createStyles(colors);
+  const theme = useTheme();
+  const { colors, isDark } = theme;
+  const styles = createStyles(theme);
   const router = useRouter();
   const insets = useSafeAreaInsets();
   
@@ -45,7 +46,7 @@ export default function SupportScreen() {
     <View style={[styles.screen, { paddingTop: insets.top > 0 ? insets.top + 10 : 48 }]}>
       <View style={styles.topNav}>
         <Pressable onPress={() => router.back()} style={styles.backBtn}>
-          <Ionicons name="chevron-back" size={24} color="#0F172A" />
+          <Ionicons name="chevron-back" size={24} color={colors.text} />
         </Pressable>
         <Text style={styles.topNavTitle}>Help & Support</Text>
         <View style={{ width: moderateScale(40) }} />
@@ -65,8 +66,8 @@ export default function SupportScreen() {
               <Text style={styles.contactSub}>Reach out to the canteen administration for order issues.</Text>
             </View>
           </View>
-          <Pressable style={styles.contactBtn} android_ripple={{ color: "#EA580C" }}>
-            <Ionicons name="call" size={18} color="white" />
+          <Pressable style={styles.contactBtn} android_ripple={{ color: isDark ? "#C2410C" : "#EA580C" }}>
+            <Ionicons name="call" size={18} color={isDark ? colors.background : "white"} />
             <Text style={styles.contactBtnText}>Call Administration</Text>
           </Pressable>
         </View>
@@ -87,7 +88,7 @@ export default function SupportScreen() {
                     <Ionicons 
                       name={isExpanded ? "chevron-up" : "chevron-down"} 
                       size={20} 
-                      color="#64748B" 
+                      color={colors.textSecondary} 
                     />
                   </Pressable>
                   {isExpanded && (
@@ -106,7 +107,7 @@ export default function SupportScreen() {
   );
 }
 
-const createStyles = (colors: any) => StyleSheet.create({
+const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => ({
   screen: {
     flex: 1,
     backgroundColor: colors.background
@@ -125,7 +126,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     backgroundColor: colors.card,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#0F172A",
+    shadowColor: colors.text,
     shadowOpacity: 0.05,
     shadowRadius: moderateScale(10),
     shadowOffset: { width: 0, height: 4 },
@@ -142,11 +143,11 @@ const createStyles = (colors: any) => StyleSheet.create({
     gap: moderateScale(32)
   },
   contactCard: {
-    backgroundColor: "#0F172A",
+    backgroundColor: isDark ? colors.surfaceAlt : "#0F172A",
     borderRadius: moderateScale(20),
     padding: moderateScale(20),
     gap: moderateScale(16),
-    shadowColor: "#0F172A",
+    shadowColor: colors.text,
     shadowOpacity: 0.15,
     shadowRadius: moderateScale(16),
     shadowOffset: { width: 0, height: 6 },
@@ -161,14 +162,14 @@ const createStyles = (colors: any) => StyleSheet.create({
     width: moderateScale(50),
     height: moderateScale(50),
     borderRadius: moderateScale(25),
-    backgroundColor: "#1E293B",
+    backgroundColor: isDark ? colors.card : "#1E293B",
     alignItems: "center",
     justifyContent: "center"
   },
   contactTitle: {
     fontSize: fontScale(18),
     fontWeight: "900",
-    color: "white"
+    color: isDark ? colors.text : "white"
   },
   contactSub: {
     color: colors.textMuted,
@@ -177,7 +178,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     lineHeight: 18
   },
   contactBtn: {
-    backgroundColor: "#FF6B35",
+    backgroundColor: isDark ? "#FF6B35" : "#FF6B35",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
@@ -186,7 +187,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     borderRadius: moderateScale(12)
   },
   contactBtnText: {
-    color: "white",
+    color: isDark ? colors.background : "white",
     fontWeight: "800",
     fontSize: fontScale(15)
   },

@@ -41,8 +41,9 @@ type MenuItem = {
 const formatCurrency = (value: number): string => `₹ ${value.toFixed(2)}`;
 
 export default function Screen() {
-  const { colors, isDark } = useTheme();
-  const styles = createStyles(colors);
+  const theme = useTheme();
+  const { colors, isDark } = theme;
+  const styles = createStyles(theme);
   const insets = useSafeAreaInsets();
   const { width: screenWidth } = useWindowDimensions();
   const router = useRouter();
@@ -98,7 +99,7 @@ export default function Screen() {
     <View style={[styles.screen, { paddingTop: insets.top > 0 ? insets.top + 10 : 48 }]}>
       <View style={styles.topNav}>
         <Pressable onPress={() => router.back()} style={styles.backBtn}>
-          <Ionicons name="chevron-back" size={24} color="#0F172A" />
+          <Ionicons name="chevron-back" size={24} color={colors.text} />
         </Pressable>
         <Text style={styles.topNavTitle}>Category</Text>
         <View style={{ width: moderateScale(40) }} />
@@ -152,7 +153,7 @@ export default function Screen() {
 
       {filtered.length === 0 && !loading ? (
         <View style={styles.emptyCard}>
-          <Ionicons name="restaurant-outline" size={30} color="#94A3B8" />
+          <Ionicons name="restaurant-outline" size={30} color={colors.textSecondary} />
           <Text style={styles.emptyTitle}>No items in this category</Text>
           <Text style={styles.emptySub}>Try another category from Search screen.</Text>
         </View>
@@ -185,7 +186,7 @@ export default function Screen() {
                   />
                 ) : (
                   <View style={styles.itemImageFallback}>
-                    <Ionicons name="fast-food-outline" size={20} color="#94A3B8" />
+                    <Ionicons name="fast-food-outline" size={20} color={colors.textMuted} />
                   </View>
                 )}
                 <View style={styles.itemBody}>
@@ -222,7 +223,7 @@ export default function Screen() {
   );
 }
 
-const createStyles = (colors: any) => StyleSheet.create({
+const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => ({
   screen: {
     flex: 1,
     backgroundColor: colors.background
@@ -393,7 +394,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     backgroundColor: colors.card,
     overflow: "hidden",
     marginBottom: verticalScale(14),
-    shadowColor: "#0F172A",
+    shadowColor: colors.text,
     shadowOpacity: 0.06,
     shadowRadius: moderateScale(10),
     shadowOffset: { width: 0, height: 4 },
@@ -440,11 +441,11 @@ const createStyles = (colors: any) => StyleSheet.create({
     fontWeight: "600"
   },
   itemPrice: {
-    color: "#C2410C",
+    color: isDark ? "#FDBA74" : "#C2410C",
     fontWeight: "800",
-    backgroundColor: "#FFF7ED",
+    backgroundColor: isDark ? "rgba(194, 65, 12, 0.2)" : "#FFF7ED",
     borderWidth: 1,
-    borderColor: "#FED7AA",
+    borderColor: isDark ? "rgba(194, 65, 12, 0.4)" : "#FED7AA",
     borderRadius: moderateScale(999),
     paddingHorizontal: moderateScale(8),
     paddingVertical: moderateScale(3),
@@ -470,7 +471,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     paddingVertical: moderateScale(10)
   },
   addBtnDisabled: {
-    backgroundColor: "#9CA3AF"
+    backgroundColor: colors.textMuted
   },
   addBtnText: {
     color: "white",

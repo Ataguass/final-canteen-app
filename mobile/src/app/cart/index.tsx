@@ -3,12 +3,15 @@ import { Link, useRouter } from "expo-router";
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useCart } from "../../hooks/useCart";
+import { useTheme } from "../../hooks/useTheme";
 import { CanteenHeader } from "../../components/CanteenHeader";
 import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../utils/responsive';
 
 const formatCurrency = (value: number): string => `₹ ${value.toFixed(2)}`;
 
 export default function Screen() {
+  const { colors, isDark } = useTheme();
+  const styles = createStyles(colors);
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { items, itemCount, subtotal, updateQuantity, updateNote, removeItem } = useCart();
@@ -25,8 +28,8 @@ export default function Screen() {
 
       {items.length === 0 ? (
         <View style={styles.emptyStateContainer}>
-          <View style={styles.emptyIconCircle}>
-            <Ionicons name="cart-outline" size={40} color="#94A3B8" />
+          <View style={[styles.emptyIconCircle, { backgroundColor: isDark ? colors.surfaceAlt : "#F1F5F9" }]}>
+            <Ionicons name="cart-outline" size={40} color={colors.textSecondary} />
           </View>
           <Text style={styles.emptyTitle}>Your cart is empty</Text>
           <Text style={styles.emptySub}>Looks like you haven't added anything to your cart yet.</Text>
@@ -46,8 +49,8 @@ export default function Screen() {
                   <Text style={styles.itemName}>{item.name}</Text>
                   <Text style={styles.itemPrice}>{formatCurrency(item.price)}</Text>
                 </View>
-                <Pressable onPress={() => removeItem(item.menuItemId)} style={styles.removeBtn}>
-                  <Ionicons name="trash-outline" size={18} color="#EF4444" />
+                <Pressable onPress={() => removeItem(item.menuItemId)} style={[styles.removeBtn, { backgroundColor: isDark ? "rgba(239, 68, 68, 0.15)" : "#FEF2F2" }]}>
+                  <Ionicons name="trash-outline" size={18} color={colors.danger} />
                 </Pressable>
               </View>
 
@@ -55,28 +58,28 @@ export default function Screen() {
                 <View style={styles.qtyControl}>
                   <Pressable
                     onPress={() => updateQuantity(item.menuItemId, item.quantity - 1)}
-                    style={styles.qtyBtn}
+                    style={[styles.qtyBtn, { backgroundColor: colors.card, shadowColor: colors.text }]}
                   >
-                    <Ionicons name="remove" size={16} color="#0F172A" />
+                    <Ionicons name="remove" size={16} color={colors.text} />
                   </Pressable>
                   <Text style={styles.qtyText}>{item.quantity}</Text>
                   <Pressable
                     onPress={() => updateQuantity(item.menuItemId, item.quantity + 1)}
-                    style={styles.qtyBtn}
+                    style={[styles.qtyBtn, { backgroundColor: colors.card, shadowColor: colors.text }]}
                   >
-                    <Ionicons name="add" size={16} color="#0F172A" />
+                    <Ionicons name="add" size={16} color={colors.text} />
                   </Pressable>
                 </View>
                 <Text style={styles.lineTotal}>{formatCurrency(item.price * item.quantity)}</Text>
               </View>
 
-              <View style={styles.noteInputWrapper}>
-                <Ionicons name="create-outline" size={16} color="#94A3B8" />
+              <View style={[styles.noteInputWrapper, { backgroundColor: colors.inputBg, borderColor: colors.border }]}>
+                <Ionicons name="create-outline" size={16} color={colors.textMuted} />
                 <TextInput
                   value={item.note ?? ""}
                   onChangeText={(txt) => updateNote(item.menuItemId, txt)}
                   placeholder="Add a note (e.g. less spicy)"
-                  placeholderTextColor="#94A3B8"
+                  placeholderTextColor={colors.textMuted}
                   style={styles.noteInput}
                 />
               </View>
@@ -85,10 +88,10 @@ export default function Screen() {
 
           <Pressable
             onPress={() => router.push("/(student)/search")}
-            style={styles.addMoreBtn}
+            style={[styles.addMoreBtn, { backgroundColor: isDark ? colors.surfaceAlt : "#EFF6FF", borderColor: isDark ? colors.border : "#BFDBFE" }]}
           >
-            <Ionicons name="add-circle-outline" size={18} color="#2563EB" />
-            <Text style={styles.addMoreBtnText}>Add More Items</Text>
+            <Ionicons name="add-circle-outline" size={18} color={colors.accent} />
+            <Text style={[styles.addMoreBtnText, { color: colors.accent }]}>Add More Items</Text>
           </Pressable>
 
           <View style={styles.invoiceCard}>
@@ -112,7 +115,7 @@ export default function Screen() {
           </View>
 
           <Link href="/cart/checkout" asChild>
-            <Pressable style={styles.checkoutBtn}>
+            <Pressable style={[styles.checkoutBtn, { backgroundColor: colors.accent, shadowColor: colors.accent }]}>
               <Text style={styles.checkoutBtnText}>Proceed to Checkout</Text>
               <Ionicons name="arrow-forward" size={20} color="white" />
             </Pressable>
@@ -123,10 +126,10 @@ export default function Screen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => ({
   screen: {
     flex: 1,
-    backgroundColor: "#EEF2F7"
+    backgroundColor: colors.background
   },
   content: {
     padding: moderateScale(16),
@@ -143,7 +146,6 @@ const styles = StyleSheet.create({
     width: moderateScale(80),
     height: moderateScale(80),
     borderRadius: moderateScale(40),
-    backgroundColor: "#F1F5F9",
     alignItems: "center",
     justifyContent: "center",
     marginBottom: verticalScale(16)
@@ -151,32 +153,32 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: fontScale(20),
     fontWeight: "800",
-    color: "#0F172A",
+    color: colors.text,
     marginBottom: verticalScale(8)
   },
   emptySub: {
     fontSize: fontScale(15),
-    color: "#64748B",
+    color: colors.textSecondary,
     textAlign: "center",
     marginBottom: verticalScale(24),
     lineHeight: 22
   },
   browseMenuBtn: {
-    backgroundColor: "#0F172A",
+    backgroundColor: colors.text,
     paddingHorizontal: moderateScale(24),
     paddingVertical: moderateScale(14),
     borderRadius: moderateScale(12)
   },
   browseMenuBtnText: {
-    color: "white",
+    color: colors.background,
     fontWeight: "700",
     fontSize: fontScale(16)
   },
   itemCard: {
-    backgroundColor: "white",
+    backgroundColor: colors.card,
     borderRadius: moderateScale(16),
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: colors.border,
     padding: moderateScale(16),
     gap: moderateScale(12)
   },
@@ -192,17 +194,16 @@ const styles = StyleSheet.create({
   itemName: {
     fontSize: fontScale(17),
     fontWeight: "800",
-    color: "#0F172A",
+    color: colors.text,
     marginBottom: verticalScale(4)
   },
   itemPrice: {
     fontSize: fontScale(14),
     fontWeight: "600",
-    color: "#64748B"
+    color: colors.textSecondary
   },
   removeBtn: {
     padding: moderateScale(6),
-    backgroundColor: "#FEF2F2",
     borderRadius: moderateScale(8)
   },
   itemControlsRow: {
@@ -214,7 +215,7 @@ const styles = StyleSheet.create({
   qtyControl: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F1F5F9",
+    backgroundColor: colors.surfaceAlt,
     borderRadius: moderateScale(8),
     padding: moderateScale(4)
   },
@@ -223,9 +224,7 @@ const styles = StyleSheet.create({
     height: moderateScale(30),
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "white",
     borderRadius: moderateScale(6),
-    shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 1,
@@ -234,22 +233,20 @@ const styles = StyleSheet.create({
   qtyText: {
     fontSize: fontScale(15),
     fontWeight: "700",
-    color: "#0F172A",
+    color: colors.text,
     width: moderateScale(32),
     textAlign: "center"
   },
   lineTotal: {
     fontSize: fontScale(16),
     fontWeight: "800",
-    color: "#0F172A"
+    color: colors.text
   },
   noteInputWrapper: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F8FAFC",
     borderRadius: moderateScale(8),
     borderWidth: 1,
-    borderColor: "#E2E8F0",
     paddingHorizontal: moderateScale(10),
     marginTop: verticalScale(4)
   },
@@ -257,7 +254,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: moderateScale(10),
     paddingLeft: moderateScale(8),
-    color: "#0F172A",
+    color: colors.text,
     fontSize: fontScale(14)
   },
   addMoreBtn: {
@@ -266,28 +263,25 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: moderateScale(8),
     paddingVertical: moderateScale(14),
-    backgroundColor: "#EFF6FF",
     borderRadius: moderateScale(12),
-    borderWidth: 1,
-    borderColor: "#BFDBFE"
+    borderWidth: 1
   },
   addMoreBtnText: {
-    color: "#2563EB",
     fontWeight: "700",
     fontSize: fontScale(15)
   },
   invoiceCard: {
-    backgroundColor: "white",
+    backgroundColor: colors.card,
     borderRadius: moderateScale(16),
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: colors.border,
     padding: moderateScale(16),
     marginTop: verticalScale(8)
   },
   invoiceTitle: {
     fontSize: fontScale(16),
     fontWeight: "800",
-    color: "#0F172A",
+    color: colors.text,
     marginBottom: verticalScale(12)
   },
   invoiceRow: {
@@ -297,17 +291,17 @@ const styles = StyleSheet.create({
   },
   invoiceLabel: {
     fontSize: fontScale(14),
-    color: "#64748B",
+    color: colors.textSecondary,
     fontWeight: "500"
   },
   invoiceValue: {
     fontSize: fontScale(14),
-    color: "#0F172A",
+    color: colors.text,
     fontWeight: "600"
   },
   invoiceDivider: {
     height: 1,
-    backgroundColor: "#E2E8F0",
+    backgroundColor: colors.border,
     borderStyle: "dashed",
     marginVertical: moderateScale(12)
   },
@@ -319,15 +313,14 @@ const styles = StyleSheet.create({
   invoiceTotalLabel: {
     fontSize: fontScale(16),
     fontWeight: "800",
-    color: "#0F172A"
+    color: colors.text
   },
   invoiceTotalValue: {
     fontSize: fontScale(18),
     fontWeight: "900",
-    color: "#2563EB"
+    color: colors.accent
   },
   checkoutBtn: {
-    backgroundColor: "#0F172A",
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
@@ -335,7 +328,6 @@ const styles = StyleSheet.create({
     borderRadius: moderateScale(16),
     marginTop: verticalScale(12),
     gap: moderateScale(8),
-    shadowColor: "#0F172A",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,
     shadowRadius: moderateScale(8),

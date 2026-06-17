@@ -9,8 +9,9 @@ import { useTheme } from '../../hooks/useTheme';
 const BRAND_COLOR = "#080d2b";
 
 export default function ForgotPasswordScreen() {
-  const { colors, isDark } = useTheme();
-  const styles = createStyles(colors);
+  const theme = useTheme();
+  const { colors, isDark } = theme;
+  const styles = createStyles(theme);
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
@@ -42,7 +43,7 @@ export default function ForgotPasswordScreen() {
         
         <Animated.View entering={FadeInDown.delay(100).springify()} style={styles.header}>
           <Pressable onPress={() => router.back()} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={24} color="#1c1c1e" />
+            <Ionicons name="arrow-back" size={24} color={isDark ? colors.text : "#1c1c1e"} />
           </Pressable>
           <View style={styles.iconContainer}>
             <Ionicons name="lock-open" size={32} color="#ffffff" />
@@ -85,7 +86,7 @@ export default function ForgotPasswordScreen() {
   );
 }
 
-const createStyles = (colors: any) => StyleSheet.create({
+const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => ({
   container: {
     flex: 1,
     backgroundColor: colors.background,
@@ -115,7 +116,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     justifyContent: 'center',
     marginBottom: verticalScale(20),
     elevation: 8,
-    shadowColor: BRAND_COLOR,
+    shadowColor: isDark ? colors.text : BRAND_COLOR,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.3,
     shadowRadius: moderateScale(16),
@@ -157,14 +158,14 @@ const createStyles = (colors: any) => StyleSheet.create({
     height: '100%',
   },
   primaryButton: {
-    backgroundColor: BRAND_COLOR,
+    backgroundColor: isDark ? colors.primary : BRAND_COLOR,
     height: moderateScale(56),
     borderRadius: moderateScale(16),
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: verticalScale(8),
     elevation: 8,
-    shadowColor: BRAND_COLOR,
+    shadowColor: isDark ? colors.primary : BRAND_COLOR,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.3,
     shadowRadius: moderateScale(16),

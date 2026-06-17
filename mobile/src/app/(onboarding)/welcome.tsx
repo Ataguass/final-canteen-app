@@ -43,8 +43,8 @@ export default function WelcomeScreen() {
       {/* Header */}
       <Animated.View entering={FadeInDown.delay(100).springify()} style={styles.header}>
         <View style={styles.headerLeft}>
-          <Ionicons name="school-outline" size={24} color={BRAND_COLOR} />
-          <Text style={styles.headerTitle}>Canteen Management</Text>
+          <Ionicons name="school-outline" size={24} color={isDark ? colors.text : BRAND_COLOR} />
+          <Text style={[styles.headerTitle, isDark && { color: colors.text }]}>Canteen Management</Text>
         </View>
         <TouchableOpacity onPress={handleSkip} activeOpacity={0.6}>
           <Text style={styles.skipText}>Skip</Text>
@@ -114,7 +114,7 @@ export default function WelcomeScreen() {
   );
 }
 
-const createStyles = (colors: any) => StyleSheet.create({
+const createStyles = (colors: any) => ({
   container: {
     flex: 1,
     backgroundColor: colors.background,
@@ -229,7 +229,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   subtitle: {
     fontSize: fontScale(17),
-    color: '#6e6e73',
+    color: colors.textSecondary,
     textAlign: 'center',
     lineHeight: 26,
     maxWidth: moderateScale(320),
@@ -244,7 +244,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     height: moderateScale(8),
     width: moderateScale(8),
     borderRadius: moderateScale(4),
-    backgroundColor: '#d1d1d6',
+    backgroundColor: colors.border,
   },
   activeDot: {
     width: moderateScale(24),

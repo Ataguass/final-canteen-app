@@ -16,6 +16,7 @@ import { useAuth } from "../../../hooks/useAuth";
 import { CanteenHeader } from "../../../components/CanteenHeader";
 import { useOrderSocket } from "../../../hooks/useOrderSocket";
 import { Order, orderService } from "../../../services/orderService";
+import { useTheme } from "../../../hooks/useTheme";
 import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../../utils/responsive';
 
 type OrderFilter = "ALL" | "PENDING" | "PREPARING" | "READY" | "COMPLETED" | "CANCELLED";
@@ -42,6 +43,9 @@ const statusColorMap: Record<string, string> = {
 const formatCurrency = (value: number): string => `₹ ${value.toFixed(2)}`;
 
 export default function Screen() {
+  const theme = useTheme();
+  const { colors, isDark } = theme;
+  const styles = createStyles(theme);
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { user, accessToken } = useAuth();
@@ -122,7 +126,7 @@ export default function Screen() {
       contentContainerStyle={[styles.content, { paddingTop: insets.top + 16 }]}
       showsVerticalScrollIndicator={false}
       refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={() => load(true)} colors={["#0F172A"]} />
+        <RefreshControl refreshing={refreshing} onRefresh={() => load(true)} colors={[colors.text]} tintColor={colors.text} />
       }
     >
       <CanteenHeader showBackButton title="My Orders" subtitle="Track live and past orders" />
@@ -130,8 +134,8 @@ export default function Screen() {
       {/* Modern Stats Row */}
       <View style={styles.statsRow}>
         <View style={styles.statCard}>
-          <View style={[styles.statIconWrap, { backgroundColor: "#F1F5F9" }]}>
-            <Ionicons name="receipt" size={16} color="#FF6B35" />
+          <View style={[styles.statIconWrap, { backgroundColor: isDark ? "rgba(255, 107, 53, 0.2)" : "#F1F5F9" }]}>
+            <Ionicons name="receipt" size={16} color={isDark ? "#FDBA74" : "#FF6B35"} />
           </View>
           <View>
             <Text style={styles.statValue}>{stats.total}</Text>
@@ -139,8 +143,8 @@ export default function Screen() {
           </View>
         </View>
         <View style={styles.statCard}>
-          <View style={[styles.statIconWrap, { backgroundColor: "#FEF3C7" }]}>
-            <Ionicons name="time" size={16} color="#D97706" />
+          <View style={[styles.statIconWrap, { backgroundColor: isDark ? "rgba(217, 119, 6, 0.2)" : "#FEF3C7" }]}>
+            <Ionicons name="time" size={16} color={isDark ? "#FBBF24" : "#D97706"} />
           </View>
           <View>
             <Text style={styles.statValue}>{stats.active}</Text>
@@ -148,8 +152,8 @@ export default function Screen() {
           </View>
         </View>
         <View style={styles.statCard}>
-          <View style={[styles.statIconWrap, { backgroundColor: "#DCFCE7" }]}>
-            <Ionicons name="checkmark-circle" size={16} color="#059669" />
+          <View style={[styles.statIconWrap, { backgroundColor: isDark ? "rgba(5, 150, 105, 0.2)" : "#DCFCE7" }]}>
+            <Ionicons name="checkmark-circle" size={16} color={isDark ? "#34D399" : "#059669"} />
           </View>
           <View>
             <Text style={styles.statValue}>{stats.completed}</Text>
@@ -160,17 +164,17 @@ export default function Screen() {
 
       {/* Floating Search Bar */}
       <View style={styles.searchBarCard}>
-        <Ionicons name="search-outline" size={20} color="#64748B" />
+        <Ionicons name="search-outline" size={20} color={colors.textSecondary} />
         <TextInput
           value={query}
           onChangeText={setQuery}
           placeholder="Search orders..."
-          placeholderTextColor="#94A3B8"
+          placeholderTextColor={colors.textMuted}
           style={styles.searchInput}
         />
         {query ? (
           <Pressable onPress={() => setQuery("")} style={styles.clearBtn}>
-            <Ionicons name="close-circle" size={18} color="#94A3B8" />
+            <Ionicons name="close-circle" size={18} color={colors.textMuted} />
           </Pressable>
         ) : null}
       </View>
@@ -188,7 +192,7 @@ export default function Screen() {
               key={item}
               onPress={() => setFilter(item)}
               style={[styles.filterChip, active && styles.filterChipActive]}
-              android_ripple={{ color: "#CBD5E1" }}
+              android_ripple={{ color: isDark ? colors.border : "#CBD5E1" }}
             >
               <Text
                 style={[
@@ -213,13 +217,13 @@ export default function Screen() {
 
       {loading && !refreshing && orders.length === 0 ? (
         <View style={styles.emptyCard}>
-          <Ionicons name="hourglass-outline" size={24} color="#94A3B8" />
+          <Ionicons name="hourglass-outline" size={24} color={colors.textMuted} />
           <Text style={styles.emptyTitle}>Loading orders...</Text>
         </View>
       ) : filteredOrders.length === 0 ? (
         <View style={styles.emptyCard}>
           <View style={styles.emptyIconWrap}>
-            <Ionicons name="receipt-outline" size={32} color="#94A3B8" />
+            <Ionicons name="receipt-outline" size={32} color={colors.textMuted} />
           </View>
           <Text style={styles.emptyTitle}>No orders found</Text>
           <Text style={styles.emptySub}>
@@ -237,7 +241,7 @@ export default function Screen() {
               href={{ pathname: "/(student)/orders/[id]", params: { id: order.id } }}
               asChild
             >
-              <Pressable style={styles.orderCard} android_ripple={{ color: "#F1F5F9" }}>
+              <Pressable style={styles.orderCard} android_ripple={{ color: isDark ? colors.surfaceAlt : "#F1F5F9" }}>
                 <View style={styles.orderHeader}>
                   <View style={styles.orderHeaderLeft}>
                     <Text style={styles.orderNumber}>{order.orderNumber}</Text>
@@ -264,19 +268,19 @@ export default function Screen() {
                   <View style={styles.orderTagRow}>
                     {order.serviceLane === "TEACHER_PRIORITY" ? (
                       <View style={[styles.orderTagPill, styles.orderTagPriority]}>
-                        <Ionicons name="star" size={12} color="#1E40AF" />
+                        <Ionicons name="star" size={12} color={isDark ? "#60A5FA" : "#1E40AF"} />
                         <Text style={[styles.orderTagText, styles.orderTagPriorityText]}>Priority</Text>
                       </View>
                     ) : null}
                     {order.laneToken ? (
                       <View style={styles.orderTagPill}>
-                        <Ionicons name="ticket" size={12} color="#475569" />
+                        <Ionicons name="ticket" size={12} color={colors.textSecondary} />
                         <Text style={styles.orderTagText}>Token {order.laneToken}</Text>
                       </View>
                     ) : null}
                     {order.isPreOrder && order.pickupSlotLabel ? (
                       <View style={[styles.orderTagPill, styles.orderTagPreOrder]}>
-                        <Ionicons name="time" size={12} color="#166534" />
+                        <Ionicons name="time" size={12} color={isDark ? "#86EFAC" : "#166534"} />
                         <Text style={[styles.orderTagText, styles.orderTagPreOrderText]}>{order.pickupSlotLabel}</Text>
                       </View>
                     ) : null}
@@ -311,10 +315,10 @@ export default function Screen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => ({
   screen: {
     flex: 1,
-    backgroundColor: "#EEF2F7"
+    backgroundColor: colors.background
   },
   content: {
     padding: moderateScale(16),
@@ -329,17 +333,17 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "white",
+    backgroundColor: colors.card,
     borderRadius: moderateScale(16),
     padding: moderateScale(12),
     gap: moderateScale(10),
-    shadowColor: "#0F172A",
+    shadowColor: colors.text,
     shadowOpacity: 0.03,
     shadowRadius: moderateScale(8),
     shadowOffset: { width: 0, height: 2 },
     elevation: 1,
     borderWidth: 1,
-    borderColor: "#E2E8F0"
+    borderColor: colors.border
   },
   statIconWrap: {
     width: moderateScale(32),
@@ -349,29 +353,29 @@ const styles = StyleSheet.create({
     justifyContent: "center"
   },
   statLabel: {
-    color: "#64748B",
+    color: colors.textSecondary,
     fontSize: fontScale(11),
     fontWeight: "700",
     textTransform: "uppercase",
     letterSpacing: 0.5
   },
   statValue: {
-    color: "#0F172A",
+    color: colors.text,
     fontWeight: "800",
     fontSize: fontScale(18),
     lineHeight: 22
   },
   searchBarCard: {
     borderWidth: 1,
-    borderColor: "#E2E8F0",
-    backgroundColor: "#FFFFFF",
+    borderColor: colors.border,
+    backgroundColor: colors.card,
     borderRadius: moderateScale(16),
     minHeight: moderateScale(52),
     paddingHorizontal: moderateScale(16),
     flexDirection: "row",
     alignItems: "center",
     gap: moderateScale(10),
-    shadowColor: "#0F172A",
+    shadowColor: colors.text,
     shadowOpacity: 0.04,
     shadowRadius: moderateScale(8),
     shadowOffset: { width: 0, height: 3 },
@@ -379,7 +383,7 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     flex: 1,
-    color: "#0F172A",
+    color: colors.text,
     paddingVertical: moderateScale(12),
     fontWeight: "600",
     fontSize: fontScale(15)
@@ -396,20 +400,20 @@ const styles = StyleSheet.create({
     paddingVertical: moderateScale(10),
     borderRadius: moderateScale(999),
     borderWidth: 1,
-    borderColor: "#CBD5E1",
-    backgroundColor: "#F8FAFC"
+    borderColor: colors.border,
+    backgroundColor: colors.card
   },
   filterChipActive: {
-    backgroundColor: "#0F172A",
-    borderColor: "#0F172A"
+    backgroundColor: colors.text,
+    borderColor: colors.text
   },
   filterChipText: {
-    color: "#475569",
+    color: colors.textSecondary,
     fontWeight: "700",
     fontSize: fontScale(14)
   },
   filterChipTextActive: {
-    color: "white"
+    color: colors.background
   },
   sectionHeader: {
     flexDirection: "row",
@@ -419,12 +423,12 @@ const styles = StyleSheet.create({
     marginBottom: verticalScale(4)
   },
   sectionTitle: {
-    color: "#0F172A",
+    color: colors.text,
     fontSize: fontScale(20),
     fontWeight: "800"
   },
   sectionMeta: {
-    color: "#64748B",
+    color: colors.textSecondary,
     fontWeight: "700",
     fontSize: fontScale(14),
     marginBottom: verticalScale(2)
@@ -432,8 +436,8 @@ const styles = StyleSheet.create({
   emptyCard: {
     borderRadius: moderateScale(16),
     borderWidth: 1,
-    borderColor: "#E2E8F0",
-    backgroundColor: "white",
+    borderColor: colors.border,
+    backgroundColor: colors.card,
     padding: moderateScale(32),
     alignItems: "center",
     justifyContent: "center",
@@ -444,18 +448,18 @@ const styles = StyleSheet.create({
     width: moderateScale(64),
     height: moderateScale(64),
     borderRadius: moderateScale(32),
-    backgroundColor: "#F1F5F9",
+    backgroundColor: colors.surfaceAlt,
     alignItems: "center",
     justifyContent: "center",
     marginBottom: verticalScale(8)
   },
   emptyTitle: {
-    color: "#0F172A",
+    color: colors.text,
     fontWeight: "800",
     fontSize: fontScale(18)
   },
   emptySub: {
-    color: "#64748B",
+    color: colors.textSecondary,
     textAlign: "center",
     fontSize: fontScale(14),
     lineHeight: 20
@@ -463,11 +467,11 @@ const styles = StyleSheet.create({
   orderCard: {
     borderRadius: moderateScale(16),
     borderWidth: 1,
-    borderColor: "#E2E8F0",
-    backgroundColor: "white",
+    borderColor: colors.border,
+    backgroundColor: colors.card,
     padding: moderateScale(16),
     gap: moderateScale(12),
-    shadowColor: "#0F172A",
+    shadowColor: colors.text,
     shadowOpacity: 0.03,
     shadowRadius: moderateScale(8),
     shadowOffset: { width: 0, height: 2 },
@@ -484,12 +488,12 @@ const styles = StyleSheet.create({
     gap: moderateScale(2)
   },
   orderNumber: {
-    color: "#0F172A",
+    color: colors.text,
     fontWeight: "800",
     fontSize: fontScale(17)
   },
   orderDate: {
-    color: "#64748B",
+    color: colors.textSecondary,
     fontSize: fontScale(13),
     fontWeight: "600"
   },
@@ -522,31 +526,31 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     borderRadius: moderateScale(8),
-    backgroundColor: "#F1F5F9",
+    backgroundColor: colors.surfaceAlt,
     paddingHorizontal: moderateScale(8),
     paddingVertical: moderateScale(5),
     gap: moderateScale(4)
   },
   orderTagText: {
-    color: "#475569",
+    color: colors.textSecondary,
     fontWeight: "700",
     fontSize: fontScale(12)
   },
   orderTagPriority: {
-    backgroundColor: "#F1F5F9"
+    backgroundColor: isDark ? "rgba(30, 64, 175, 0.2)" : "#F1F5F9"
   },
   orderTagPriorityText: {
-    color: "#1E40AF"
+    color: isDark ? "#93C5FD" : "#1E40AF"
   },
   orderTagPreOrder: {
-    backgroundColor: "#DCFCE7"
+    backgroundColor: isDark ? "rgba(22, 101, 52, 0.2)" : "#DCFCE7"
   },
   orderTagPreOrderText: {
-    color: "#166534"
+    color: isDark ? "#86EFAC" : "#166534"
   },
   divider: {
     height: 1,
-    backgroundColor: "#E2E8F0",
+    backgroundColor: colors.border,
     marginVertical: moderateScale(2)
   },
   orderFooter: {
@@ -555,30 +559,30 @@ const styles = StyleSheet.create({
     alignItems: "center"
   },
   orderItems: {
-    color: "#64748B",
+    color: colors.textSecondary,
     fontWeight: "600",
     fontSize: fontScale(14)
   },
   orderTotal: {
-    color: "#0F172A",
+    color: colors.text,
     fontWeight: "800",
     fontSize: fontScale(18)
   },
   browseBtn: {
-    backgroundColor: "#0F172A",
+    backgroundColor: colors.text,
     borderRadius: moderateScale(16),
     paddingVertical: moderateScale(16),
     marginTop: verticalScale(8),
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#0F172A",
+    shadowColor: colors.text,
     shadowOpacity: 0.2,
     shadowRadius: moderateScale(8),
     shadowOffset: { width: 0, height: 4 },
     elevation: 4
   },
   browseBtnText: {
-    color: "white",
+    color: colors.background,
     fontSize: fontScale(16),
     fontWeight: "800"
   }

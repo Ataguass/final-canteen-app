@@ -21,7 +21,8 @@
       "@react-native-firebase/auth"
     ],
     "experiments": {
-      "typedRoutes": true
+      "typedRoutes": true,
+      "networkInspector": false
     },
     "android": {
       "usesCleartextTraffic": true,

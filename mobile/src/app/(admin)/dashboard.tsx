@@ -70,8 +70,9 @@ const quickActions: QuickAction[] = [
 ];
 
 export default function Screen() {
-  const { colors, isDark } = useTheme();
-  const styles = createStyles(colors);
+  const theme = useTheme();
+  const { colors, isDark } = theme;
+  const styles = createStyles(theme);
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { user, accessToken } = useAuth();
@@ -267,12 +268,12 @@ export default function Screen() {
   ];
 
   return (
-    <View style={styles.screen}>
+    <View key={isDark ? "dark" : "light"} style={styles.screen}>
       <ScrollView 
         contentContainerStyle={[styles.content, { paddingTop: 16 }]}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={() => loadDashboard(true)} colors={["#0F172A"]} />
+          <RefreshControl refreshing={refreshing} onRefresh={() => loadDashboard(true)} colors={[isDark ? colors.text : "#0F172A"]} />
         }
       >
         {/* Overview Header */}
@@ -303,10 +304,10 @@ export default function Screen() {
           <View style={styles.quickGrid}>
             {quickActions.map((action) => (
               <Pressable
-                key={action.path}
+                key={`${action.path}-${isDark}`}
                 onPress={() => router.push(action.path as never)}
                 style={styles.quickCard}
-                android_ripple={{ color: "#E2E8F0" }}
+                android_ripple={{ color: isDark ? colors.surfaceAlt : "#E2E8F0" }}
               >
                 <View style={[styles.quickIconWrap, { backgroundColor: action.tint }]}>
                   <Ionicons name={action.icon} size={22} color={action.iconColor} />
@@ -425,17 +426,17 @@ export default function Screen() {
           <View style={[styles.card, styles.flexCard]}>
             <Text style={styles.cardHeader}>Team Alerts</Text>
             <View style={styles.teamGrid}>
-              <View style={[styles.teamBox, { backgroundColor: "#ECFDF5" }]}>
-                <Text style={[styles.teamBoxLabel, { color: "#047857" }]}>Teachers</Text>
-                <Text style={[styles.teamBoxValue, { color: "#064E3B" }]}>{dashboardData.teamData.teachers}</Text>
+              <View style={[styles.teamBox, { backgroundColor: isDark ? 'rgba(16, 185, 129, 0.1)' : "#ECFDF5" }]}>
+                <Text style={[styles.teamBoxLabel, { color: isDark ? '#34D399' : "#047857" }]}>Teachers</Text>
+                <Text style={[styles.teamBoxValue, { color: isDark ? '#10B981' : "#064E3B" }]}>{dashboardData.teamData.teachers}</Text>
               </View>
-              <View style={[styles.teamBox, { backgroundColor: "#EFF6FF" }]}>
-                <Text style={[styles.teamBoxLabel, { color: "#1D4ED8" }]}>Staff</Text>
-                <Text style={[styles.teamBoxValue, { color: "#1E3A8A" }]}>{dashboardData.teamData.staff}</Text>
+              <View style={[styles.teamBox, { backgroundColor: isDark ? 'rgba(59, 130, 246, 0.1)' : "#EFF6FF" }]}>
+                <Text style={[styles.teamBoxLabel, { color: isDark ? '#60A5FA' : "#1D4ED8" }]}>Staff</Text>
+                <Text style={[styles.teamBoxValue, { color: isDark ? '#3B82F6' : "#1E3A8A" }]}>{dashboardData.teamData.staff}</Text>
               </View>
-              <View style={[styles.teamBox, { backgroundColor: "#FEF2F2" }]}>
-                <Text style={[styles.teamBoxLabel, { color: "#DC2626" }]}>Pending</Text>
-                <Text style={[styles.teamBoxValue, { color: "#7F1D1D" }]}>{dashboardData.teamData.pendingApprovals}</Text>
+              <View style={[styles.teamBox, { backgroundColor: isDark ? 'rgba(239, 68, 68, 0.1)' : "#FEF2F2" }]}>
+                <Text style={[styles.teamBoxLabel, { color: isDark ? '#F87171' : "#DC2626" }]}>Pending</Text>
+                <Text style={[styles.teamBoxValue, { color: isDark ? '#EF4444' : "#7F1D1D" }]}>{dashboardData.teamData.pendingApprovals}</Text>
               </View>
             </View>
             <Pressable
@@ -452,13 +453,13 @@ export default function Screen() {
           <Text style={styles.sectionTitle}>Inventory Alerts</Text>
           <View style={styles.card}>
             <View style={styles.inventoryGrid}>
-              <View style={[styles.inventoryBox, { backgroundColor: "#FEF2F2" }]}>
-                <Text style={[styles.inventoryLabel, { color: "#B91C1C" }]}>Out of Stock</Text>
-                <Text style={[styles.inventoryValue, { color: "#7F1D1D" }]}>{dashboardData.outOfStockItems.length}</Text>
+              <View style={[styles.inventoryBox, { backgroundColor: isDark ? 'rgba(239, 68, 68, 0.1)' : "#FEF2F2" }]}>
+                <Text style={[styles.inventoryLabel, { color: isDark ? '#F87171' : "#B91C1C" }]}>Out of Stock</Text>
+                <Text style={[styles.inventoryValue, { color: isDark ? '#EF4444' : "#7F1D1D" }]}>{dashboardData.outOfStockItems.length}</Text>
               </View>
-              <View style={[styles.inventoryBox, { backgroundColor: "#FFFBEB" }]}>
-                <Text style={[styles.inventoryLabel, { color: "#B45309" }]}>Low Stock</Text>
-                <Text style={[styles.inventoryValue, { color: "#78350F" }]}>{dashboardData.lowStockItems.length}</Text>
+              <View style={[styles.inventoryBox, { backgroundColor: isDark ? 'rgba(245, 158, 11, 0.1)' : "#FFFBEB" }]}>
+                <Text style={[styles.inventoryLabel, { color: isDark ? '#FBBF24' : "#B45309" }]}>Low Stock</Text>
+                <Text style={[styles.inventoryValue, { color: isDark ? '#F59E0B' : "#78350F" }]}>{dashboardData.lowStockItems.length}</Text>
               </View>
               <View style={[styles.inventoryBox, { backgroundColor: colors.surfaceAlt }]}>
                 <Text style={[styles.inventoryLabel, { color: colors.textSecondary }]}>Hidden</Text>
@@ -503,10 +504,10 @@ export default function Screen() {
                 const statusTint = statusColorMap[order.status] ?? "#64748B";
                 return (
                   <Pressable
-                    key={order.id}
+                    key={`${order.id}-${isDark}`}
                     onPress={() => router.push({ pathname: "/(admin)/orders/[id]", params: { id: order.id } })}
                     style={styles.orderCard}
-                    android_ripple={{ color: "#F1F5F9" }}
+                    android_ripple={{ color: isDark ? colors.surfaceAlt : "#F1F5F9" }}
                   >
                     <View style={styles.orderTopRow}>
                       <Text style={styles.orderNumber}>{order.orderNumber}</Text>
@@ -535,7 +536,7 @@ export default function Screen() {
   );
 }
 
-const createStyles = (colors: any) => StyleSheet.create({
+const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: colors.background
@@ -606,14 +607,15 @@ const createStyles = (colors: any) => StyleSheet.create({
     paddingVertical: moderateScale(4)
   },
   viewAllText: {
-    color: "#2563EB",
+    color: isDark ? colors.primary : "#2563EB",
     fontWeight: "700",
     fontSize: fontScale(14)
   },
   quickGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: moderateScale(10)
+    justifyContent: "space-between",
+    rowGap: moderateScale(12)
   },
   quickCard: {
     width: "23%",
@@ -704,7 +706,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     borderRadius: moderateScale(12),
     padding: moderateScale(10),
     borderWidth: 1,
-    borderColor: "#F1F5F9"
+    borderColor: isDark ? colors.border : "#F1F5F9"
   },
   chartSummaryLabel: {
     color: colors.textSecondary,
@@ -719,7 +721,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   chartArea: {
     height: moderateScale(180),
-    backgroundColor: "#FAFAFA",
+    backgroundColor: isDark ? colors.background : "#FAFAFA",
     borderTopWidth: 1,
     borderTopColor: colors.border
   },
@@ -735,7 +737,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     position: "absolute",
     height: moderateScale(4),
     borderRadius: moderateScale(2),
-    backgroundColor: "#3B82F6",
+    backgroundColor: isDark ? colors.primary : "#3B82F6",
     transformOrigin: "left center" as any // React native 0.73+ supports this
   },
   chartPointWrap: {
@@ -748,13 +750,13 @@ const createStyles = (colors: any) => StyleSheet.create({
     borderRadius: moderateScale(6),
     backgroundColor: colors.card,
     borderWidth: 3,
-    borderColor: "#2563EB",
+    borderColor: isDark ? colors.primary : "#2563EB",
     zIndex: 2
   },
   chartPointTooltip: {
     position: "absolute",
     top: verticalScale(-24),
-    backgroundColor: "#0F172A",
+    backgroundColor: isDark ? colors.surfaceAlt : "#0F172A",
     borderRadius: moderateScale(6),
     paddingHorizontal: moderateScale(6),
     paddingVertical: moderateScale(2)
@@ -834,7 +836,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     fontSize: fontScale(16)
   },
   actionBtn: {
-    backgroundColor: "#0F172A",
+    backgroundColor: isDark ? colors.primary : "#0F172A",
     borderRadius: moderateScale(10),
     paddingVertical: moderateScale(10),
     alignItems: "center",
@@ -866,7 +868,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   inventoryList: {
     marginTop: verticalScale(12),
-    backgroundColor: "#FFFBEB",
+    backgroundColor: isDark ? 'rgba(245, 158, 11, 0.05)' : "#FFFBEB",
     borderRadius: moderateScale(10),
     padding: moderateScale(10),
     gap: moderateScale(6)
@@ -877,7 +879,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     gap: moderateScale(6)
   },
   inventoryListText: {
-    color: "#92400E",
+    color: isDark ? '#FBBF24' : "#92400E",
     fontSize: fontScale(13),
     fontWeight: "600"
   },

@@ -51,7 +51,6 @@ config.resolver.resolveRequest = (context, moduleName, platform) => {
     "react-native-reanimated",
     "react-native-safe-area-context",
     "react-native-screens",
-    "react-native-worklets",
     "@expo/metro-runtime",
     "expo-router"
   ];

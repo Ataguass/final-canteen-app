@@ -51,8 +51,9 @@ const SPECIAL_CARD_WIDTH = 246;
 const SPECIAL_PITCH = SPECIAL_CARD_WIDTH + HORIZONTAL_GAP;
 
 export default function Screen() {
-  const { colors, isDark } = useTheme();
-  const styles = createStyles(colors);
+  const theme = useTheme();
+  const { colors, isDark } = theme;
+  const styles = createStyles(theme);
   const router = useRouter();
   const { width: screenWidth } = useWindowDimensions();
   const { user, accessToken } = useAuth();
@@ -264,14 +265,14 @@ export default function Screen() {
       <View style={styles.topHeader}>
         <View style={styles.headerLeft}>
           <Pressable onPress={() => DeviceEventEmitter.emit("openStudentDrawer")}>
-            <Ionicons name="menu" size={28} color="#0F172A" />
+            <Ionicons name="menu" size={28} color={colors.text} />
           </Pressable>
           <Text style={styles.headerUserName}>Welcome, {user?.name?.split(" ")[0] ?? "Student"}</Text>
-          <Ionicons name="chevron-down" size={16} color="#0F172A" />
+          <Ionicons name="chevron-down" size={16} color={colors.text} />
         </View>
         <View style={styles.headerRight}>
           <Pressable onPress={() => router.push("/cart" as any)} style={styles.cartIconWrapper}>
-            <Ionicons name="cart-outline" size={26} color="#0F172A" />
+            <Ionicons name="cart-outline" size={26} color={colors.text} />
             {cartItemsCount > 0 && (
               <View style={styles.cartBadge}>
                 <Text style={styles.cartBadgeText}>{cartItemsCount}</Text>
@@ -296,7 +297,7 @@ export default function Screen() {
           <TextInput 
             placeholder="Search for snacks, lunch..." 
             style={styles.searchInput} 
-            placeholderTextColor="#94A3B8" 
+            placeholderTextColor={colors.textMuted} 
             editable={false}
             pointerEvents="none"
           />
@@ -369,7 +370,7 @@ export default function Screen() {
                           resizeMode="cover"
                         />
                       ) : (
-                        <Ionicons name="fast-food" size={24} color="#94A3B8" />
+                        <Ionicons name="fast-food" size={24} color={colors.textMuted} />
                       )}
                     </View>
                     <Text style={styles.categoryCircleName} numberOfLines={1}>{category.name}</Text>
@@ -444,7 +445,7 @@ export default function Screen() {
   );
 }
 
-const createStyles = (colors: any) => StyleSheet.create({
+const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => ({
   screen: {
     flex: 1,
     backgroundColor: colors.background,
@@ -520,7 +521,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     paddingHorizontal: moderateScale(18),
     paddingVertical: moderateScale(14),
     gap: moderateScale(12),
-    shadowColor: "#0F172A",
+    shadowColor: colors.text,
     shadowOpacity: 0.06,
     shadowRadius: moderateScale(12),
     shadowOffset: { width: 0, height: 4 },
@@ -623,7 +624,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     borderRadius: moderateScale(16),
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#000",
+    shadowColor: colors.text,
     shadowOpacity: 0.1,
     shadowRadius: moderateScale(4),
     shadowOffset: { width: 0, height: 2 },
@@ -679,7 +680,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
     padding: moderateScale(14),
-    shadowColor: "#000",
+    shadowColor: colors.text,
     shadowOpacity: 0.02,
     shadowRadius: moderateScale(8),
     shadowOffset: { width: 0, height: 2 },

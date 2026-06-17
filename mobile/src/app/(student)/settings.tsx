@@ -14,8 +14,9 @@ import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns }
 import { useTheme } from '../../hooks/useTheme';
 
 export default function SettingsScreen() {
-  const { colors, isDark, toggleTheme } = useTheme();
-  const styles = createStyles(colors);
+  const theme = useTheme();
+  const { colors, isDark, toggleTheme } = theme;
+  const styles = createStyles(theme);
   const router = useRouter();
   const insets = useSafeAreaInsets();
   
@@ -25,7 +26,7 @@ export default function SettingsScreen() {
     <View style={[styles.screen, { paddingTop: insets.top > 0 ? insets.top + 10 : 48 }]}>
       <View style={styles.topNav}>
         <Pressable onPress={() => router.back()} style={styles.backBtn}>
-          <Ionicons name="chevron-back" size={24} color="colors.text" />
+          <Ionicons name="chevron-back" size={24} color={colors.text} />
         </Pressable>
         <Text style={styles.topNavTitle}>Settings</Text>
         <View style={{ width: moderateScale(40) }} />
@@ -60,8 +61,8 @@ export default function SettingsScreen() {
             <View style={styles.divider} />
             <View style={styles.row}>
               <View style={styles.rowLeft}>
-                <View style={[styles.iconWrap, { backgroundColor: "#FFF7ED" }]}>
-                  <Ionicons name="notifications" size={20} color="#EA580C" />
+                <View style={[styles.iconWrap, { backgroundColor: isDark ? "rgba(234, 88, 12, 0.2)" : "#FFF7ED" }]}>
+                  <Ionicons name="notifications" size={20} color={isDark ? "#FDBA74" : "#EA580C"} />
                 </View>
                 <View>
                   <Text style={styles.rowTitle}>Push Notifications</Text>
@@ -71,34 +72,20 @@ export default function SettingsScreen() {
               <Switch
                 value={notifications}
                 onValueChange={setNotifications}
-                trackColor={{ false: "colors.border", true: "#FF6B35" }}
-                thumbColor={"colors.card"}
+                trackColor={{ false: colors.border, true: "#FF6B35" }}
+                thumbColor={colors.card}
               />
             </View>
           </View>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Account</Text>
-          <View style={styles.card}>
-            <Pressable style={styles.actionRow} android_ripple={{ color: colors.surfaceAlt }}>
-              <Text style={styles.actionText}>Edit Profile</Text>
-              <Ionicons name="chevron-forward" size={20} color="colors.textMuted" />
-            </Pressable>
-            <View style={styles.divider} />
-            <Pressable style={styles.actionRow} android_ripple={{ color: colors.surfaceAlt }}>
-              <Text style={styles.actionText}>Change Password</Text>
-              <Ionicons name="chevron-forward" size={20} color="colors.textMuted" />
-            </Pressable>
-          </View>
-        </View>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Danger Zone</Text>
-          <View style={[styles.card, { borderColor: "#FECACA" }]}>
-            <Pressable style={styles.actionRow} android_ripple={{ color: "#FEF2F2" }}>
+          <View style={[styles.card, { borderColor: isDark ? "rgba(220, 38, 38, 0.4)" : "#FECACA" }]}>
+            <Pressable style={styles.actionRow} android_ripple={{ color: isDark ? "rgba(220, 38, 38, 0.2)" : "#FEF2F2" }}>
               <Text style={styles.dangerText}>Delete Account</Text>
-              <Ionicons name="trash-outline" size={20} color="#DC2626" />
+              <Ionicons name="trash-outline" size={20} color={isDark ? "#F87171" : "#DC2626"} />
             </Pressable>
           </View>
         </View>
@@ -108,7 +95,7 @@ export default function SettingsScreen() {
   );
 }
 
-const createStyles = (colors: any) => StyleSheet.create({
+const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => ({
   screen: {
     flex: 1,
     backgroundColor: colors.background
@@ -127,7 +114,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     backgroundColor: colors.card,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "colors.text",
+    shadowColor: colors.text,
     shadowOpacity: 0.05,
     shadowRadius: moderateScale(10),
     shadowOffset: { width: 0, height: 4 },
@@ -159,7 +146,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     borderRadius: moderateScale(16),
     borderWidth: 1,
     borderColor: colors.border,
-    shadowColor: "colors.text",
+    shadowColor: colors.text,
     shadowOpacity: 0.03,
     shadowRadius: moderateScale(8),
     shadowOffset: { width: 0, height: 2 },
@@ -213,6 +200,6 @@ const createStyles = (colors: any) => StyleSheet.create({
   dangerText: {
     fontSize: fontScale(15),
     fontWeight: "700",
-    color: "#DC2626"
+    color: isDark ? "#F87171" : "#DC2626"
   }
 });

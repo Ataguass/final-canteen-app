@@ -34,8 +34,9 @@ const formatDate = (value: string): string => {
 };
 
 export default function Screen() {
-  const { colors, isDark } = useTheme();
-  const styles = createStyles(colors);
+  const theme = useTheme();
+  const { colors, isDark } = theme;
+  const styles = createStyles(theme);
   const { user, accessToken } = useAuth();
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
@@ -284,7 +285,7 @@ export default function Screen() {
                 disabled={busy}
                 style={[styles.downloadButton, busy && styles.buttonDisabled]}
               >
-                <Ionicons name="download-outline" size={15} color="#0F172A" />
+                <Ionicons name="download-outline" size={15} color={colors.text} />
                 <Text style={styles.downloadText}>{busy ? "Please wait..." : "Download ZIP"}</Text>
               </Pressable>
             </View>
@@ -295,7 +296,7 @@ export default function Screen() {
   );
 }
 
-const createStyles = (colors: any) => StyleSheet.create({
+const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => ({
   screen: {
     flex: 1,
     backgroundColor: colors.background
@@ -341,7 +342,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   primaryButton: {
     borderRadius: moderateScale(16),
     paddingVertical: moderateScale(14),
-    backgroundColor: "#0F172A",
+    backgroundColor: isDark ? colors.text : "#0F172A",
     alignItems: "center",
     justifyContent: "center",
     flexDirection: "row",
@@ -353,7 +354,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     elevation: 3
   },
   primaryButtonText: {
-    color: "white",
+    color: isDark ? colors.background : "white",
     fontWeight: "800"
   },
   buttonDisabled: {

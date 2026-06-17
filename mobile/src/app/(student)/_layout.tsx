@@ -7,6 +7,7 @@ import {
   Animated,
   Dimensions,
   Easing,
+  Image,
   Modal,
   Pressable,
   ScrollView,
@@ -23,19 +24,38 @@ type DrawerItem = {
   icon: keyof typeof Ionicons.glyphMap;
 };
 
-const drawerItems: DrawerItem[] = [
-  { label: "Dashboard", path: "/(student)/dashboard", icon: "home-outline" },
-  { label: "Search Menu", path: "/(student)/search", icon: "search-outline" },
-  { label: "Orders", path: "/(student)/orders", icon: "receipt-outline" },
-  { label: "Community", path: "/(student)/community", icon: "chatbubbles-outline" },
-  { label: "Profile", path: "/(student)/profile", icon: "person-outline" },
-  { label: "Cart", path: "/cart", icon: "cart-outline" },
-  { label: "Settings", path: "/(student)/settings", icon: "settings-outline" },
-  { label: "Support", path: "/(student)/support", icon: "help-circle-outline" }
+type DrawerSection = {
+  title: string;
+  items: DrawerItem[];
+};
+
+const drawerSections: DrawerSection[] = [
+  {
+    title: "MAIN",
+    items: [
+      { label: "Dashboard", path: "/(student)/dashboard", icon: "home-outline" },
+      { label: "Search Menu", path: "/(student)/search", icon: "search-outline" },
+      { label: "Orders", path: "/(student)/orders", icon: "receipt-outline" },
+      { label: "Cart", path: "/cart", icon: "cart-outline" }
+    ]
+  },
+  {
+    title: "SOCIAL",
+    items: [
+      { label: "Community", path: "/(student)/community", icon: "chatbubbles-outline" }
+    ]
+  },
+  {
+    title: "ACCOUNT",
+    items: [
+      { label: "Profile", path: "/(student)/profile", icon: "person-outline" },
+      { label: "Support", path: "/(student)/support", icon: "help-circle-outline" }
+    ]
+  }
 ];
 
 const windowWidth = Dimensions.get("window").width;
-const drawerWidth = Math.min(350, Math.round(windowWidth * 0.8));
+const drawerWidth = Math.min(380, Math.round(windowWidth * 0.8));
 
 const isPathActive = (pathname: string, targetPath: string): boolean => {
   const normalizedTarget = targetPath.replace("/(student)", "");
@@ -169,12 +189,12 @@ export default function StudentLayout() {
                 borderRadius: 10,
                 borderWidth: 1,
                 borderColor: colors.border,
-                backgroundColor: "white",
+                backgroundColor: colors.card,
                 alignItems: "center",
                 justifyContent: "center"
               }}
             >
-              <Ionicons name="menu-outline" size={22} color="colors.text" />
+              <Ionicons name="menu-outline" size={22} color={colors.text} />
             </Pressable>
           ),
           headerRight: () => (
@@ -188,12 +208,12 @@ export default function StudentLayout() {
                   borderRadius: 10,
                   borderWidth: 1,
                   borderColor: colors.border,
-                  backgroundColor: "white",
+                  backgroundColor: colors.card,
                   alignItems: "center",
                   justifyContent: "center"
                 }}
               >
-                <Ionicons name="search-outline" size={20} color="colors.text" />
+                <Ionicons name="search-outline" size={20} color={colors.text} />
               </Pressable>
 
               <Pressable
@@ -205,12 +225,12 @@ export default function StudentLayout() {
                   borderRadius: 10,
                   borderWidth: 1,
                   borderColor: colors.border,
-                  backgroundColor: "white",
+                  backgroundColor: colors.card,
                   alignItems: "center",
                   justifyContent: "center"
                 }}
               >
-                <Ionicons name="cart-outline" size={20} color="colors.text" />
+                <Ionicons name="cart-outline" size={20} color={colors.text} />
                 {itemCount > 0 ? (
                   <View
                     style={{
@@ -327,7 +347,7 @@ export default function StudentLayout() {
               borderRadius: 12,
               borderWidth: 1,
               borderColor: colors.border,
-              backgroundColor: "white",
+              backgroundColor: colors.card,
               padding: 8,
               gap: 4
             }}
@@ -346,7 +366,7 @@ export default function StudentLayout() {
                 gap: 8
               }}
             >
-              <Ionicons name="person-outline" size={16} color="colors.text" />
+              <Ionicons name="person-outline" size={16} color={colors.text} />
               <Text style={{ color: colors.text, fontWeight: "700" }}>My Profile</Text>
             </Pressable>
             <Pressable
@@ -363,7 +383,7 @@ export default function StudentLayout() {
                 gap: 8
               }}
             >
-              <Ionicons name="receipt-outline" size={16} color="colors.text" />
+              <Ionicons name="receipt-outline" size={16} color={colors.text} />
               <Text style={{ color: colors.text, fontWeight: "700" }}>My Orders</Text>
             </Pressable>
             <Pressable
@@ -406,102 +426,84 @@ export default function StudentLayout() {
               borderBottomRightRadius: 24,
               overflow: "hidden",
               transform: [{ translateX: drawerTranslateX }],
-              shadowColor: "colors.text",
+              shadowColor: colors.text,
               shadowOpacity: 0.18,
               shadowRadius: 18,
               shadowOffset: { width: 4, height: 0 },
               elevation: 12
             }}
           >
-            <View style={{ paddingHorizontal: 16, paddingTop: 54, paddingBottom: 14, backgroundColor: colors.text }}>
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-                <View
-                  style={{
-                    width: 48,
-                    height: 48,
-                    borderRadius: 24,
-                    backgroundColor: "#DBEAFE",
-                    alignItems: "center",
-                    justifyContent: "center"
-                  }}
-                >
-                  <Text style={{ color: "#1D4ED8", fontWeight: "800", fontSize: 18 }}>{avatarText}</Text>
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={{ color: "white", fontWeight: "800", fontSize: 18 }}>{user?.name ?? "Student"}</Text>
-                  <Text style={{ color: "#CBD5E1", marginTop: 1 }}>{user?.phone ?? user?.email ?? "student"}</Text>
-                </View>
+            <View style={{ paddingHorizontal: 24, paddingTop: 64, paddingBottom: 24, backgroundColor: colors.background, borderBottomWidth: 1, borderColor: colors.border, flexDirection: "row", alignItems: "center", gap: 14 }}>
+              <Image source={require("../../assets/images/canteen_logo_final.png")} style={{ width: 44, height: 44, borderRadius: 10 }} resizeMode="contain" />
+              <View style={{ flex: 1 }}>
+                <Text style={{ color: colors.text, fontWeight: "900", fontSize: 20, letterSpacing: -0.5 }}>College Canteen</Text>
+                <Text style={{ color: colors.textSecondary, fontSize: 13, fontWeight: "600" }}>Student Portal</Text>
               </View>
             </View>
 
-            <View style={{ flex: 1 }}>
-              <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 24, paddingBottom: 24, gap: 12 }}>
-                {drawerItems.map((item) => {
-                  const active = isPathActive(pathname, item.path);
-                  return (
-                    <Pressable
-                      key={item.path}
-                      onPress={() => navigateFromDrawer(item.path)}
-                      android_ripple={{ color: colors.border }}
-                      style={{
-                        borderRadius: 16,
-                        backgroundColor: active ? "rgba(255, 107, 53, 0.1)" : "transparent",
-                        paddingVertical: 14,
-                        paddingHorizontal: 16,
-                        flexDirection: "row",
-                        alignItems: "center",
-                        gap: 14,
-                        overflow: "hidden"
-                      }}
-                    >
-                      {active && (
-                        <View
-                          style={{
-                            position: "absolute",
-                            left: 0,
-                            top: 0,
-                            bottom: 0,
-                            width: 4,
-                            backgroundColor: "#FF6B35"
-                          }}
-                        />
-                      )}
-                      <Ionicons name={item.icon} size={22} color={active ? "#FF6B35" : "colors.textSecondary"} />
-                      <Text style={{ color: active ? "#FF6B35" : "colors.text", fontWeight: active ? "800" : "600", fontSize: 15 }}>
-                        {item.label}
-                      </Text>
-                    </Pressable>
-                  );
-                })}
-              </ScrollView>
+            <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 20, paddingBottom: 32, gap: 20 }}>
+              {drawerSections.map((section, index) => (
+                <View key={section.title} style={{ gap: 6 }}>
+                  <Text style={{ color: colors.textMuted, fontWeight: "800", fontSize: 11, letterSpacing: 1.2, paddingHorizontal: 12, marginBottom: 4 }}>
+                    {section.title}
+                  </Text>
 
-              <View
+                  {section.items.map((item) => {
+                    const active = isPathActive(pathname, item.path);
+                    return (
+                      <Pressable
+                        key={item.path}
+                        onPress={() => navigateFromDrawer(item.path)}
+                        android_ripple={{ color: "rgba(0,0,0,0.05)" }}
+                        style={{
+                          borderRadius: 14,
+                          backgroundColor: active ? "#FF6B35" : "transparent",
+                          paddingVertical: 14,
+                          paddingHorizontal: 14,
+                          flexDirection: "row",
+                          alignItems: "center",
+                          gap: 14
+                        }}
+                      >
+                        <Ionicons name={item.icon} size={22} color={active ? "white" : colors.textSecondary} />
+                        <Text style={{ color: active ? "white" : colors.text, fontWeight: active ? "800" : "600", fontSize: 15, flex: 1 }}>
+                          {item.label}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </View>
+              ))}
+            </ScrollView>
+
+            <View style={{ padding: 16, borderTopWidth: 1, borderColor: colors.border, backgroundColor: colors.background }}>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 12, paddingHorizontal: 8 }}>
+                <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: colors.border, alignItems: "center", justifyContent: "center" }}>
+                  <Text style={{ color: colors.text, fontWeight: "800", fontSize: 16 }}>{avatarText}</Text>
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: colors.text, fontWeight: "800", fontSize: 15 }}>{user?.name ?? "Student"}</Text>
+                  <Text style={{ color: colors.textSecondary, fontSize: 12, fontWeight: "500" }}>{user?.email ?? user?.phone ?? "student@canteen"}</Text>
+                </View>
+              </View>
+              <Pressable
+                onPress={() => closeDrawer(() => onLogout().catch(() => undefined))}
+                android_ripple={{ color: colors.surfaceAlt }}
                 style={{
-                  borderTopWidth: 1,
-                  borderTopColor: colors.border,
-                  paddingHorizontal: 16,
-                  paddingTop: 16,
-                  paddingBottom: 24,
-                  backgroundColor: colors.background
+                  borderRadius: 12,
+                  backgroundColor: colors.card,
+                  borderWidth: 1,
+                  borderColor: colors.border,
+                  paddingVertical: 12,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 8
                 }}
               >
-                <Pressable
-                  onPress={() => closeDrawer(() => onLogout().catch(() => undefined))}
-                  android_ripple={{ color: colors.border }}
-                  style={{
-                    borderRadius: 16,
-                    backgroundColor: "transparent",
-                    paddingVertical: 14,
-                    paddingHorizontal: 16,
-                    flexDirection: "row",
-                    alignItems: "center",
-                    gap: 14
-                  }}
-                >
-                  <Ionicons name="log-out-outline" size={22} color="#EF4444" />
-                  <Text style={{ color: "#EF4444", fontWeight: "700", fontSize: 15 }}>Logout</Text>
-                </Pressable>
-              </View>
+                <Ionicons name="log-out-outline" size={20} color="#EF4444" />
+                <Text style={{ color: "#EF4444", fontWeight: "700", fontSize: 14 }}>Log Out</Text>
+              </Pressable>
             </View>
           </Animated.View>
         </View>

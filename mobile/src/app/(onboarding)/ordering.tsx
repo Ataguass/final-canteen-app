@@ -49,8 +49,8 @@ export default function OrderingScreen() {
       {/* Header */}
       <Animated.View entering={FadeInDown.delay(100).springify()} style={styles.header}>
         <View style={styles.headerLeft}>
-          <Ionicons name="school-outline" size={24} color={BRAND_COLOR} />
-          <Text style={styles.headerTitle}>Canteen Management</Text>
+          <Ionicons name="school-outline" size={24} color={isDark ? colors.text : BRAND_COLOR} />
+          <Text style={[styles.headerTitle, isDark && { color: colors.text }]}>Canteen Management</Text>
         </View>
         <TouchableOpacity onPress={handleSkip} activeOpacity={0.6}>
           <Text style={styles.skipText}>Skip</Text>
@@ -79,7 +79,7 @@ export default function OrderingScreen() {
                 </View>
               </View>
               <View style={styles.phoneTabBar}>
-                <Ionicons name="home-outline" size={22} color={BRAND_COLOR} />
+                <Ionicons name="home-outline" size={22} color={isDark ? colors.text : BRAND_COLOR} />
                 <Ionicons name="search-outline" size={22} color="#8e8e93" />
                 <Ionicons name="cart-outline" size={22} color="#8e8e93" />
               </View>
@@ -117,7 +117,7 @@ export default function OrderingScreen() {
   );
 }
 
-const createStyles = (colors: any) => StyleSheet.create({
+const createStyles = (colors: any) => ({
   container: {
     flex: 1,
     backgroundColor: colors.background,
@@ -170,7 +170,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     borderRadius: moderateScale(40),
     padding: moderateScale(6),
     borderWidth: 6,
-    borderColor: '#3a3d3e',
+    borderColor: isDark ? colors.border : '#3a3d3e',
     elevation: 24,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 16 },
@@ -210,7 +210,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   skeletonLine: {
     height: moderateScale(16),
-    backgroundColor: '#e6e8eb',
+    backgroundColor: isDark ? colors.surfaceAlt : '#e6e8eb',
     borderRadius: moderateScale(8),
   },
   mockButton: {
@@ -234,7 +234,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   phoneTabBar: {
     padding: moderateScale(16),
     borderTopWidth: 1,
-    borderTopColor: '#f3f4f5',
+    borderTopColor: colors.surfaceAlt,
     flexDirection: 'row',
     justifyContent: 'space-around',
     backgroundColor: colors.card,
@@ -272,7 +272,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   subtitle: {
     fontSize: fontScale(17),
-    color: '#6e6e73',
+    color: colors.textSecondary,
     textAlign: 'center',
     lineHeight: 26,
     maxWidth: moderateScale(320),
@@ -287,7 +287,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     height: moderateScale(8),
     width: moderateScale(8),
     borderRadius: moderateScale(4),
-    backgroundColor: '#d1d1d6',
+    backgroundColor: colors.border,
   },
   activeDot: {
     width: moderateScale(24),

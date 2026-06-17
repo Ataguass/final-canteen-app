@@ -69,8 +69,9 @@ const toggleRows: ToggleRow[] = [
 ];
 
 export default function Screen() {
-  const { colors, isDark } = useTheme();
-  const styles = createStyles(colors);
+  const theme = useTheme();
+  const { colors, isDark } = theme;
+  const styles = createStyles(theme);
   const { user, accessToken } = useAuth();
   const [settings, setSettings] = useState<InvoiceSettings | null>(null);
   const [logoUrl, setLogoUrl] = useState("");
@@ -308,7 +309,7 @@ export default function Screen() {
             onChangeText={setFooterNote}
             placeholder="Thank you for visiting our canteen"
             multiline
-            style={[styles.input, styles.multilineInput]}
+            style={[styles.input, styles.multilineInput, { color: colors.text }]}
           />
         </View>
 
@@ -322,7 +323,7 @@ export default function Screen() {
               return (
                 <View key={row.key} style={[styles.toggleRow, index === toggleRows.length - 1 && styles.toggleRowLast]}>
                   <View style={styles.toggleIconWrap}>
-                    <Ionicons name={row.icon} size={18} color={enabled ? "#0F172A" : "#94A3B8"} />
+                    <Ionicons name={row.icon} size={18} color={enabled ? (isDark ? colors.text : "#0F172A") : colors.textSecondary} />
                   </View>
                   <View style={styles.toggleTextWrap}>
                     <Text style={[styles.toggleTitle, !enabled && styles.toggleTitleDisabled]}>{row.label}</Text>
@@ -349,7 +350,7 @@ export default function Screen() {
   );
 }
 
-const createStyles = (colors: any) => StyleSheet.create({
+const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => ({
   screen: {
     flex: 1,
     backgroundColor: colors.background
@@ -392,7 +393,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     width: moderateScale(42),
     height: moderateScale(42),
     borderRadius: moderateScale(12),
-    backgroundColor: "#DBEAFE",
+    backgroundColor: isDark ? colors.surfaceAlt : "#DBEAFE",
     alignItems: "center",
     justifyContent: "center"
   },
@@ -506,7 +507,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   saveButton: {
     marginTop: verticalScale(2),
-    backgroundColor: "#0F172A",
+    backgroundColor: isDark ? colors.text : "#0F172A",
     borderRadius: moderateScale(12),
     padding: moderateScale(13),
     flexDirection: "row",
@@ -515,7 +516,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     gap: moderateScale(8)
   },
   saveButtonText: {
-    color: "white",
+    color: isDark ? colors.background : "white",
     textAlign: "center",
     fontWeight: "800"
   }

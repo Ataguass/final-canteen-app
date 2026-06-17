@@ -5,26 +5,30 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Alert, Image, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { useAuth } from "../../../hooks/useAuth";
 import { bannerService, type Banner } from "../../../services/bannerService";
+import { useTheme } from '../../../hooks/useTheme';
 
 const MAX_BANNER_SIZE_BYTES = 2 * 1024 * 1024;
 const MAX_BANNER_WIDTH = 1600;
 const MAX_BANNER_HEIGHT = 900;
 const estimateBase64Bytes = (base64: string): number => Math.floor((base64.length * 3) / 4);
 
-const cardShadow = {
-  borderWidth: 1,
-  borderColor: "#E5E7EB",
-  borderRadius: 16,
-  backgroundColor: "white",
-  shadowColor: "#0F172A",
-  shadowOpacity: 0.06,
-  shadowRadius: 8,
-  shadowOffset: { width: 0, height: 4 },
-  elevation: 2
-} as const;
 
 export default function Screen() {
+  const theme = useTheme();
+  const { colors, isDark } = theme;
   const { user, accessToken } = useAuth();
+  
+  const cardShadow = {
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 16,
+    backgroundColor: colors.card,
+    shadowColor: "#000",
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 2
+  } as const;
   const [banners, setBanners] = useState<Banner[]>([]);
   const [loading, setLoading] = useState(false);
   const [creating, setCreating] = useState(false);
@@ -198,40 +202,40 @@ export default function Screen() {
   }, [banners, query, showActiveOnly]);
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: "#EEF2F7" }} contentContainerStyle={{ padding: 16, gap: 14, paddingBottom: 24 }}>
+    <ScrollView style={{ flex: 1, backgroundColor: colors.background }} contentContainerStyle={{ padding: 16, gap: 14, paddingBottom: 24 }}>
       <View style={{ flexDirection: "row", gap: 10 }}>
         <View style={{ flex: 1, ...cardShadow, padding: 12 }}>
-          <Text style={{ color: "#475569", fontSize: 12, fontWeight: "700" }}>Total</Text>
-          <Text style={{ color: "#0F172A", fontSize: 24, fontWeight: "800", marginTop: 4 }}>{stats.total}</Text>
+          <Text style={{ color: colors.textSecondary, fontSize: 12, fontWeight: "700" }}>Total</Text>
+          <Text style={{ color: colors.text, fontSize: 24, fontWeight: "800", marginTop: 4 }}>{stats.total}</Text>
         </View>
         <View style={{ flex: 1, ...cardShadow, padding: 12 }}>
-          <Text style={{ color: "#475569", fontSize: 12, fontWeight: "700" }}>Active</Text>
-          <Text style={{ color: "#059669", fontSize: 24, fontWeight: "800", marginTop: 4 }}>{stats.active}</Text>
+          <Text style={{ color: colors.textSecondary, fontSize: 12, fontWeight: "700" }}>Active</Text>
+          <Text style={{ color: isDark ? '#34D399' : "#059669", fontSize: 24, fontWeight: "800", marginTop: 4 }}>{stats.active}</Text>
         </View>
         <View style={{ flex: 1, ...cardShadow, padding: 12 }}>
-          <Text style={{ color: "#475569", fontSize: 12, fontWeight: "700" }}>Hidden</Text>
-          <Text style={{ color: "#DC2626", fontSize: 24, fontWeight: "800", marginTop: 4 }}>{stats.hidden}</Text>
+          <Text style={{ color: colors.textSecondary, fontSize: 12, fontWeight: "700" }}>Hidden</Text>
+          <Text style={{ color: isDark ? '#F87171' : "#DC2626", fontSize: 24, fontWeight: "800", marginTop: 4 }}>{stats.hidden}</Text>
         </View>
       </View>
 
       <View style={{ ...cardShadow, padding: 16, gap: 12 }}>
-        <Text style={{ fontSize: 18, fontWeight: "800", color: "#0F172A" }}>Add New Banner</Text>
+        <Text style={{ fontSize: 18, fontWeight: "800", color: colors.text }}>Add New Banner</Text>
         
         <View style={{ flexDirection: "row", gap: 8 }}>
           <TextInput
             value={title}
             onChangeText={setTitle}
             placeholder="Banner title (optional)"
-            placeholderTextColor="#94A3B8"
-            style={{ flex: 2, borderWidth: 1, borderColor: "#E2E8F0", borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, backgroundColor: "#F8FAFC", fontSize: 14, color: "#0F172A", fontWeight: "500" }}
+            placeholderTextColor={colors.textSecondary}
+            style={{ flex: 2, borderWidth: 1, borderColor: colors.border, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, backgroundColor: colors.surfaceAlt, fontSize: 14, color: colors.text, fontWeight: "500" }}
           />
           <TextInput
             value={sortOrder}
             onChangeText={setSortOrder}
             placeholder="Order (0)"
             keyboardType="numeric"
-            placeholderTextColor="#94A3B8"
-            style={{ flex: 1, borderWidth: 1, borderColor: "#E2E8F0", borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, backgroundColor: "#F8FAFC", fontSize: 14, color: "#0F172A", fontWeight: "500" }}
+            placeholderTextColor={colors.textSecondary}
+            style={{ flex: 1, borderWidth: 1, borderColor: colors.border, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, backgroundColor: colors.surfaceAlt, fontSize: 14, color: colors.text, fontWeight: "500" }}
           />
         </View>
 
@@ -240,20 +244,20 @@ export default function Screen() {
           onChangeText={setActionUrl}
           placeholder="Action URL (optional destination link)"
           autoCapitalize="none"
-          placeholderTextColor="#94A3B8"
-          style={{ borderWidth: 1, borderColor: "#E2E8F0", borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, backgroundColor: "#F8FAFC", fontSize: 14, color: "#0F172A", fontWeight: "500" }}
+          placeholderTextColor={colors.textSecondary}
+          style={{ borderWidth: 1, borderColor: colors.border, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, backgroundColor: colors.surfaceAlt, fontSize: 14, color: colors.text, fontWeight: "500" }}
         />
 
-        <View style={{ backgroundColor: "#F8FAFC", borderWidth: 1, borderColor: "#E2E8F0", borderStyle: "dashed", borderRadius: 14, padding: 16, alignItems: "center", gap: 10 }}>
+        <View style={{ backgroundColor: colors.surfaceAlt, borderWidth: 1, borderColor: colors.border, borderStyle: "dashed", borderRadius: 14, padding: 16, alignItems: "center", gap: 10 }}>
           {imageUrl ? (
             <Image
               source={{ uri: imageUrl }}
               resizeMode="cover"
-              style={{ width: "100%", height: 110, backgroundColor: "#EEF2F7", borderRadius: 10 }}
+              style={{ width: "100%", height: 110, backgroundColor: colors.background, borderRadius: 10 }}
             />
           ) : (
-            <View style={{ width: 60, height: 60, borderRadius: 30, backgroundColor: "#EEF2F7", alignItems: "center", justifyContent: "center" }}>
-              <Ionicons name="image-outline" size={28} color="#94A3B8" />
+            <View style={{ width: 60, height: 60, borderRadius: 30, backgroundColor: colors.background, alignItems: "center", justifyContent: "center" }}>
+              <Ionicons name="image-outline" size={28} color={colors.textSecondary} />
             </View>
           )}
 
@@ -264,7 +268,7 @@ export default function Screen() {
               borderRadius: 999,
               paddingVertical: 10,
               paddingHorizontal: 20,
-              backgroundColor: "#4338CA",
+              backgroundColor: colors.primary,
               alignItems: "center",
               justifyContent: "center",
               flexDirection: "row",
@@ -275,7 +279,7 @@ export default function Screen() {
             <Ionicons name="cloud-upload-outline" size={16} color="white" />
             <Text style={{ color: "white", fontWeight: "700", fontSize: 14 }}>{uploadingImage ? "Uploading..." : "Upload Image"}</Text>
           </Pressable>
-          <Text style={{ color: "#64748B", fontSize: 12, textAlign: "center", fontWeight: "500" }}>
+          <Text style={{ color: colors.textSecondary, fontSize: 12, textAlign: "center", fontWeight: "500" }}>
             Recommended size: 1600x900 px (16:9 ratio). Max 2MB.
           </Text>
         </View>
@@ -285,33 +289,33 @@ export default function Screen() {
           onChangeText={setImageUrl}
           placeholder="Or paste an image URL here..."
           autoCapitalize="none"
-          placeholderTextColor="#94A3B8"
-          style={{ borderWidth: 1, borderColor: "#E2E8F0", borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10, backgroundColor: "#F8FAFC", fontSize: 13, color: "#0F172A", fontWeight: "500" }}
+          placeholderTextColor={colors.textSecondary}
+          style={{ borderWidth: 1, borderColor: colors.border, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10, backgroundColor: colors.surfaceAlt, fontSize: 13, color: colors.text, fontWeight: "500" }}
         />
 
         <Pressable
           onPress={onCreate}
           disabled={creating}
-          style={{ borderRadius: 14, paddingVertical: 14, alignItems: "center", backgroundColor: "#0F172A", marginTop: 4, shadowColor: "#000", shadowOpacity: 0.1, shadowRadius: 8, shadowOffset: { width: 0, height: 4 }, elevation: 3 }}
+          style={{ borderRadius: 14, paddingVertical: 14, alignItems: "center", backgroundColor: isDark ? colors.text : "#0F172A", marginTop: 4, shadowColor: "#000", shadowOpacity: 0.1, shadowRadius: 8, shadowOffset: { width: 0, height: 4 }, elevation: 3 }}
         >
-          <Text style={{ color: "white", fontWeight: "800", fontSize: 15 }}>{creating ? "Creating Banner..." : "Create Banner"}</Text>
+          <Text style={{ color: isDark ? colors.background : "white", fontWeight: "800", fontSize: 15 }}>{creating ? "Creating Banner..." : "Create Banner"}</Text>
         </Pressable>
       </View>
 
       <View style={{ ...cardShadow, padding: 14, gap: 10 }}>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-          <View style={{ flex: 1, borderWidth: 1, borderColor: "#E2E8F0", borderRadius: 12, backgroundColor: "#F8FAFC", flexDirection: "row", alignItems: "center", paddingHorizontal: 12 }}>
-            <Ionicons name="search-outline" size={16} color="#64748B" />
+          <View style={{ flex: 1, borderWidth: 1, borderColor: colors.border, borderRadius: 12, backgroundColor: colors.surfaceAlt, flexDirection: "row", alignItems: "center", paddingHorizontal: 12 }}>
+            <Ionicons name="search-outline" size={16} color={colors.textSecondary} />
             <TextInput
               value={query}
               onChangeText={setQuery}
               placeholder="Search title..."
-              placeholderTextColor="#94A3B8"
-              style={{ flex: 1, paddingVertical: 12, paddingHorizontal: 8, color: "#0F172A", fontWeight: "500", fontSize: 14 }}
+              placeholderTextColor={colors.textSecondary}
+              style={{ flex: 1, paddingVertical: 12, paddingHorizontal: 8, color: colors.text, fontWeight: "500", fontSize: 14 }}
             />
             {query ? (
               <Pressable onPress={() => setQuery("")}>
-                <Ionicons name="close-circle" size={18} color="#94A3B8" />
+                <Ionicons name="close-circle" size={18} color={colors.textSecondary} />
               </Pressable>
             ) : null}
           </View>
@@ -320,31 +324,31 @@ export default function Screen() {
             style={{
               borderRadius: 12,
               borderWidth: 1,
-              borderColor: showActiveOnly ? "#0F172A" : "#E2E8F0",
-              backgroundColor: showActiveOnly ? "#0F172A" : "#F8FAFC",
+              borderColor: showActiveOnly ? (isDark ? colors.text : "#0F172A") : colors.border,
+              backgroundColor: showActiveOnly ? (isDark ? colors.text : "#0F172A") : colors.surfaceAlt,
               paddingVertical: 12,
               paddingHorizontal: 14,
               alignItems: "center",
               justifyContent: "center"
             }}
           >
-            <Ionicons name={showActiveOnly ? "eye-outline" : "eye-off-outline"} size={18} color={showActiveOnly ? "white" : "#64748B"} />
+            <Ionicons name={showActiveOnly ? "eye-outline" : "eye-off-outline"} size={18} color={showActiveOnly ? (isDark ? colors.background : "white") : colors.textSecondary} />
           </Pressable>
         </View>
       </View>
 
       <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 6, paddingHorizontal: 4 }}>
-        <Text style={{ fontSize: 18, fontWeight: "800", color: "#0F172A" }}>
-          Existing Banners <Text style={{ color: "#64748B", fontWeight: "600", fontSize: 14 }}>({filteredBanners.length})</Text>
+        <Text style={{ fontSize: 18, fontWeight: "800", color: colors.text }}>
+          Existing Banners <Text style={{ color: colors.textSecondary, fontWeight: "600", fontSize: 14 }}>({filteredBanners.length})</Text>
         </Text>
         <Pressable onPress={() => load().catch(() => undefined)} disabled={loading}>
-          <Text style={{ color: "#1D4ED8", fontWeight: "700", fontSize: 14 }}>{loading ? "Loading..." : "Refresh"}</Text>
+          <Text style={{ color: colors.primary, fontWeight: "700", fontSize: 14 }}>{loading ? "Loading..." : "Refresh"}</Text>
         </Pressable>
       </View>
 
       {filteredBanners.length === 0 ? (
         <View style={{ ...cardShadow, padding: 14 }}>
-          <Text style={{ color: "#64748B" }}>No banners found.</Text>
+          <Text style={{ color: colors.textSecondary }}>No banners found.</Text>
         </View>
       ) : (
         filteredBanners.map((banner) => (
@@ -352,15 +356,15 @@ export default function Screen() {
             <Image
               source={{ uri: banner.imageUrl }}
               resizeMode="cover"
-              style={{ width: "100%", height: 160, backgroundColor: "#F3F4F6", borderRadius: 12 }}
+              style={{ width: "100%", height: 160, backgroundColor: colors.surfaceAlt, borderRadius: 12 }}
             />
             <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
               <View style={{ flex: 1, gap: 4 }}>
-                <Text style={{ color: "#0F172A", fontWeight: "800", fontSize: 16 }}>{banner.title || "(No Title)"}</Text>
-                <Text style={{ color: "#64748B", fontSize: 13, fontWeight: "500" }}>Order: {banner.sortOrder} {banner.actionUrl ? `• Link: ${banner.actionUrl}` : ""}</Text>
+                <Text style={{ color: colors.text, fontWeight: "800", fontSize: 16 }}>{banner.title || "(No Title)"}</Text>
+                <Text style={{ color: colors.textSecondary, fontSize: 13, fontWeight: "500" }}>Order: {banner.sortOrder} {banner.actionUrl ? `• Link: ${banner.actionUrl}` : ""}</Text>
               </View>
-              <View style={{ borderRadius: 999, backgroundColor: banner.isActive ? "#ECFDF5" : "#FEF2F2", paddingHorizontal: 10, paddingVertical: 4, borderWidth: 1, borderColor: banner.isActive ? "#A7F3D0" : "#FECACA" }}>
-                <Text style={{ color: banner.isActive ? "#059669" : "#DC2626", fontWeight: "800", fontSize: 11, textTransform: "uppercase" }}>
+              <View style={{ borderRadius: 999, backgroundColor: banner.isActive ? (isDark ? 'rgba(16, 185, 129, 0.15)' : "#ECFDF5") : (isDark ? 'rgba(239, 68, 68, 0.15)' : "#FEF2F2"), paddingHorizontal: 10, paddingVertical: 4, borderWidth: 1, borderColor: banner.isActive ? (isDark ? '#059669' : "#A7F3D0") : (isDark ? '#DC2626' : "#FECACA") }}>
+                <Text style={{ color: banner.isActive ? (isDark ? '#34D399' : "#059669") : (isDark ? '#F87171' : "#DC2626"), fontWeight: "800", fontSize: 11, textTransform: "uppercase" }}>
                   {banner.isActive ? "Active" : "Hidden"}
                 </Text>
               </View>
@@ -374,16 +378,16 @@ export default function Screen() {
                   borderRadius: 12,
                   paddingVertical: 12,
                   alignItems: "center",
-                  backgroundColor: banner.isActive ? "#F1F5F9" : "#10B981"
+                  backgroundColor: banner.isActive ? colors.surfaceAlt : (isDark ? '#059669' : "#10B981")
                 }}
               >
-                <Text style={{ color: banner.isActive ? "#475569" : "white", fontWeight: "800", fontSize: 14 }}>{banner.isActive ? "Hide" : "Activate"}</Text>
+                <Text style={{ color: banner.isActive ? colors.textSecondary : "white", fontWeight: "800", fontSize: 14 }}>{banner.isActive ? "Hide" : "Activate"}</Text>
               </Pressable>
               <Pressable
                 onPress={() => onDelete(banner.id)}
-                style={{ flex: 1, borderRadius: 12, paddingVertical: 12, alignItems: "center", backgroundColor: "#FEF2F2" }}
+                style={{ flex: 1, borderRadius: 12, paddingVertical: 12, alignItems: "center", backgroundColor: isDark ? 'rgba(239, 68, 68, 0.15)' : "#FEF2F2" }}
               >
-                <Text style={{ color: "#DC2626", fontWeight: "800", fontSize: 14 }}>Delete</Text>
+                <Text style={{ color: isDark ? '#F87171' : "#DC2626", fontWeight: "800", fontSize: 14 }}>Delete</Text>
               </Pressable>
             </View>
           </View>

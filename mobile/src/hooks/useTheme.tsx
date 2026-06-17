@@ -1,6 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { StatusBar } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { ThemeProvider as NavThemeProvider, DefaultTheme as NavDefaultTheme, DarkTheme as NavDarkTheme } from '@react-navigation/native';
 
 // ─── Color Tokens ────────────────────────────────────────────────────────────
 
@@ -21,6 +22,8 @@ export type ThemeColors = {
   surfaceAlt: string;
   /** Brand accent (orange) */
   accent: string;
+  /** Primary brand color alias */
+  primary: string;
   /** Danger / destructive */
   danger: string;
   /** Search bar / input background */
@@ -46,6 +49,7 @@ const lightColors: ThemeColors = {
   border: '#E2E8F0',
   surfaceAlt: '#F1F5F9',
   accent: '#FF6B35',
+  primary: '#FF6B35',
   danger: '#EF4444',
   inputBg: '#FFFFFF',
   headerBg: '#EEF2F7',
@@ -62,9 +66,10 @@ const darkColors: ThemeColors = {
   textSecondary: '#94A3B8',
   textMuted: '#64748B',
   border: '#334155',
-  surfaceAlt: '#1E293B',
+  surfaceAlt: '#334155',
   accent: '#FF6B35',
-  danger: '#EF4444',
+  primary: '#FF6B35',
+  danger: '#F87171',
   inputBg: '#1E293B',
   headerBg: '#0F172A',
   tabBarBg: '#1E293B',
@@ -132,13 +137,31 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     [mode, isDark, colors, toggleTheme, setTheme]
   );
 
+  const navTheme = useMemo(() => {
+    const baseTheme = isDark ? NavDarkTheme : NavDefaultTheme;
+    return {
+      ...baseTheme,
+      colors: {
+        ...baseTheme.colors,
+        primary: colors.primary,
+        background: colors.background,
+        card: colors.card,
+        text: colors.text,
+        border: colors.border,
+        notification: colors.accent,
+      },
+    };
+  }, [isDark, colors]);
+
   return (
     <ThemeContext.Provider value={value}>
-      <StatusBar
-        barStyle={isDark ? 'light-content' : 'dark-content'}
-        backgroundColor={colors.background}
-      />
-      {children}
+      <NavThemeProvider value={navTheme}>
+        <StatusBar
+          barStyle={isDark ? 'light-content' : 'dark-content'}
+          backgroundColor={colors.background}
+        />
+        {children}
+      </NavThemeProvider>
     </ThemeContext.Provider>
   );
 }

@@ -11,6 +11,7 @@ import {
   View,
   RefreshControl
 } from "react-native";
+import { Video, ResizeMode } from "expo-av";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "../../hooks/useAuth";
 import { CanteenHeader } from "../../components/CanteenHeader";
@@ -19,8 +20,9 @@ import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns }
 import { useTheme } from '../../hooks/useTheme';
 
 export default function Screen() {
-  const { colors, isDark } = useTheme();
-  const styles = createStyles(colors);
+  const theme = useTheme();
+  const { colors, isDark } = theme;
+  const styles = createStyles(theme);
   const insets = useSafeAreaInsets();
   const { user, accessToken } = useAuth();
   const [posts, setPosts] = useState<CommunityPost[]>([]);
@@ -64,7 +66,7 @@ export default function Screen() {
       contentContainerStyle={[styles.content, { paddingTop: insets.top + 16 }]}
       showsVerticalScrollIndicator={false}
       refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={() => load(true)} colors={["#0F172A"]} />
+        <RefreshControl refreshing={refreshing} onRefresh={() => load(true)} colors={[colors.text]} tintColor={colors.text} />
       }
     >
       <CanteenHeader showBackButton title="Community" subtitle="Announcements and updates" />
@@ -72,7 +74,7 @@ export default function Screen() {
       {orderedPosts.length === 0 && !loading && !refreshing ? (
         <View style={styles.emptyCard}>
           <View style={styles.emptyIconWrap}>
-            <Ionicons name="megaphone-outline" size={32} color="#94A3B8" />
+            <Ionicons name="megaphone-outline" size={32} color={colors.textMuted} />
           </View>
           <Text style={styles.emptyTitle}>No announcements yet</Text>
           <Text style={styles.emptySub}>New updates from the canteen admin will appear here.</Text>
@@ -81,7 +83,7 @@ export default function Screen() {
 
       {loading && !refreshing && orderedPosts.length === 0 ? (
         <View style={styles.loadingWrap}>
-          <Ionicons name="sync-outline" size={24} color="#94A3B8" />
+          <Ionicons name="sync-outline" size={24} color={colors.textMuted} />
           <Text style={styles.loadingText}>Loading updates...</Text>
         </View>
       ) : null}
@@ -94,7 +96,7 @@ export default function Screen() {
               <View style={styles.postHeaderRow}>
                 <View style={styles.authorWrap}>
                   <View style={styles.authorAvatar}>
-                    <Ionicons name="person" size={16} color="#64748B" />
+                    <Ionicons name="person" size={16} color={colors.textSecondary} />
                   </View>
                   <View>
                     <Text style={styles.authorName}>{post.author?.name ?? "Canteen Admin"}</Text>
@@ -105,7 +107,7 @@ export default function Screen() {
                 </View>
                 {isPinned ? (
                   <View style={styles.pinnedPill}>
-                    <Ionicons name="pin" size={12} color="#4F46E5" />
+                    <Ionicons name="pin" size={12} color={isDark ? "#818CF8" : "#4F46E5"} />
                     <Text style={styles.pinnedPillText}>Pinned</Text>
                   </View>
                 ) : null}
@@ -127,21 +129,13 @@ export default function Screen() {
               ) : null}
 
               {post.mediaUrl && post.mediaType === "VIDEO" ? (
-                <Pressable
-                  onPress={async () => {
-                    const canOpen = await Linking.canOpenURL(post.mediaUrl as string);
-                    if (!canOpen) {
-                      Alert.alert("Invalid URL", "Could not open this video.");
-                      return;
-                    }
-                    await Linking.openURL(post.mediaUrl as string);
-                  }}
-                  style={styles.videoBtn}
-                  android_ripple={{ color: "#E2E8F0" }}
-                >
-                  <Ionicons name="play-circle" size={20} color="#0F172A" />
-                  <Text style={styles.videoBtnText}>Watch Video</Text>
-                </Pressable>
+                <Video
+                  source={{ uri: post.mediaUrl }}
+                  style={styles.postVideo}
+                  useNativeControls
+                  resizeMode={ResizeMode.COVER}
+                  isLooping={false}
+                />
               ) : null}
             </View>
           );
@@ -151,7 +145,7 @@ export default function Screen() {
   );
 }
 
-const createStyles = (colors: any) => StyleSheet.create({
+const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => ({
   screen: {
     flex: 1,
     backgroundColor: colors.background
@@ -213,15 +207,15 @@ const createStyles = (colors: any) => StyleSheet.create({
     backgroundColor: colors.card,
     padding: moderateScale(16),
     gap: moderateScale(14),
-    shadowColor: "#0F172A",
+    shadowColor: colors.text,
     shadowOpacity: 0.05,
     shadowRadius: moderateScale(8),
     shadowOffset: { width: 0, height: 4 },
     elevation: 2
   },
   postCardPinned: {
-    borderColor: "#C7D2FE",
-    backgroundColor: "#FAFAFF"
+    borderColor: isDark ? "rgba(79, 70, 229, 0.4)" : "#C7D2FE",
+    backgroundColor: isDark ? "rgba(79, 70, 229, 0.1)" : "#FAFAFF"
   },
   postHeaderRow: {
     flexDirection: "row",
@@ -259,16 +253,16 @@ const createStyles = (colors: any) => StyleSheet.create({
   pinnedPill: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#EEF2FF",
+    backgroundColor: isDark ? "rgba(79, 70, 229, 0.2)" : "#EEF2FF",
     borderRadius: moderateScale(6),
     paddingHorizontal: moderateScale(8),
     paddingVertical: moderateScale(4),
     gap: moderateScale(4),
     borderWidth: 1,
-    borderColor: "#C7D2FE"
+    borderColor: isDark ? "rgba(79, 70, 229, 0.4)" : "#C7D2FE"
   },
   pinnedPillText: {
-    color: "#4F46E5",
+    color: isDark ? "#818CF8" : "#4F46E5",
     fontWeight: "800",
     fontSize: fontScale(11),
     textTransform: "uppercase",
@@ -296,20 +290,10 @@ const createStyles = (colors: any) => StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border
   },
-  videoBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: colors.background,
+  postVideo: {
+    width: "100%",
+    height: moderateScale(220),
     borderRadius: moderateScale(12),
-    paddingVertical: moderateScale(14),
-    gap: moderateScale(8),
-    borderWidth: 1,
-    borderColor: colors.border
-  },
-  videoBtnText: {
-    color: colors.text,
-    fontWeight: "700",
-    fontSize: fontScale(15)
+    backgroundColor: "black",
   }
 });

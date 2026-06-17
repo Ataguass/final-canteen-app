@@ -6,6 +6,8 @@ import { useAuth } from "../../../hooks/useAuth";
 import { userService } from "../../../services/userService";
 import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../../utils/responsive';
 
+import { useTheme } from "../../../hooks/useTheme";
+
 type ActionCard = {
   title: string;
   subtitle: string;
@@ -101,6 +103,8 @@ const legalItems = [
 ] as const;
 
 export default function Screen() {
+  const { colors, isDark } = useTheme();
+  const styles = createStyles(colors);
   const router = useRouter();
   const { user, accessToken, logout, setSessionUser } = useAuth();
   
@@ -224,7 +228,7 @@ export default function Screen() {
               style={({ pressed }) => [
                 styles.listItem,
                 index !== dailyCards.length - 1 && styles.listItemBorder,
-                pressed && { backgroundColor: "#F1F5F9" }
+                pressed && { backgroundColor: isDark ? colors.surfaceAlt : "#F1F5F9" }
               ]}
               onPress={() => router.push(card.path as never)}
             >
@@ -416,10 +420,10 @@ export default function Screen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => ({
   screen: {
     flex: 1,
-    backgroundColor: "#F8FAFC"
+    backgroundColor: colors.background
   },
   content: {
     padding: moderateScale(16),
@@ -427,14 +431,14 @@ const styles = StyleSheet.create({
     paddingBottom: verticalScale(40)
   },
   heroCard: {
-    backgroundColor: "white",
+    backgroundColor: colors.card,
     borderRadius: moderateScale(24),
     padding: moderateScale(20),
     flexDirection: "row",
     alignItems: "center",
     gap: moderateScale(16),
     overflow: "hidden",
-    shadowColor: "#000",
+    shadowColor: colors.text,
     shadowOpacity: 0.04,
     shadowRadius: moderateScale(10),
     shadowOffset: { width: 0, height: 4 },
@@ -474,15 +478,15 @@ const styles = StyleSheet.create({
   heroName: {
     fontSize: fontScale(22),
     fontWeight: "900",
-    color: "#0F172A"
+    color: colors.text
   },
   heroRole: {
     fontSize: fontScale(14),
     fontWeight: "600",
-    color: "#64748B"
+    color: colors.textSecondary
   },
   tenantPill: {
-    backgroundColor: "#F1F5F9",
+    backgroundColor: colors.surfaceAlt,
     alignSelf: "flex-start",
     paddingHorizontal: moderateScale(8),
     paddingVertical: moderateScale(4),
@@ -492,7 +496,7 @@ const styles = StyleSheet.create({
   tenantPillText: {
     fontSize: fontScale(11),
     fontWeight: "700",
-    color: "#475569"
+    color: colors.textSecondary
   },
   sectionWrap: {
     gap: moderateScale(12)
@@ -500,7 +504,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: fontScale(18),
     fontWeight: "900",
-    color: "#0F172A",
+    color: colors.text,
     marginLeft: moderateScale(4)
   },
   logoutButton: {
@@ -525,10 +529,10 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5
   },
   listWrap: {
-    backgroundColor: "white",
+    backgroundColor: colors.card,
     borderRadius: moderateScale(20),
     overflow: "hidden",
-    shadowColor: "#000",
+    shadowColor: colors.text,
     shadowOpacity: 0.03,
     shadowRadius: moderateScale(8),
     shadowOffset: { width: 0, height: 4 },
@@ -542,7 +546,7 @@ const styles = StyleSheet.create({
   },
   listItemBorder: {
     borderBottomWidth: 1,
-    borderColor: "#F1F5F9"
+    borderColor: colors.border
   },
   iconWrapSmall: {
     width: moderateScale(36),
@@ -558,12 +562,12 @@ const styles = StyleSheet.create({
   listItemTitle: {
     fontSize: fontScale(15),
     fontWeight: "800",
-    color: "#0F172A"
+    color: colors.text
   },
   listItemSubtitle: {
     fontSize: fontScale(12),
     fontWeight: "500",
-    color: "#64748B"
+    color: colors.textSecondary
   },
   appVersion: {
     textAlign: "center",
@@ -574,16 +578,16 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(15,23,42,0.4)",
+    backgroundColor: colors.overlay,
     justifyContent: "center",
     padding: moderateScale(20)
   },
   modalContent: {
-    backgroundColor: "white",
+    backgroundColor: colors.card,
     borderRadius: moderateScale(24),
     padding: moderateScale(24),
     gap: moderateScale(20),
-    shadowColor: "#000",
+    shadowColor: colors.text,
     shadowOpacity: 0.1,
     shadowRadius: moderateScale(20),
     shadowOffset: { width: 0, height: 10 },
@@ -597,7 +601,7 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: fontScale(20),
     fontWeight: "900",
-    color: "#0F172A"
+    color: colors.text
   },
   modalBody: {
     gap: moderateScale(12)
@@ -605,17 +609,17 @@ const styles = StyleSheet.create({
   inputLabel: {
     fontSize: fontScale(13),
     fontWeight: "700",
-    color: "#475569",
+    color: colors.textSecondary,
     marginBottom: verticalScale(-4)
   },
   textInput: {
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: colors.border,
     borderRadius: moderateScale(12),
     padding: moderateScale(14),
     fontSize: fontScale(15),
-    color: "#0F172A",
-    backgroundColor: "#F8FAFC"
+    color: colors.text,
+    backgroundColor: colors.inputBg
   },
   submitBtn: {
     backgroundColor: "#1D4ED8",

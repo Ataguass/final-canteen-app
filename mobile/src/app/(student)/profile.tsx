@@ -12,7 +12,8 @@ import {
   View,
   RefreshControl,
   KeyboardAvoidingView,
-  Platform
+  Platform,
+  Switch
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "../../hooks/useAuth";
@@ -56,8 +57,9 @@ const roleLabelMap: Record<MyProfile["role"], string> = {
 };
 
 export default function Screen() {
-  const { colors, isDark } = useTheme();
-  const styles = createStyles(colors);
+  const theme = useTheme();
+  const { colors, isDark } = theme;
+  const styles = createStyles(theme);
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { user, accessToken, logout, setSessionUser } = useAuth();
@@ -328,19 +330,19 @@ export default function Screen() {
         refreshControl={<RefreshControl refreshing={loading} onRefresh={load} tintColor="#FF6B35" />}
       >
         <CanteenHeader showBackButton title="My Profile" subtitle="Manage your account" />
-        <View style={styles.heroCard}>
-          <View style={styles.heroTopRow}>
-            <View style={styles.avatarCircle}>
-              <Text style={styles.avatarText}>{avatarLetter}</Text>
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.heroName}>{profileView.name}</Text>
-              <Text style={styles.heroRole}>
-                {roleLabelMap[profileView.role]} • {profileView.phone ?? "No phone"}
-              </Text>
+          <View style={[styles.heroCard, { backgroundColor: isDark ? colors.surfaceAlt : "#0F172A" }]}>
+            <View style={styles.heroTopRow}>
+              <View style={styles.avatarCircle}>
+                <Text style={styles.avatarText}>{avatarLetter}</Text>
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.heroName, isDark && { color: colors.text }]}>{profileView.name}</Text>
+                <Text style={styles.heroRole}>
+                  {roleLabelMap[profileView.role]} • {profileView.phone ?? "No phone"}
+                </Text>
+              </View>
             </View>
           </View>
-        </View>
 
         <View style={styles.statsRow}>
           <View style={styles.statBox}>
@@ -406,32 +408,50 @@ export default function Screen() {
         <View style={styles.menuSection}>
           <Text style={styles.sectionLabel}>ACCOUNT SETTINGS</Text>
           <View style={styles.menuCard}>
-            <Pressable onPress={onOpenEdit} style={styles.menuItem}>
-              <View style={[styles.menuIcon, { backgroundColor: "#F3F4F6" }]}>
-                <Ionicons name="person-outline" size={18} color="#4B5563" />
+            <Pressable onPress={onOpenEdit} style={styles.menuItem} android_ripple={{ color: colors.surfaceAlt }}>
+              <View style={[styles.menuIcon, { backgroundColor: isDark ? "rgba(75, 85, 99, 0.2)" : "#F3F4F6" }]}>
+                <Ionicons name="person-outline" size={18} color={colors.textSecondary} />
               </View>
               <Text style={styles.menuText}>Edit Profile</Text>
-              <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
+              <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
             </Pressable>
             
             <View style={styles.menuDivider} />
             
-            <Pressable onPress={() => setPasswordVisible(true)} style={styles.menuItem}>
-              <View style={[styles.menuIcon, { backgroundColor: "#F3F4F6" }]}>
-                <Ionicons name="lock-closed-outline" size={18} color="#4B5563" />
+            <Pressable onPress={() => setPasswordVisible(true)} style={styles.menuItem} android_ripple={{ color: colors.surfaceAlt }}>
+              <View style={[styles.menuIcon, { backgroundColor: isDark ? "rgba(75, 85, 99, 0.2)" : "#F3F4F6" }]}>
+                <Ionicons name="lock-closed-outline" size={18} color={colors.textSecondary} />
               </View>
               <Text style={styles.menuText}>Change Password</Text>
-              <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
+              <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
             </Pressable>
 
             <View style={styles.menuDivider} />
             
-            <Pressable onPress={() => Alert.alert("Coming Soon", "Notifications settings will be available soon.")} style={styles.menuItem}>
-              <View style={[styles.menuIcon, { backgroundColor: "#F3F4F6" }]}>
-                <Ionicons name="notifications-outline" size={18} color="#4B5563" />
+            <Pressable onPress={() => Alert.alert("Coming Soon", "Notifications settings will be available soon.")} style={styles.menuItem} android_ripple={{ color: colors.surfaceAlt }}>
+              <View style={[styles.menuIcon, { backgroundColor: isDark ? "rgba(75, 85, 99, 0.2)" : "#F3F4F6" }]}>
+                <Ionicons name="notifications-outline" size={18} color={colors.textSecondary} />
               </View>
               <Text style={styles.menuText}>Notifications</Text>
-              <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
+              <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+            </Pressable>
+
+            <Pressable onPress={() => router.push("/(student)/settings" as never)} style={styles.menuItem} android_ripple={{ color: colors.surfaceAlt }}>
+              <View style={[styles.menuIcon, { backgroundColor: isDark ? "rgba(75, 85, 99, 0.2)" : "#F3F4F6" }]}>
+                <Ionicons name="settings-outline" size={18} color={colors.textSecondary} />
+              </View>
+              <Text style={styles.menuText}>Settings</Text>
+              <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
+            </Pressable>
+
+            <View style={styles.menuDivider} />
+            
+            <Pressable onPress={theme.toggleTheme} style={styles.menuItem} android_ripple={{ color: colors.surfaceAlt }}>
+              <View style={[styles.menuIcon, { backgroundColor: isDark ? "rgba(75, 85, 99, 0.2)" : "#F3F4F6" }]}>
+                <Ionicons name={isDark ? "moon" : "sunny-outline"} size={18} color={colors.textSecondary} />
+              </View>
+              <Text style={styles.menuText}>Dark Theme</Text>
+              <Switch value={isDark} onValueChange={theme.toggleTheme} thumbColor={isDark ? "#FFF" : "#FF6B35"} trackColor={{ false: "#E2E8F0", true: "#FF6B35" }} />
             </Pressable>
           </View>
         </View>
@@ -439,29 +459,29 @@ export default function Screen() {
         <View style={styles.menuSection}>
           <Text style={styles.sectionLabel}>SUPPORT & MORE</Text>
           <View style={styles.menuCard}>
-            <Pressable onPress={() => Alert.alert("Help Center", "Support contact: support@collegecanteen.com")} style={styles.menuItem}>
-              <View style={[styles.menuIcon, { backgroundColor: "#F3F4F6" }]}>
-                <Ionicons name="help-circle-outline" size={18} color="#4B5563" />
+            <Pressable onPress={() => Alert.alert("Help Center", "Support contact: support@collegecanteen.com")} style={styles.menuItem} android_ripple={{ color: colors.surfaceAlt }}>
+              <View style={[styles.menuIcon, { backgroundColor: isDark ? "rgba(75, 85, 99, 0.2)" : "#F3F4F6" }]}>
+                <Ionicons name="help-circle-outline" size={18} color={colors.textSecondary} />
               </View>
               <Text style={styles.menuText}>Help Center</Text>
-              <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
+              <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
             </Pressable>
             
             <View style={styles.menuDivider} />
             
-            <Pressable onPress={() => Alert.alert("About", "Canteen App v1.0.0")} style={styles.menuItem}>
-              <View style={[styles.menuIcon, { backgroundColor: "#F3F4F6" }]}>
-                <Ionicons name="information-circle-outline" size={18} color="#4B5563" />
+            <Pressable onPress={() => Alert.alert("About", "Canteen App v1.0.0")} style={styles.menuItem} android_ripple={{ color: colors.surfaceAlt }}>
+              <View style={[styles.menuIcon, { backgroundColor: isDark ? "rgba(75, 85, 99, 0.2)" : "#F3F4F6" }]}>
+                <Ionicons name="information-circle-outline" size={18} color={colors.textSecondary} />
               </View>
               <Text style={styles.menuText}>About</Text>
-              <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
+              <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
             </Pressable>
           </View>
         </View>
 
-        <Pressable onPress={onLogout} style={styles.logoutBtn}>
-          <Ionicons name="log-out-outline" size={18} color="#DC2626" />
-          <Text style={styles.logoutBtnText}>Log Out</Text>
+        <Pressable onPress={onLogout} style={[styles.logoutBtn, { backgroundColor: isDark ? "rgba(220, 38, 38, 0.1)" : "#FFF1F2" }]} android_ripple={{ color: isDark ? "rgba(220, 38, 38, 0.2)" : "#FECDD3" }}>
+          <Ionicons name="log-out-outline" size={18} color={isDark ? "#F87171" : "#DC2626"} />
+          <Text style={[styles.logoutBtnText, { color: isDark ? "#F87171" : "#DC2626" }]}>Log Out</Text>
         </Pressable>
       </ScrollView>
 
@@ -619,7 +639,7 @@ export default function Screen() {
   );
 }
 
-const createStyles = (colors: any) => StyleSheet.create({
+const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => ({
   screen: {
     flex: 1,
     backgroundColor: colors.background
@@ -634,7 +654,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     backgroundColor: "#0F172A",
     padding: moderateScale(20),
     gap: moderateScale(10),
-    shadowColor: "#0F172A",
+    shadowColor: colors.text,
     shadowOpacity: 0.2,
     shadowRadius: moderateScale(15),
     shadowOffset: { width: 0, height: 8 },
@@ -736,7 +756,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     backgroundColor: colors.card,
     padding: moderateScale(16),
     gap: moderateScale(12),
-    shadowColor: "#0F172A",
+    shadowColor: colors.text,
     shadowOpacity: 0.05,
     shadowRadius: moderateScale(10),
     shadowOffset: { width: 0, height: 4 },
@@ -778,7 +798,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     paddingHorizontal: moderateScale(10),
     paddingVertical: moderateScale(9),
     borderTopWidth: 1,
-    borderTopColor: "#F1F5F9"
+    borderTopColor: colors.surfaceAlt
   },
   walletTxnType: {
     color: colors.text,
@@ -824,7 +844,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     borderRadius: moderateScale(20),
     padding: moderateScale(16),
     alignItems: "center",
-    shadowColor: "#0F172A",
+    shadowColor: colors.text,
     shadowOpacity: 0.05,
     shadowRadius: moderateScale(10),
     shadowOffset: { width: 0, height: 4 },
@@ -857,7 +877,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   statDivider: {
     width: 1,
     height: moderateScale(30),
-    backgroundColor: "#E2E8F0",
+    backgroundColor: colors.surfaceAlt,
     marginHorizontal: moderateScale(16)
   },
   menuSection: {
@@ -875,7 +895,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     backgroundColor: colors.card,
     borderRadius: moderateScale(20),
     overflow: "hidden",
-    shadowColor: "#0F172A",
+    shadowColor: colors.text,
     shadowOpacity: 0.05,
     shadowRadius: moderateScale(10),
     shadowOffset: { width: 0, height: 4 },
@@ -937,7 +957,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     borderRadius: moderateScale(28),
     padding: moderateScale(24),
     gap: moderateScale(16),
-    shadowColor: "#0F172A",
+    shadowColor: colors.text,
     shadowOpacity: 0.15,
     shadowRadius: moderateScale(20),
     shadowOffset: { width: 0, height: 10 },

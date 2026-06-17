@@ -33,8 +33,9 @@ const statusBgMap: Record<string, string> = {
 const formatCurrency = (value: number): string => `₹ ${value.toFixed(2)}`;
 
 export default function Screen() {
-  const { colors, isDark } = useTheme();
-  const styles = createStyles(colors);
+  const theme = useTheme();
+  const { colors, isDark } = theme;
+  const styles = createStyles(theme);
   const { id } = useLocalSearchParams<{ id: string }>();
   const { user, accessToken } = useAuth();
   const [order, setOrder] = useState<Order | null>(null);
@@ -105,8 +106,25 @@ export default function Screen() {
     );
   }
 
-  const statusColor = statusColorMap[order.status] ?? "#334155";
-  const statusBg = statusBgMap[order.status] ?? "#F8FAFC";
+  const statusColor = isDark 
+    ? (order.status === 'PENDING' ? '#FBBF24' :
+       order.status === 'ACCEPTED' ? '#60A5FA' :
+       order.status === 'PREPARING' ? '#A78BFA' :
+       order.status === 'READY' ? '#22D3EE' :
+       order.status === 'COMPLETED' ? '#34D399' :
+       order.status === 'CANCELLED' ? '#F87171' :
+       order.status === 'REFUNDED' ? '#9CA3AF' : colors.text)
+    : (statusColorMap[order.status] ?? "#334155");
+    
+  const statusBg = isDark 
+    ? (order.status === 'PENDING' ? 'rgba(217, 119, 6, 0.15)' :
+       order.status === 'ACCEPTED' ? 'rgba(37, 99, 235, 0.15)' :
+       order.status === 'PREPARING' ? 'rgba(124, 58, 237, 0.15)' :
+       order.status === 'READY' ? 'rgba(8, 145, 178, 0.15)' :
+       order.status === 'COMPLETED' ? 'rgba(5, 150, 105, 0.15)' :
+       order.status === 'CANCELLED' ? 'rgba(220, 38, 38, 0.15)' :
+       order.status === 'REFUNDED' ? 'rgba(107, 114, 128, 0.15)' : 'rgba(255,255,255,0.05)')
+    : (statusBgMap[order.status] ?? "#F8FAFC");
 
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
@@ -125,13 +143,13 @@ export default function Screen() {
 
         {/* 2x2 Info Grid */}
         <View style={styles.infoGridRow}>
-          <View style={[styles.infoGridBox, { backgroundColor: "#EEF2FF" }]}>
-            <Text style={[styles.infoGridLabel, { color: "#4338CA" }]}>Created</Text>
+          <View style={[styles.infoGridBox, { backgroundColor: isDark ? 'rgba(67, 56, 202, 0.15)' : "#EEF2FF" }]}>
+            <Text style={[styles.infoGridLabel, { color: isDark ? '#818CF8' : "#4338CA" }]}>Created</Text>
             <Text style={styles.infoGridValue}>{new Date(order.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</Text>
             <Text style={styles.infoGridSubValue}>{new Date(order.createdAt).toLocaleDateString()}</Text>
           </View>
-          <View style={[styles.infoGridBox, { backgroundColor: "#ECFEFF" }]}>
-            <Text style={[styles.infoGridLabel, { color: "#0E7490" }]}>Payment</Text>
+          <View style={[styles.infoGridBox, { backgroundColor: isDark ? 'rgba(14, 116, 144, 0.15)' : "#ECFEFF" }]}>
+            <Text style={[styles.infoGridLabel, { color: isDark ? '#22D3EE' : "#0E7490" }]}>Payment</Text>
             <Text style={styles.infoGridValue}>{order.paymentMethod}</Text>
             <Text style={styles.infoGridSubValue}>{order.paymentStatus ?? "UNPAID"}</Text>
           </View>
@@ -148,8 +166,8 @@ export default function Screen() {
                 <Text style={styles.infoGridSubValue}>Token: {order.laneToken}</Text>
               ) : null}
             </View>
-            <View style={[styles.infoGridBox, { backgroundColor: "#F0FDF4" }]}>
-              <Text style={[styles.infoGridLabel, { color: "#166534" }]}>Pickup</Text>
+            <View style={[styles.infoGridBox, { backgroundColor: isDark ? 'rgba(22, 101, 52, 0.15)' : "#F0FDF4" }]}>
+              <Text style={[styles.infoGridLabel, { color: isDark ? '#4ADE80' : "#166534" }]}>Pickup</Text>
               <Text style={styles.infoGridValue}>
                 {order.isPreOrder ? "Scheduled" : "Immediate"}
               </Text>
@@ -192,7 +210,7 @@ export default function Screen() {
             pressed && { opacity: 0.7 }
           ]}
         >
-          <Ionicons name="refresh-outline" size={18} color="#475569" />
+          <Ionicons name="refresh-outline" size={18} color={isDark ? colors.textSecondary : "#475569"} />
           <Text style={styles.refreshButtonLargeText}>{loading ? "Refreshing..." : "Refresh Order"}</Text>
         </Pressable>
       </View>
@@ -237,7 +255,7 @@ export default function Screen() {
   );
 }
 
-const createStyles = (colors: any) => StyleSheet.create({
+const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => ({
   centerScreen: {
     flex: 1,
     justifyContent: "center",
@@ -353,8 +371,8 @@ const createStyles = (colors: any) => StyleSheet.create({
     borderWidth: 1
   },
   statusActionButtonSelected: {
-    backgroundColor: "#0F172A",
-    borderColor: "#0F172A"
+    backgroundColor: isDark ? colors.primary : "#0F172A",
+    borderColor: isDark ? colors.primary : "#0F172A"
   },
   statusActionButtonUnselected: {
     backgroundColor: colors.card,
@@ -398,7 +416,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   itemRowBorder: {
     borderBottomWidth: 1,
-    borderColor: "#F1F5F9"
+    borderColor: isDark ? colors.border : "#F1F5F9"
   },
   itemRowLeft: {
     flex: 1,
@@ -416,7 +434,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     fontSize: fontScale(13)
   },
   itemNote: {
-    color: "#D97706",
+    color: isDark ? '#FBBF24' : "#D97706",
     fontWeight: "600",
     fontSize: fontScale(12),
     marginTop: verticalScale(2)
@@ -456,7 +474,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     fontSize: fontScale(18)
   },
   grandTotalValue: {
-    color: "#1D4ED8",
+    color: isDark ? colors.primary : "#1D4ED8",
     fontWeight: "900",
     fontSize: fontScale(22)
   }

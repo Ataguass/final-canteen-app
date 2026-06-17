@@ -23,8 +23,8 @@ export function CanteenHeader({
   const router = useRouter();
   const { user } = useAuth();
   const { items: cartItems } = useCart();
-  const { colors, isDark } = useTheme();
-  const styles = createStyles(colors);
+  const { colors, isDark, toggleTheme } = useTheme();
+  const styles = createStyles(colors, isDark);
 
   const displayTitle = title ?? user?.name ?? 'Student';
   const displaySubtitle = subtitle ?? 'Campus Canteen';
@@ -34,7 +34,7 @@ export function CanteenHeader({
       <View style={styles.headerLeft}>
         {showBackButton && (
           <Pressable onPress={() => router.back()} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={24} color="#0F172A" />
+            <Ionicons name="arrow-back" size={24} color={colors.text} />
           </Pressable>
         )}
         {!showBackButton && showLocationIcon && (
@@ -44,7 +44,7 @@ export function CanteenHeader({
           <Text style={styles.locationTitle}>
             {displayTitle}{' '}
             {!showBackButton && showLocationIcon && (
-              <Ionicons name="chevron-down" size={14} color="#0F172A" />
+              <Ionicons name="chevron-down" size={14} color={colors.text} />
             )}
           </Text>
           {displaySubtitle ? (
@@ -55,7 +55,7 @@ export function CanteenHeader({
 
       <View style={styles.headerRight}>
         <Pressable onPress={() => router.push('/cart')} style={styles.iconButton}>
-          <Ionicons name="cart-outline" size={28} color="#0F172A" />
+          <Ionicons name="cart-outline" size={28} color={colors.text} />
           {cartItems && cartItems.length > 0 && (
             <View style={styles.cartBadge}>
               <Text style={styles.cartBadgeText}>{cartItems.length}</Text>
@@ -74,7 +74,7 @@ export function CanteenHeader({
   );
 }
 
-const createStyles = (colors: any) => StyleSheet.create({
+const createStyles = (colors: any, isDark: boolean) => StyleSheet.create({
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -104,7 +104,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   headerRight: {
     flexDirection: 'row',
-    gap: moderateScale(12),
+    gap: moderateScale(10),
     alignItems: 'center',
   },
   iconButton: {
@@ -115,12 +115,12 @@ const createStyles = (colors: any) => StyleSheet.create({
     width: moderateScale(36),
     height: moderateScale(36),
     borderRadius: moderateScale(18),
-    backgroundColor: '#DBEAFE',
+    backgroundColor: isDark ? "rgba(37, 99, 235, 0.2)" : '#DBEAFE',
     alignItems: 'center',
     justifyContent: 'center',
   },
   avatarText: {
-    color: '#1D4ED8',
+    color: isDark ? "#93C5FD" : '#1D4ED8',
     fontWeight: '700',
     fontSize: fontScale(16),
   },
@@ -135,7 +135,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
-    borderColor: '#FFFBEB',
+    borderColor: isDark ? colors.background : '#FFFBEB',
   },
   cartBadgeText: {
     color: 'white',

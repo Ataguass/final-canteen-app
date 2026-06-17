@@ -6,6 +6,7 @@ import { useAuth } from "../../../hooks/useAuth";
 import { useOrderSocket } from "../../../hooks/useOrderSocket";
 import { Order, orderService } from "../../../services/orderService";
 import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../../utils/responsive';
+import { useTheme } from '../../../hooks/useTheme';
 
 type StatusFilter =
   | "ALL"
@@ -45,6 +46,9 @@ const isSameDay = (a: Date, b: Date): boolean =>
   a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 
 export default function Screen() {
+  const theme = useTheme();
+  const { colors, isDark } = theme;
+  const styles = createStyles(theme);
   const router = useRouter();
   const { user, accessToken } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
@@ -111,11 +115,11 @@ export default function Screen() {
   }, [orders, query, statusFilter]);
 
   return (
-    <View style={styles.screen}>
+    <View key={isDark ? "dark" : "light"} style={styles.screen}>
       <ScrollView 
         style={styles.scroll} 
         contentContainerStyle={styles.content}
-        refreshControl={<RefreshControl refreshing={loading} onRefresh={load} colors={["#1D4ED8"]} />}
+        refreshControl={<RefreshControl refreshing={loading} onRefresh={load} colors={[colors.primary]} tintColor={colors.primary} />}
       >
         
         {/* Top Header */}
@@ -132,26 +136,26 @@ export default function Screen() {
         <View style={styles.statsGrid}>
           <View style={styles.statCard}>
             <Text style={styles.statLabel}>Total Orders</Text>
-            <Text style={[styles.statValue, { color: "#0F172A" }]}>{stats.total}</Text>
+            <Text style={[styles.statValue, { color: colors.text }]}>{stats.total}</Text>
           </View>
           <View style={styles.statCard}>
             <Text style={styles.statLabel}>Active Orders</Text>
-            <Text style={[styles.statValue, { color: "#D97706" }]}>{stats.active}</Text>
+            <Text style={[styles.statValue, { color: isDark ? '#FBBF24' : "#D97706" }]}>{stats.active}</Text>
           </View>
           <View style={styles.statCard}>
             <Text style={styles.statLabel}>Completed</Text>
-            <Text style={[styles.statValue, { color: "#059669" }]}>{stats.completed}</Text>
+            <Text style={[styles.statValue, { color: isDark ? '#34D399' : "#059669" }]}>{stats.completed}</Text>
           </View>
           <View style={styles.statCard}>
             <Text style={styles.statLabel}>Today Sales</Text>
-            <Text style={[styles.statValue, { color: "#1D4ED8", fontSize: 20 }]}>{formatCurrency(stats.todaySales)}</Text>
+            <Text style={[styles.statValue, { color: isDark ? colors.primary : "#1D4ED8", fontSize: 20 }]}>{formatCurrency(stats.todaySales)}</Text>
           </View>
         </View>
 
         {/* Search & Filters */}
         <View style={styles.filterSection}>
           <View style={styles.searchContainer}>
-            <Ionicons name="search" size={18} color="#64748B" />
+            <Ionicons name="search" size={18} color={colors.textSecondary} />
             <TextInput
               placeholder="Search ID, status, payment..."
               placeholderTextColor="#94A3B8"
@@ -161,7 +165,7 @@ export default function Screen() {
             />
             {query ? (
               <Pressable onPress={() => setQuery("")} style={{ padding: moderateScale(4) }}>
-                <Ionicons name="close-circle" size={18} color="#94A3B8" />
+                <Ionicons name="close-circle" size={18} color={colors.textSecondary} />
               </Pressable>
             ) : null}
           </View>
@@ -196,9 +200,9 @@ export default function Screen() {
           {filteredOrders.length > 3 && (
             <Pressable 
               onPress={() => router.push("/(admin)/orders/all")} 
-              style={{ paddingHorizontal: moderateScale(12), paddingVertical: verticalScale(6), backgroundColor: "#E2E8F0", borderRadius: moderateScale(8) }}
+              style={{ paddingHorizontal: moderateScale(12), paddingVertical: verticalScale(6), backgroundColor: isDark ? colors.surfaceAlt : "#E2E8F0", borderRadius: moderateScale(8) }}
             >
-              <Text style={{ fontSize: fontScale(13), fontWeight: "700", color: "#0F172A" }}>
+              <Text style={{ fontSize: fontScale(13), fontWeight: "700", color: colors.text }}>
                 View All
               </Text>
             </Pressable>
@@ -207,14 +211,31 @@ export default function Screen() {
 
         {filteredOrders.length === 0 ? (
           <View style={styles.emptyCard}>
-            <Ionicons name="receipt-outline" size={32} color="#94A3B8" />
+            <Ionicons name="receipt-outline" size={32} color={colors.textSecondary} />
             <Text style={styles.emptyText}>No orders match your search.</Text>
           </View>
         ) : (
           <View style={styles.orderList}>
             {filteredOrders.slice(0, 5).map((order) => {
-              const statusColor = statusColorMap[order.status] ?? "#334155";
-              const statusBg = statusBgMap[order.status] ?? "#F8FAFC";
+              const statusColor = isDark 
+                ? (order.status === 'PENDING' ? '#FBBF24' :
+                   order.status === 'ACCEPTED' ? '#60A5FA' :
+                   order.status === 'PREPARING' ? '#A78BFA' :
+                   order.status === 'READY' ? '#22D3EE' :
+                   order.status === 'COMPLETED' ? '#34D399' :
+                   order.status === 'CANCELLED' ? '#F87171' :
+                   order.status === 'REFUNDED' ? '#9CA3AF' : colors.text)
+                : (statusColorMap[order.status] ?? "#334155");
+                
+              const statusBg = isDark 
+                ? (order.status === 'PENDING' ? 'rgba(217, 119, 6, 0.15)' :
+                   order.status === 'ACCEPTED' ? 'rgba(37, 99, 235, 0.15)' :
+                   order.status === 'PREPARING' ? 'rgba(124, 58, 237, 0.15)' :
+                   order.status === 'READY' ? 'rgba(8, 145, 178, 0.15)' :
+                   order.status === 'COMPLETED' ? 'rgba(5, 150, 105, 0.15)' :
+                   order.status === 'CANCELLED' ? 'rgba(220, 38, 38, 0.15)' :
+                   order.status === 'REFUNDED' ? 'rgba(107, 114, 128, 0.15)' : 'rgba(255,255,255,0.05)')
+                : (statusBgMap[order.status] ?? "#F8FAFC");
               return (
                 <Pressable
                   key={order.id}
@@ -237,18 +258,18 @@ export default function Screen() {
                   {(order.laneToken || order.isPreOrder) ? (
                     <View style={styles.laneTagsRow}>
                       {order.serviceLane === "TEACHER_PRIORITY" ? (
-                        <View style={[styles.tagPill, { backgroundColor: "#DBEAFE" }]}>
-                          <Text style={[styles.tagText, { color: "#1E40AF" }]}>Priority</Text>
+                        <View style={[styles.tagPill, { backgroundColor: isDark ? 'rgba(37, 99, 235, 0.15)' : "#DBEAFE" }]}>
+                          <Text style={[styles.tagText, { color: isDark ? '#60A5FA' : "#1E40AF" }]}>Priority</Text>
                         </View>
                       ) : null}
                       {order.laneToken ? (
-                        <View style={[styles.tagPill, { backgroundColor: "#F1F5F9" }]}>
-                          <Text style={[styles.tagText, { color: "#334155" }]}>Token: {order.laneToken}</Text>
+                        <View style={[styles.tagPill, { backgroundColor: isDark ? colors.surfaceAlt : "#F1F5F9" }]}>
+                          <Text style={[styles.tagText, { color: isDark ? colors.textSecondary : "#334155" }]}>Token: {order.laneToken}</Text>
                         </View>
                       ) : null}
                       {order.isPreOrder && order.pickupSlotLabel ? (
-                        <View style={[styles.tagPill, { backgroundColor: "#DCFCE7" }]}>
-                          <Text style={[styles.tagText, { color: "#166534" }]}>{order.pickupSlotLabel}</Text>
+                        <View style={[styles.tagPill, { backgroundColor: isDark ? 'rgba(5, 150, 105, 0.15)' : "#DCFCE7" }]}>
+                          <Text style={[styles.tagText, { color: isDark ? '#34D399' : "#166534" }]}>{order.pickupSlotLabel}</Text>
                         </View>
                       ) : null}
                     </View>
@@ -270,10 +291,10 @@ export default function Screen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => ({
   screen: {
     flex: 1,
-    backgroundColor: "#F8FAFC"
+    backgroundColor: colors.background
   },
   scroll: {
     flex: 1
@@ -291,10 +312,10 @@ const styles = StyleSheet.create({
   pageTitle: {
     fontSize: fontScale(24),
     fontWeight: "900",
-    color: "#0F172A"
+    color: colors.text
   },
   lastUpdatedText: {
-    color: "#64748B",
+    color: colors.textSecondary,
     fontSize: fontScale(13),
     fontWeight: "500",
     marginTop: verticalScale(2)
@@ -306,7 +327,7 @@ const styles = StyleSheet.create({
   },
   statCard: {
     width: "48%",
-    backgroundColor: "white",
+    backgroundColor: colors.card,
     borderRadius: moderateScale(16),
     padding: moderateScale(14),
     shadowColor: "#000",
@@ -316,7 +337,7 @@ const styles = StyleSheet.create({
     elevation: 2
   },
   statLabel: {
-    color: "#64748B",
+    color: colors.textSecondary,
     fontWeight: "700",
     fontSize: fontScale(12)
   },
@@ -331,7 +352,7 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "white",
+    backgroundColor: colors.card,
     borderRadius: moderateScale(16),
     paddingHorizontal: moderateScale(14),
     height: moderateScale(50),
@@ -347,7 +368,7 @@ const styles = StyleSheet.create({
     marginLeft: moderateScale(10),
     fontSize: fontScale(15),
     fontWeight: "500",
-    color: "#0F172A"
+    color: colors.text
   },
   filterScroll: {
     gap: moderateScale(8)
@@ -361,22 +382,22 @@ const styles = StyleSheet.create({
     alignItems: "center"
   },
   filterChipActive: {
-    backgroundColor: "#0F172A",
-    borderColor: "#0F172A"
+    backgroundColor: isDark ? colors.text : "#0F172A",
+    borderColor: isDark ? colors.text : "#0F172A"
   },
   filterChipInactive: {
-    backgroundColor: "white",
-    borderColor: "#E2E8F0"
+    backgroundColor: colors.card,
+    borderColor: isDark ? colors.border : "#E2E8F0"
   },
   filterChipText: {
     fontWeight: "800",
     fontSize: fontScale(13)
   },
   filterChipTextActive: {
-    color: "white"
+    color: isDark ? colors.background : "white"
   },
   filterChipTextInactive: {
-    color: "#475569"
+    color: colors.textSecondary
   },
   listHeader: {
     flexDirection: "row",
@@ -387,26 +408,26 @@ const styles = StyleSheet.create({
   listTitle: {
     fontSize: fontScale(18),
     fontWeight: "900",
-    color: "#0F172A"
+    color: colors.text
   },
   listSubtitle: {
-    color: "#64748B",
+    color: colors.textSecondary,
     fontWeight: "700",
     fontSize: fontScale(13)
   },
   emptyCard: {
-    backgroundColor: "white",
+    backgroundColor: colors.card,
     borderRadius: moderateScale(20),
     padding: moderateScale(30),
     alignItems: "center",
     justifyContent: "center",
     gap: moderateScale(12),
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: isDark ? colors.border : "#E2E8F0",
     borderStyle: "dashed"
   },
   emptyText: {
-    color: "#64748B",
+    color: colors.textSecondary,
     fontWeight: "600",
     fontSize: fontScale(15)
   },
@@ -414,7 +435,7 @@ const styles = StyleSheet.create({
     gap: moderateScale(12)
   },
   orderCard: {
-    backgroundColor: "white",
+    backgroundColor: colors.card,
     borderRadius: moderateScale(20),
     padding: moderateScale(16),
     gap: moderateScale(12),
@@ -432,10 +453,10 @@ const styles = StyleSheet.create({
   orderNumber: {
     fontSize: fontScale(18),
     fontWeight: "900",
-    color: "#0F172A"
+    color: colors.text
   },
   orderDate: {
-    color: "#64748B",
+    color: colors.textSecondary,
     fontSize: fontScale(12),
     fontWeight: "500",
     marginTop: verticalScale(2)
@@ -471,15 +492,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingTop: verticalScale(12),
     borderTopWidth: 1,
-    borderColor: "#F1F5F9"
+    borderColor: isDark ? colors.border : "#F1F5F9"
   },
   orderItemsText: {
-    color: "#475569",
+    color: colors.textSecondary,
     fontWeight: "600",
     fontSize: fontScale(13)
   },
   orderTotalText: {
-    color: "#0F172A",
+    color: colors.text,
     fontWeight: "900",
     fontSize: fontScale(18)
   }

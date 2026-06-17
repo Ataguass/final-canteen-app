@@ -330,7 +330,11 @@ export default function AdminLayout() {
         screenOptions={{
           headerShown: true,
           tabBarActiveTintColor: "#FF6B35",
-          tabBarInactiveTintColor: "colors.textSecondary",
+          tabBarInactiveTintColor: colors.textSecondary,
+          tabBarStyle: {
+            backgroundColor: colors.tabBarBg,
+            borderTopColor: colors.border,
+          },
           headerStyle: {
             backgroundColor: colors.headerBg,
             elevation: 0,
@@ -364,7 +368,7 @@ export default function AdminLayout() {
                       {
                         padding: 4,
                         opacity: pressed ? 0.7 : 1,
-                        backgroundColor: "white",
+                        backgroundColor: colors.card,
                         borderRadius: 12,
                         shadowColor: "#000",
                         shadowOpacity: 0.05,
@@ -374,7 +378,7 @@ export default function AdminLayout() {
                       }
                     ]}
                   >
-                    <Ionicons name="arrow-back" size={24} color="colors.text" />
+                    <Ionicons name="arrow-back" size={24} color={colors.text} />
                   </Pressable>
                 ) : (
                   <Pressable
@@ -383,7 +387,7 @@ export default function AdminLayout() {
                       {
                         padding: 4,
                         opacity: pressed ? 0.7 : 1,
-                        backgroundColor: normalizedPath === "/dashboard" ? "transparent" : "white",
+                        backgroundColor: normalizedPath === "/dashboard" ? "transparent" : colors.card,
                         borderRadius: 12,
                         shadowColor: "#000",
                         shadowOpacity: normalizedPath === "/dashboard" ? 0 : 0.05,
@@ -393,7 +397,7 @@ export default function AdminLayout() {
                       }
                     ]}
                   >
-                    <Ionicons name="menu" size={26} color="colors.text" />
+                    <Ionicons name="menu" size={26} color={colors.text} />
                   </Pressable>
                 )}
               </View>
@@ -407,7 +411,7 @@ export default function AdminLayout() {
                   { padding: 4, opacity: pressed ? 0.7 : 1 }
                 ]}
               >
-                <Ionicons name={isDark ? "sunny-outline" : "moon-outline"} size={24} color="colors.text" />
+                <Ionicons name={isDark ? "sunny-outline" : "moon-outline"} size={24} color={colors.text} />
               </Pressable>
 
               <Pressable
@@ -416,7 +420,7 @@ export default function AdminLayout() {
                   { padding: 4, opacity: pressed ? 0.7 : 1 }
                 ]}
               >
-                <Ionicons name="notifications-outline" size={24} color="colors.text" />
+                <Ionicons name="notifications-outline" size={24} color={colors.text} />
                 {newOrderCount > 0 ? (
                   <View
                     style={{
@@ -525,7 +529,7 @@ export default function AdminLayout() {
               borderBottomRightRadius: 24,
               overflow: "hidden",
               transform: [{ translateX: drawerTranslateX }],
-              shadowColor: "colors.text",
+              shadowColor: colors.text,
               shadowOpacity: 0.18,
               shadowRadius: 18,
               shadowOffset: { width: 4, height: 0 },
@@ -564,8 +568,8 @@ export default function AdminLayout() {
                           gap: 14
                         }}
                       >
-                        <Ionicons name={item.icon} size={22} color={active ? "white" : "colors.textSecondary"} />
-                        <Text style={{ color: active ? "white" : "#334155", fontWeight: active ? "800" : "600", fontSize: 15, flex: 1 }}>
+                        <Ionicons name={item.icon} size={22} color={active ? "white" : colors.textSecondary} />
+                        <Text style={{ color: active ? "white" : colors.text, fontWeight: active ? "800" : "600", fontSize: 15, flex: 1 }}>
                           {item.label}
                         </Text>
                       </Pressable>
@@ -591,14 +595,14 @@ export default function AdminLayout() {
                 android_ripple={{ color: "rgba(0,0,0,0.05)" }}
                 style={{
                   borderRadius: 12,
-                  backgroundColor: "#FEF2F2",
+                  backgroundColor: isDark ? "rgba(239, 68, 68, 0.15)" : "#FEF2F2",
                   paddingVertical: 12,
                   alignItems: "center",
                   justifyContent: "center",
                   flexDirection: "row",
                   gap: 8,
                   borderWidth: 1,
-                  borderColor: "#FECACA"
+                  borderColor: isDark ? "rgba(239, 68, 68, 0.3)" : "#FECACA"
                 }}
               >
                 <Ionicons name="log-out-outline" size={18} color="#DC2626" />
@@ -644,7 +648,7 @@ export default function AdminLayout() {
                   backgroundColor: colors.border
                 }}
               >
-                <Ionicons name="notifications" size={20} color="colors.text" />
+                <Ionicons name="notifications" size={20} color={colors.text} />
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={{ fontSize: 19, fontWeight: "800", color: colors.text }}>

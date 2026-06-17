@@ -4,6 +4,7 @@ import { Alert, Pressable, ScrollView, Share, Text, TextInput, View, RefreshCont
 import { useAuth } from "../../../hooks/useAuth";
 import { orderService, type Order } from "../../../services/orderService";
 import type { PaymentMethod, PaymentStatus } from "../../../services/types";
+import { useTheme } from '../../../hooks/useTheme';
 
 type RangeKey = "TODAY" | "WEEK" | "MONTH" | "ALL" | "CUSTOM";
 
@@ -56,17 +57,6 @@ const parseDateInput = (value: string, endOfDay: boolean): Date | null => {
 
 const formatCurrency = (value: number) => `₹ ${value.toFixed(2)}`;
 
-const cardShadow = {
-  borderWidth: 1,
-  borderColor: "#E5E7EB",
-  borderRadius: 16,
-  backgroundColor: "white",
-  shadowColor: "#0F172A",
-  shadowOpacity: 0.06,
-  shadowRadius: 8,
-  shadowOffset: { width: 0, height: 4 },
-  elevation: 2
-} as const;
 
 const statusColorMap: Record<string, string> = {
   PAID: "#059669",
@@ -75,7 +65,22 @@ const statusColorMap: Record<string, string> = {
 };
 
 export default function Screen() {
+  const theme = useTheme();
+  const { colors, isDark } = theme;
   const { user, accessToken } = useAuth();
+
+  const cardShadow = {
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 16,
+    backgroundColor: colors.card,
+    shadowColor: "#000",
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 2
+  } as const;
+  
   const now = useMemo(() => new Date(), []);
   const monthStart = useMemo(() => new Date(now.getFullYear(), now.getMonth(), 1), [now]);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -257,21 +262,21 @@ export default function Screen() {
 
   if (!user || (user.role !== "ADMIN" && user.role !== "SUPER_ADMIN")) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <Text>Admin access required.</Text>
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: colors.background }}>
+        <Text style={{ color: colors.text }}>Admin access required.</Text>
       </View>
     );
   }
 
   return (
     <ScrollView 
-      style={{ flex: 1, backgroundColor: "#F8FAFC" }} 
+      style={{ flex: 1, backgroundColor: colors.background }} 
       contentContainerStyle={{ padding: 16, gap: 16, paddingBottom: 40 }}
-      refreshControl={<RefreshControl refreshing={loading} onRefresh={() => loadOrders().catch(() => undefined)} />}
+      refreshControl={<RefreshControl refreshing={loading} onRefresh={() => loadOrders().catch(() => undefined)} colors={[colors.primary]} tintColor={colors.primary} />}
     >
       <View style={{ gap: 12 }}>
         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-          <Text style={{ fontSize: 16, fontWeight: "800", color: "#0F172A" }}>Date Range</Text>
+          <Text style={{ fontSize: 16, fontWeight: "800", color: colors.text }}>Date Range</Text>
           <Pressable
             onPress={exportCsv}
             style={{
@@ -310,13 +315,13 @@ export default function Screen() {
                 style={{
                   borderRadius: 999,
                   borderWidth: 1,
-                  borderColor: active ? "#0F172A" : "#E2E8F0",
-                  backgroundColor: active ? "#0F172A" : "white",
+                  borderColor: active ? (isDark ? colors.text : "#0F172A") : colors.border,
+                  backgroundColor: active ? (isDark ? colors.text : "#0F172A") : colors.card,
                   paddingVertical: 8,
                   paddingHorizontal: 16
                 }}
               >
-                <Text style={{ color: active ? "white" : "#475569", fontWeight: "700", fontSize: 13 }}>{label}</Text>
+                <Text style={{ color: active ? (isDark ? colors.background : "white") : colors.textSecondary, fontWeight: "700", fontSize: 13 }}>{label}</Text>
               </Pressable>
             );
           })}
@@ -330,7 +335,7 @@ export default function Screen() {
               placeholder="From (YYYY-MM-DD)"
               autoCapitalize="none"
               autoCorrect={false}
-              style={{ flex: 1, borderWidth: 1, borderColor: "#E2E8F0", borderRadius: 12, padding: 12, backgroundColor: "white", color: "#0F172A", fontSize: 14, fontWeight: "600" }}
+              style={{ flex: 1, borderWidth: 1, borderColor: colors.border, borderRadius: 12, padding: 12, backgroundColor: colors.card, color: colors.text, fontSize: 14, fontWeight: "600" }}
               placeholderTextColor="#94A3B8"
             />
             <TextInput
@@ -339,7 +344,7 @@ export default function Screen() {
               placeholder="To (YYYY-MM-DD)"
               autoCapitalize="none"
               autoCorrect={false}
-              style={{ flex: 1, borderWidth: 1, borderColor: "#E2E8F0", borderRadius: 12, padding: 12, backgroundColor: "white", color: "#0F172A", fontSize: 14, fontWeight: "600" }}
+              style={{ flex: 1, borderWidth: 1, borderColor: colors.border, borderRadius: 12, padding: 12, backgroundColor: colors.card, color: colors.text, fontSize: 14, fontWeight: "600" }}
               placeholderTextColor="#94A3B8"
             />
           </View>
@@ -349,16 +354,16 @@ export default function Screen() {
 
       <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
         <View style={{ width: "31%", ...cardShadow, padding: 12, alignItems: "center" }}>
-          <Text style={{ color: "#64748B", fontWeight: "700", fontSize: 10, textTransform: "uppercase" }}>Orders</Text>
-          <Text style={{ fontSize: 20, fontWeight: "800", color: "#0F172A", marginTop: 2 }}>{summary.totalOrders}</Text>
+          <Text style={{ color: colors.textSecondary, fontWeight: "700", fontSize: 10, textTransform: "uppercase" }}>Orders</Text>
+          <Text style={{ fontSize: 20, fontWeight: "800", color: colors.text, marginTop: 2 }}>{summary.totalOrders}</Text>
         </View>
         <View style={{ width: "31%", ...cardShadow, padding: 12, alignItems: "center" }}>
-          <Text style={{ color: "#64748B", fontWeight: "700", fontSize: 10, textTransform: "uppercase" }}>Paid</Text>
-          <Text style={{ fontSize: 20, fontWeight: "800", color: "#4338CA", marginTop: 2 }}>{formatCurrency(summary.paidSales)}</Text>
+          <Text style={{ color: colors.textSecondary, fontWeight: "700", fontSize: 10, textTransform: "uppercase" }}>Paid</Text>
+          <Text style={{ fontSize: 20, fontWeight: "800", color: isDark ? '#60A5FA' : "#4338CA", marginTop: 2 }}>{formatCurrency(summary.paidSales)}</Text>
         </View>
         <View style={{ width: "31%", ...cardShadow, padding: 12, alignItems: "center" }}>
-          <Text style={{ color: "#64748B", fontWeight: "700", fontSize: 10, textTransform: "uppercase" }}>Avg</Text>
-          <Text style={{ fontSize: 20, fontWeight: "800", color: "#92400E", marginTop: 2 }}>{formatCurrency(summary.avgTicket)}</Text>
+          <Text style={{ color: colors.textSecondary, fontWeight: "700", fontSize: 10, textTransform: "uppercase" }}>Avg</Text>
+          <Text style={{ fontSize: 20, fontWeight: "800", color: isDark ? '#FBBF24' : "#92400E", marginTop: 2 }}>{formatCurrency(summary.avgTicket)}</Text>
         </View>
 
         <View style={{ width: "100%", ...cardShadow, padding: 16, backgroundColor: "#065F46" }}>
@@ -367,47 +372,47 @@ export default function Screen() {
         </View>
 
         <View style={{ width: "48%", ...cardShadow, padding: 14 }}>
-          <Text style={{ color: "#64748B", fontWeight: "700", fontSize: 11, textTransform: "uppercase" }}>Today Sales</Text>
-          <Text style={{ fontSize: 18, fontWeight: "800", color: "#1D4ED8", marginTop: 2 }}>{formatCurrency(fixedSales.todaySales)}</Text>
+          <Text style={{ color: colors.textSecondary, fontWeight: "700", fontSize: 11, textTransform: "uppercase" }}>Today Sales</Text>
+          <Text style={{ fontSize: 18, fontWeight: "800", color: isDark ? '#3B82F6' : "#1D4ED8", marginTop: 2 }}>{formatCurrency(fixedSales.todaySales)}</Text>
         </View>
         <View style={{ width: "48%", ...cardShadow, padding: 14 }}>
-          <Text style={{ color: "#64748B", fontWeight: "700", fontSize: 11, textTransform: "uppercase" }}>Monthly Sales</Text>
-          <Text style={{ fontSize: 18, fontWeight: "800", color: "#5B21B6", marginTop: 2 }}>{formatCurrency(fixedSales.monthSales)}</Text>
+          <Text style={{ color: colors.textSecondary, fontWeight: "700", fontSize: 11, textTransform: "uppercase" }}>Monthly Sales</Text>
+          <Text style={{ fontSize: 18, fontWeight: "800", color: isDark ? '#8B5CF6' : "#5B21B6", marginTop: 2 }}>{formatCurrency(fixedSales.monthSales)}</Text>
         </View>
       </View>
 
       <View style={{ ...cardShadow, padding: 16, gap: 12 }}>
-        <Text style={{ fontSize: 16, fontWeight: "800", color: "#0F172A" }}>Order & Payment Status</Text>
+        <Text style={{ fontSize: 16, fontWeight: "800", color: colors.text }}>Order & Payment Status</Text>
         <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
-          <View style={{ width: "48%", borderRadius: 12, backgroundColor: "#FEF3C7", padding: 12, borderWidth: 1, borderColor: "#FDE68A" }}>
-            <Text style={{ color: "#92400E", fontSize: 11, fontWeight: "800", textTransform: "uppercase" }}>Pending</Text>
-            <Text style={{ color: "#78350F", fontSize: 22, fontWeight: "800", marginTop: 2 }}>{summary.pendingOrders}</Text>
+          <View style={{ width: "48%", borderRadius: 12, backgroundColor: isDark ? 'rgba(217, 119, 6, 0.1)' : "#FEF3C7", padding: 12, borderWidth: 1, borderColor: isDark ? '#F59E0B' : "#FDE68A" }}>
+            <Text style={{ color: isDark ? '#FCD34D' : "#92400E", fontSize: 11, fontWeight: "800", textTransform: "uppercase" }}>Pending</Text>
+            <Text style={{ color: isDark ? '#FDE68A' : "#78350F", fontSize: 22, fontWeight: "800", marginTop: 2 }}>{summary.pendingOrders}</Text>
           </View>
-          <View style={{ width: "48%", borderRadius: 12, backgroundColor: "#ECFDF5", padding: 12, borderWidth: 1, borderColor: "#A7F3D0" }}>
-            <Text style={{ color: "#047857", fontSize: 11, fontWeight: "800", textTransform: "uppercase" }}>Completed</Text>
-            <Text style={{ color: "#065F46", fontSize: 22, fontWeight: "800", marginTop: 2 }}>{summary.completedOrders}</Text>
+          <View style={{ width: "48%", borderRadius: 12, backgroundColor: isDark ? 'rgba(16, 185, 129, 0.1)' : "#ECFDF5", padding: 12, borderWidth: 1, borderColor: isDark ? '#10B981' : "#A7F3D0" }}>
+            <Text style={{ color: isDark ? '#6EE7B7' : "#047857", fontSize: 11, fontWeight: "800", textTransform: "uppercase" }}>Completed</Text>
+            <Text style={{ color: isDark ? '#A7F3D0' : "#065F46", fontSize: 22, fontWeight: "800", marginTop: 2 }}>{summary.completedOrders}</Text>
           </View>
-          <View style={{ width: "48%", borderRadius: 12, backgroundColor: "#EEF2FF", padding: 12, borderWidth: 1, borderColor: "#C7D2FE" }}>
-            <Text style={{ color: "#3730A3", fontSize: 11, fontWeight: "800", textTransform: "uppercase" }}>Paid</Text>
-            <Text style={{ color: "#312E81", fontSize: 22, fontWeight: "800", marginTop: 2 }}>{paymentStatusBreakdown.find(s => s.status === 'PAID')?.count || 0}</Text>
+          <View style={{ width: "48%", borderRadius: 12, backgroundColor: isDark ? 'rgba(79, 70, 229, 0.1)' : "#EEF2FF", padding: 12, borderWidth: 1, borderColor: isDark ? '#6366F1' : "#C7D2FE" }}>
+            <Text style={{ color: isDark ? '#A5B4FC' : "#3730A3", fontSize: 11, fontWeight: "800", textTransform: "uppercase" }}>Paid</Text>
+            <Text style={{ color: isDark ? '#C7D2FE' : "#312E81", fontSize: 22, fontWeight: "800", marginTop: 2 }}>{paymentStatusBreakdown.find(s => s.status === 'PAID')?.count || 0}</Text>
           </View>
-          <View style={{ width: "48%", borderRadius: 12, backgroundColor: "#FEF2F2", padding: 12, borderWidth: 1, borderColor: "#FECACA" }}>
-            <Text style={{ color: "#991B1B", fontSize: 11, fontWeight: "800", textTransform: "uppercase" }}>Unpaid</Text>
-            <Text style={{ color: "#7F1D1D", fontSize: 22, fontWeight: "800", marginTop: 2 }}>{paymentStatusBreakdown.find(s => s.status === 'UNPAID')?.count || 0}</Text>
+          <View style={{ width: "48%", borderRadius: 12, backgroundColor: isDark ? 'rgba(239, 68, 68, 0.1)' : "#FEF2F2", padding: 12, borderWidth: 1, borderColor: isDark ? '#EF4444' : "#FECACA" }}>
+            <Text style={{ color: isDark ? '#FCA5A5' : "#991B1B", fontSize: 11, fontWeight: "800", textTransform: "uppercase" }}>Unpaid</Text>
+            <Text style={{ color: isDark ? '#FECACA' : "#7F1D1D", fontSize: 22, fontWeight: "800", marginTop: 2 }}>{paymentStatusBreakdown.find(s => s.status === 'UNPAID')?.count || 0}</Text>
           </View>
         </View>
       </View>
 
       <View style={{ ...cardShadow, padding: 16, gap: 12 }}>
-        <Text style={{ fontSize: 16, fontWeight: "800", color: "#0F172A" }}>Payment Methods</Text>
+        <Text style={{ fontSize: 16, fontWeight: "800", color: colors.text }}>Payment Methods</Text>
         <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
           {paymentBreakdown.filter(e => e.count > 0).length === 0 ? (
-            <Text style={{ color: "#64748B", fontSize: 13, fontWeight: "500" }}>No payment data available.</Text>
+            <Text style={{ color: colors.textSecondary, fontSize: 13, fontWeight: "500" }}>No payment data available.</Text>
           ) : (
             paymentBreakdown.filter(e => e.count > 0).map((entry) => (
-              <View key={entry.method} style={{ width: "48%", padding: 12, backgroundColor: "#F8FAFC", borderRadius: 12, borderWidth: 1, borderColor: "#E2E8F0" }}>
-                <Text style={{ color: "#475569", fontWeight: "700", fontSize: 11, textTransform: "uppercase" }}>{entry.method} ({entry.count})</Text>
-                <Text style={{ fontSize: 16, fontWeight: "800", color: "#0F172A", marginTop: 4 }}>{formatCurrency(entry.amount)}</Text>
+              <View key={entry.method} style={{ width: "48%", padding: 12, backgroundColor: colors.surfaceAlt, borderRadius: 12, borderWidth: 1, borderColor: colors.border }}>
+                <Text style={{ color: colors.textSecondary, fontWeight: "700", fontSize: 11, textTransform: "uppercase" }}>{entry.method} ({entry.count})</Text>
+                <Text style={{ fontSize: 16, fontWeight: "800", color: colors.text, marginTop: 4 }}>{formatCurrency(entry.amount)}</Text>
               </View>
             ))
           )}
@@ -415,38 +420,38 @@ export default function Screen() {
       </View>
 
       <View style={{ ...cardShadow, padding: 16, gap: 12 }}>
-        <Text style={{ fontSize: 16, fontWeight: "800", color: "#0F172A" }}>Top Items</Text>
-        {topItems.length === 0 ? <Text style={{ color: "#64748B", fontSize: 13, fontWeight: "500" }}>No item sales in selected range.</Text> : null}
+        <Text style={{ fontSize: 16, fontWeight: "800", color: colors.text }}>Top Items</Text>
+        {topItems.length === 0 ? <Text style={{ color: colors.textSecondary, fontSize: 13, fontWeight: "500" }}>No item sales in selected range.</Text> : null}
         {topItems.map((item, index) => (
-          <View key={`${item.name}-${index}`} style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingVertical: 8, borderBottomWidth: index === topItems.length - 1 ? 0 : 1, borderBottomColor: "#E2E8F0" }}>
+          <View key={`${item.name}-${index}`} style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingVertical: 8, borderBottomWidth: index === topItems.length - 1 ? 0 : 1, borderBottomColor: colors.border }}>
             <View style={{ flex: 1, flexDirection: "row", alignItems: "center", gap: 8 }}>
-              <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: "#F1F5F9", alignItems: "center", justifyContent: "center" }}>
-                <Text style={{ color: "#475569", fontSize: 11, fontWeight: "800" }}>{index + 1}</Text>
+              <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: colors.surfaceAlt, alignItems: "center", justifyContent: "center" }}>
+                <Text style={{ color: colors.textSecondary, fontSize: 11, fontWeight: "800" }}>{index + 1}</Text>
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={{ color: "#0F172A", fontWeight: "800", fontSize: 14 }} numberOfLines={1}>{item.name}</Text>
-                <Text style={{ color: "#64748B", fontSize: 12, fontWeight: "500", marginTop: 2 }}>{item.qty} sold</Text>
+                <Text style={{ color: colors.text, fontWeight: "800", fontSize: 14 }} numberOfLines={1}>{item.name}</Text>
+                <Text style={{ color: colors.textSecondary, fontSize: 12, fontWeight: "500", marginTop: 2 }}>{item.qty} sold</Text>
               </View>
             </View>
-            <Text style={{ color: "#065F46", fontWeight: "800", fontSize: 15 }}>{formatCurrency(item.amount)}</Text>
+            <Text style={{ color: isDark ? '#34D399' : "#065F46", fontWeight: "800", fontSize: 15 }}>{formatCurrency(item.amount)}</Text>
           </View>
         ))}
       </View>
 
       <View style={{ ...cardShadow, padding: 16, gap: 12 }}>
-        <Text style={{ fontSize: 16, fontWeight: "800", color: "#0F172A" }}>Recent Orders</Text>
-        {recentOrders.length === 0 ? <Text style={{ color: "#64748B", fontSize: 13, fontWeight: "500" }}>No orders in selected range.</Text> : null}
+        <Text style={{ fontSize: 16, fontWeight: "800", color: colors.text }}>Recent Orders</Text>
+        {recentOrders.length === 0 ? <Text style={{ color: colors.textSecondary, fontSize: 13, fontWeight: "500" }}>No orders in selected range.</Text> : null}
         {recentOrders.map((order, index) => (
-          <View key={order.id} style={{ paddingVertical: 10, borderBottomWidth: index === recentOrders.length - 1 ? 0 : 1, borderBottomColor: "#E2E8F0", gap: 4 }}>
+          <View key={order.id} style={{ paddingVertical: 10, borderBottomWidth: index === recentOrders.length - 1 ? 0 : 1, borderBottomColor: colors.border, gap: 4 }}>
             <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-              <Text style={{ fontWeight: "800", color: "#0F172A", fontSize: 14 }}>{order.orderNumber}</Text>
-              <Text style={{ color: "#0F172A", fontWeight: "800", fontSize: 15 }}>{formatCurrency(order.totalAmount)}</Text>
+              <Text style={{ fontWeight: "800", color: colors.text, fontSize: 14 }}>{order.orderNumber}</Text>
+              <Text style={{ color: colors.text, fontWeight: "800", fontSize: 15 }}>{formatCurrency(order.totalAmount)}</Text>
             </View>
             <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-              <Text style={{ color: "#64748B", fontSize: 12, fontWeight: "600" }}>
+              <Text style={{ color: colors.textSecondary, fontSize: 12, fontWeight: "600" }}>
                 {order.status} • {order.paymentMethod}
               </Text>
-              <Text style={{ color: "#94A3B8", fontSize: 11, fontWeight: "500" }}>{new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
+              <Text style={{ color: isDark ? colors.textSecondary : "#94A3B8", fontSize: 11, fontWeight: "500" }}>{new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
             </View>
           </View>
         ))}

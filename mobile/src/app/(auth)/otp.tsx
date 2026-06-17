@@ -11,8 +11,9 @@ const BRAND_COLOR = "#080d2b";
 const OTP_LENGTH = 6;
 
 export default function OtpScreen() {
-  const { colors, isDark } = useTheme();
-  const styles = createStyles(colors);
+  const theme = useTheme();
+  const { colors, isDark } = theme;
+  const styles = createStyles(theme);
   const router = useRouter();
   const { pendingRegistration, registerAfterOtp, confirmationResult } = useAuth();
   
@@ -82,7 +83,7 @@ export default function OtpScreen() {
         
         <Animated.View entering={FadeInDown.delay(100).springify()} style={styles.header}>
           <Pressable onPress={() => router.back()} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={24} color="#1c1c1e" />
+            <Ionicons name="arrow-back" size={24} color={isDark ? colors.text : "#1c1c1e"} />
           </Pressable>
           <View style={styles.iconContainer}>
             <Ionicons name="chatbubble-ellipses" size={32} color="#ffffff" />
@@ -157,7 +158,7 @@ export default function OtpScreen() {
   );
 }
 
-const createStyles = (colors: any) => StyleSheet.create({
+const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => ({
   container: {
     flex: 1,
     backgroundColor: colors.background,
@@ -187,7 +188,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     justifyContent: 'center',
     marginBottom: verticalScale(20),
     elevation: 8,
-    shadowColor: BRAND_COLOR,
+    shadowColor: isDark ? colors.text : BRAND_COLOR,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.3,
     shadowRadius: moderateScale(16),
@@ -206,7 +207,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     lineHeight: 24,
   },
   highlightText: {
-    color: BRAND_COLOR,
+    color: isDark ? colors.primary : BRAND_COLOR,
     fontWeight: '700',
   },
   form: {
@@ -228,11 +229,11 @@ const createStyles = (colors: any) => StyleSheet.create({
     alignItems: 'center',
   },
   otpBoxActive: {
-    borderColor: BRAND_COLOR,
-    backgroundColor: 'rgba(8, 13, 43, 0.02)',
+    borderColor: isDark ? colors.primary : BRAND_COLOR,
+    backgroundColor: isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(8, 13, 43, 0.02)',
   },
   otpBoxFilled: {
-    borderColor: BRAND_COLOR,
+    borderColor: isDark ? colors.primary : BRAND_COLOR,
     backgroundColor: colors.card,
   },
   otpText: {
@@ -247,14 +248,14 @@ const createStyles = (colors: any) => StyleSheet.create({
     opacity: 0,
   },
   primaryButton: {
-    backgroundColor: BRAND_COLOR,
+    backgroundColor: isDark ? colors.primary : BRAND_COLOR,
     height: moderateScale(56),
     borderRadius: moderateScale(16),
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: verticalScale(8),
     elevation: 8,
-    shadowColor: BRAND_COLOR,
+    shadowColor: isDark ? colors.primary : BRAND_COLOR,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.3,
     shadowRadius: moderateScale(16),
@@ -274,7 +275,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     fontSize: fontScale(15),
   },
   resendLink: {
-    color: BRAND_COLOR,
+    color: isDark ? colors.text : BRAND_COLOR,
     fontSize: fontScale(15),
     fontWeight: '700',
   }

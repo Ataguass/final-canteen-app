@@ -25,8 +25,9 @@ const statusColorMap: Record<string, string> = {
 const formatCurrency = (value: number): string => `₹ ${value.toFixed(2)}`;
 
 export default function Screen() {
-  const { colors, isDark } = useTheme();
-  const styles = createStyles(colors);
+  const theme = useTheme();
+  const { colors, isDark } = theme;
+  const styles = createStyles(theme);
   const { id } = useLocalSearchParams<{ id: string }>();
   const insets = useSafeAreaInsets();
   const { user, accessToken } = useAuth();
@@ -69,7 +70,7 @@ export default function Screen() {
         <Stack.Screen options={{ headerShown: false }} />
         <CanteenHeader showBackButton title="Order Details" subtitle="Loading..." />
         <View style={styles.loadingWrap}>
-          <Ionicons name="hourglass-outline" size={24} color="#94A3B8" />
+          <Ionicons name="hourglass-outline" size={24} color={colors.textMuted} />
           <Text style={styles.loadingText}>Loading order details...</Text>
         </View>
       </View>
@@ -82,7 +83,7 @@ export default function Screen() {
         <Stack.Screen options={{ headerShown: false }} />
         <CanteenHeader showBackButton title="Order Not Found" subtitle="" />
         <View style={styles.loadingWrap}>
-          <Ionicons name="receipt-outline" size={32} color="#94A3B8" />
+          <Ionicons name="receipt-outline" size={32} color={colors.textMuted} />
           <Text style={styles.emptyTitle}>Order not found</Text>
           <Text style={styles.emptySub}>The order you are looking for does not exist or has been deleted.</Text>
         </View>
@@ -120,13 +121,13 @@ export default function Screen() {
             <View style={styles.headerTagRow}>
               {order.serviceLane === "TEACHER_PRIORITY" ? (
                 <View style={[styles.headerTagPill, styles.headerTagPriority]}>
-                  <Ionicons name="star" size={14} color="#1E40AF" />
+                  <Ionicons name="star" size={14} color={isDark ? "#60A5FA" : "#1E40AF"} />
                   <Text style={[styles.headerTagText, styles.headerTagPriorityText]}>Teacher Priority</Text>
                 </View>
               ) : null}
               {order.laneToken ? (
                 <View style={styles.headerTagPill}>
-                  <Ionicons name="ticket" size={14} color="#475569" />
+                  <Ionicons name="ticket" size={14} color={colors.textSecondary} />
                   <Text style={styles.headerTagText}>Token {order.laneToken}</Text>
                 </View>
               ) : null}
@@ -137,7 +138,7 @@ export default function Screen() {
         {order.isPreOrder && (order.pickupSlotLabel || order.pickupSlotStart) ? (
           <View style={styles.slotCard}>
             <View style={styles.slotIconWrap}>
-              <Ionicons name="time" size={24} color="#166534" />
+              <Ionicons name="time" size={24} color={isDark ? "#86EFAC" : "#166534"} />
             </View>
             <View style={{ flex: 1 }}>
               <Text style={styles.cardTitle}>Scheduled Pickup</Text>
@@ -210,7 +211,7 @@ export default function Screen() {
                   </Text>
                   {item.note ? (
                     <View style={styles.noteRow}>
-                      <Ionicons name="chatbubble-ellipses-outline" size={14} color="#64748B" />
+                      <Ionicons name="chatbubble-ellipses-outline" size={14} color={colors.textSecondary} />
                       <Text style={styles.noteText}>{item.note}</Text>
                     </View>
                   ) : null}
@@ -249,7 +250,7 @@ export default function Screen() {
   );
 }
 
-const createStyles = (colors: any) => StyleSheet.create({
+const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => ({
   screen: {
     flex: 1,
     backgroundColor: colors.background
@@ -285,7 +286,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     borderRadius: moderateScale(16),
     backgroundColor: colors.card,
     padding: moderateScale(20),
-    shadowColor: "#0F172A",
+    shadowColor: colors.text,
     shadowOpacity: 0.03,
     shadowRadius: moderateScale(8),
     shadowOffset: { width: 0, height: 2 },
@@ -357,18 +358,18 @@ const createStyles = (colors: any) => StyleSheet.create({
     fontSize: fontScale(13)
   },
   headerTagPriority: {
-    backgroundColor: colors.surfaceAlt
+    backgroundColor: isDark ? "rgba(30, 64, 175, 0.2)" : "#F1F5F9"
   },
   headerTagPriorityText: {
-    color: "#1E40AF"
+    color: isDark ? "#93C5FD" : "#1E40AF"
   },
   slotCard: {
     flexDirection: "row",
     alignItems: "center",
     borderRadius: moderateScale(16),
     borderWidth: 1,
-    borderColor: "#BBF7D0",
-    backgroundColor: "#DCFCE7",
+    borderColor: isDark ? "rgba(4, 120, 87, 0.4)" : "#BBF7D0",
+    backgroundColor: isDark ? "rgba(4, 120, 87, 0.2)" : "#DCFCE7",
     padding: moderateScale(16),
     gap: moderateScale(12)
   },
@@ -376,18 +377,18 @@ const createStyles = (colors: any) => StyleSheet.create({
     width: moderateScale(48),
     height: moderateScale(48),
     borderRadius: moderateScale(24),
-    backgroundColor: "#BBF7D0",
+    backgroundColor: isDark ? "rgba(4, 120, 87, 0.4)" : "#BBF7D0",
     alignItems: "center",
     justifyContent: "center"
   },
   slotLabel: {
-    color: "#14532D",
+    color: isDark ? "#A7F3D0" : "#14532D",
     fontWeight: "800",
     fontSize: fontScale(16),
     marginTop: verticalScale(2)
   },
   slotMeta: {
-    color: "#166534",
+    color: isDark ? "#86EFAC" : "#166534",
     fontWeight: "600",
     fontSize: fontScale(13),
     marginTop: verticalScale(2)
@@ -405,7 +406,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     backgroundColor: colors.card,
     padding: moderateScale(16),
     gap: moderateScale(12),
-    shadowColor: "#0F172A",
+    shadowColor: colors.text,
     shadowOpacity: 0.02,
     shadowRadius: moderateScale(8),
     shadowOffset: { width: 0, height: 2 },
@@ -438,7 +439,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     fontSize: fontScale(16)
   },
   summaryTotalValue: {
-    color: "#059669",
+    color: isDark ? "#10B981" : "#059669",
     fontWeight: "900",
     fontSize: fontScale(22)
   },
@@ -448,7 +449,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     borderColor: colors.border,
     backgroundColor: colors.card,
     padding: moderateScale(16),
-    shadowColor: "#0F172A",
+    shadowColor: colors.text,
     shadowOpacity: 0.02,
     shadowRadius: moderateScale(8),
     shadowOffset: { width: 0, height: 2 },
@@ -470,28 +471,28 @@ const createStyles = (colors: any) => StyleSheet.create({
     width: moderateScale(12),
     height: moderateScale(12),
     borderRadius: moderateScale(6),
-    backgroundColor: "#E2E8F0",
+    backgroundColor: isDark ? colors.surfaceAlt : "#E2E8F0",
     borderWidth: 2,
-    borderColor: "white",
+    borderColor: colors.card,
     zIndex: 2
   },
   timelineDotActive: {
-    backgroundColor: "#0F172A"
+    backgroundColor: colors.text
   },
   timelineDotCurrent: {
-    backgroundColor: "#FF6B35",
+    backgroundColor: colors.accent,
     transform: [{ scale: 1.2 }]
   },
   timelineLine: {
     width: moderateScale(2),
     flex: 1,
-    backgroundColor: "#E2E8F0",
+    backgroundColor: isDark ? colors.border : "#E2E8F0",
     marginTop: verticalScale(-2),
     marginBottom: verticalScale(-2),
     zIndex: 1
   },
   timelineLineActive: {
-    backgroundColor: "#0F172A"
+    backgroundColor: colors.text
   },
   timelineContent: {
     flex: 1,
@@ -518,7 +519,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     borderColor: colors.border,
     backgroundColor: colors.card,
     padding: moderateScale(16),
-    shadowColor: "#0F172A",
+    shadowColor: colors.text,
     shadowOpacity: 0.02,
     shadowRadius: moderateScale(8),
     shadowOffset: { width: 0, height: 2 },
@@ -579,7 +580,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   divider: {
     height: 1,
-    backgroundColor: "#E2E8F0",
+    backgroundColor: colors.border,
     marginVertical: moderateScale(4)
   }
 });

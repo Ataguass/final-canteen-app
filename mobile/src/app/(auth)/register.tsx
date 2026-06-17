@@ -15,8 +15,9 @@ const BRAND_COLOR = "#080d2b";
 type Tenant = { id: string; name: string; slug: string; logo?: string | null };
 
 export default function RegisterScreen() {
-  const { colors, isDark } = useTheme();
-  const styles = createStyles(colors);
+  const theme = useTheme();
+  const { colors, isDark } = theme;
+  const styles = createStyles(theme);
   const router = useRouter();
   const { setPendingRegistration, setConfirmationResult } = useAuth();
   
@@ -88,7 +89,7 @@ export default function RegisterScreen() {
           
           <Animated.View entering={FadeInDown.delay(100).springify()} style={styles.header}>
             <Pressable onPress={() => router.back()} style={styles.backButton}>
-              <Ionicons name="arrow-back" size={24} color="#1c1c1e" />
+              <Ionicons name="arrow-back" size={24} color={isDark ? colors.text : "#1c1c1e"} />
             </Pressable>
             <View style={styles.logoContainer}>
               <Ionicons name="person-add" size={32} color="#ffffff" />
@@ -210,7 +211,7 @@ export default function RegisterScreen() {
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Select School</Text>
               <Pressable onPress={() => setShowTenantModal(false)} style={styles.closeModalButton}>
-                <Ionicons name="close" size={24} color="#1c1c1e" />
+                <Ionicons name="close" size={24} color={isDark ? colors.text : "#1c1c1e"} />
               </Pressable>
             </View>
             <FlatList
@@ -228,7 +229,7 @@ export default function RegisterScreen() {
                   <Ionicons 
                     name="school" 
                     size={24} 
-                    color={selectedTenant?.id === item.id ? BRAND_COLOR : "#8e8e93"} 
+                    color={selectedTenant?.id === item.id ? (isDark ? colors.primary : BRAND_COLOR) : "#8e8e93"} 
                     style={{ marginRight: moderateScale(16) }}
                   />
                   <Text style={[styles.tenantOptionText, selectedTenant?.id === item.id && styles.tenantOptionTextSelected]}>
@@ -248,7 +249,7 @@ export default function RegisterScreen() {
   );
 }
 
-const createStyles = (colors: any) => StyleSheet.create({
+const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => ({
   container: {
     flex: 1,
     backgroundColor: colors.background,
@@ -279,7 +280,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     justifyContent: 'center',
     marginBottom: verticalScale(20),
     elevation: 8,
-    shadowColor: BRAND_COLOR,
+    shadowColor: isDark ? colors.text : BRAND_COLOR,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.3,
     shadowRadius: moderateScale(16),
@@ -327,14 +328,14 @@ const createStyles = (colors: any) => StyleSheet.create({
     padding: moderateScale(8),
   },
   registerButton: {
-    backgroundColor: BRAND_COLOR,
+    backgroundColor: isDark ? colors.primary : BRAND_COLOR,
     height: moderateScale(56),
     borderRadius: moderateScale(16),
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: verticalScale(16),
     elevation: 8,
-    shadowColor: BRAND_COLOR,
+    shadowColor: isDark ? colors.primary : BRAND_COLOR,
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.3,
     shadowRadius: moderateScale(16),
@@ -354,7 +355,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     fontSize: fontScale(15),
   },
   loginLink: {
-    color: BRAND_COLOR,
+    color: isDark ? colors.text : BRAND_COLOR,
     fontSize: fontScale(15),
     fontWeight: '700',
   },
@@ -376,7 +377,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     paddingHorizontal: moderateScale(24),
     paddingVertical: moderateScale(20),
     borderBottomWidth: 1,
-    borderBottomColor: '#f3f4f5',
+    borderBottomColor: colors.surfaceAlt,
   },
   modalTitle: {
     fontSize: fontScale(20),
@@ -392,10 +393,10 @@ const createStyles = (colors: any) => StyleSheet.create({
     paddingVertical: moderateScale(16),
     paddingHorizontal: moderateScale(8),
     borderBottomWidth: 1,
-    borderBottomColor: '#f3f4f5',
+    borderBottomColor: colors.surfaceAlt,
   },
   tenantOptionSelected: {
-    backgroundColor: 'rgba(8, 13, 43, 0.04)',
+    backgroundColor: isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(8, 13, 43, 0.04)',
     borderRadius: moderateScale(12),
   },
   tenantOptionText: {
@@ -404,7 +405,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     fontWeight: '500',
   },
   tenantOptionTextSelected: {
-    color: BRAND_COLOR,
+    color: isDark ? colors.primary : BRAND_COLOR,
     fontWeight: '700',
   },
   emptyText: {

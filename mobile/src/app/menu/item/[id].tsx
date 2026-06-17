@@ -21,8 +21,9 @@ import { useTheme } from '../../../hooks/useTheme';
 const formatCurrency = (value: number): string => `₹ ${value.toFixed(2)}`;
 
 export default function Screen() {
-  const { colors, isDark } = useTheme();
-  const styles = createStyles(colors);
+  const theme = useTheme();
+  const { colors, isDark } = theme;
+  const styles = createStyles(theme);
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -77,7 +78,7 @@ export default function Screen() {
     <View style={[styles.screen, { paddingTop: insets.top > 0 ? insets.top + 10 : 20 }]}>
       <View style={styles.topNav}>
         <Pressable onPress={() => router.back()} style={styles.backBtn}>
-          <Ionicons name="chevron-back" size={24} color="#0F172A" />
+          <Ionicons name="chevron-back" size={24} color={colors.text} />
         </Pressable>
         <Text style={styles.topNavTitle}>Item Details</Text>
         <View style={{ width: moderateScale(40) }} />
@@ -92,7 +93,7 @@ export default function Screen() {
           <Image source={{ uri: item.image }} style={styles.itemImage} resizeMode="cover" />
         ) : (
           <View style={styles.itemImageFallback}>
-            <Ionicons name="fast-food-outline" size={32} color="#94A3B8" />
+            <Ionicons name="fast-food-outline" size={32} color={colors.textMuted} />
           </View>
         )}
         <View style={styles.heroContent}>
@@ -163,7 +164,7 @@ export default function Screen() {
           value={note}
           onChangeText={setNote}
           placeholder="No onion, less spicy, etc."
-          placeholderTextColor="#94A3B8"
+          placeholderTextColor={colors.textMuted}
           style={styles.noteInput}
           multiline
           numberOfLines={3}
@@ -190,7 +191,7 @@ export default function Screen() {
   );
 }
 
-const createStyles = (colors: any) => StyleSheet.create({
+const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => ({
   screen: {
     flex: 1,
     backgroundColor: colors.background
@@ -239,7 +240,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     borderColor: colors.border,
     backgroundColor: colors.card,
     overflow: "hidden",
-    shadowColor: "#0F172A",
+    shadowColor: colors.text,
     shadowOpacity: 0.04,
     shadowRadius: moderateScale(8),
     shadowOffset: { width: 0, height: 3 },
@@ -265,11 +266,11 @@ const createStyles = (colors: any) => StyleSheet.create({
     paddingHorizontal: moderateScale(10),
     paddingVertical: moderateScale(5),
     borderWidth: 1,
-    borderColor: "#FED7AA",
-    backgroundColor: "#FFF7ED"
+    borderColor: isDark ? "rgba(194, 65, 12, 0.4)" : "#FED7AA",
+    backgroundColor: isDark ? "rgba(194, 65, 12, 0.2)" : "#FFF7ED"
   },
   priceBadgeText: {
-    color: "#C2410C",
+    color: isDark ? "#FDBA74" : "#C2410C",
     fontWeight: "800"
   },
   stockBadge: {
@@ -282,12 +283,12 @@ const createStyles = (colors: any) => StyleSheet.create({
     gap: moderateScale(4)
   },
   stockBadgeIn: {
-    borderColor: "#BBF7D0",
-    backgroundColor: "#ECFDF5"
+    borderColor: isDark ? "rgba(4, 120, 87, 0.4)" : "#BBF7D0",
+    backgroundColor: isDark ? "rgba(4, 120, 87, 0.2)" : "#ECFDF5"
   },
   stockBadgeOut: {
-    borderColor: "#FECACA",
-    backgroundColor: "#FEF2F2"
+    borderColor: isDark ? "rgba(185, 28, 28, 0.4)" : "#FECACA",
+    backgroundColor: isDark ? "rgba(185, 28, 28, 0.2)" : "#FEF2F2"
   },
   stockBadgeText: {
     fontWeight: "700",
@@ -345,10 +346,10 @@ const createStyles = (colors: any) => StyleSheet.create({
     fontWeight: "700"
   },
   stockIn: {
-    color: "#047857"
+    color: isDark ? "#34D399" : "#047857"
   },
   stockOut: {
-    color: "#B91C1C"
+    color: isDark ? "#F87171" : "#B91C1C"
   },
   quantityRow: {
     gap: moderateScale(8)
@@ -373,8 +374,8 @@ const createStyles = (colors: any) => StyleSheet.create({
     justifyContent: "center"
   },
   qtyBtnPlus: {
-    borderColor: "#BFDBFE",
-    backgroundColor: "#EFF6FF"
+    borderColor: isDark ? colors.border : "#BFDBFE",
+    backgroundColor: isDark ? colors.surfaceAlt : "#EFF6FF"
   },
   qtyBtnText: {
     color: colors.text,
@@ -417,17 +418,17 @@ const createStyles = (colors: any) => StyleSheet.create({
     fontWeight: "700"
   },
   totalValue: {
-    color: "#059669",
+    color: isDark ? "#10B981" : "#059669",
     fontSize: fontScale(22),
     fontWeight: "900"
   },
   addBtn: {
-    backgroundColor: "#FF6B35",
+    backgroundColor: colors.accent,
     borderRadius: moderateScale(12),
     paddingVertical: moderateScale(13)
   },
   addBtnDisabled: {
-    backgroundColor: "#94A3B8"
+    backgroundColor: colors.textMuted
   },
   addBtnText: {
     color: "white",

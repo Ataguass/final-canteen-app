@@ -89,8 +89,9 @@ const paymentStatusIcons: Record<PaymentStatus, keyof typeof Ionicons.glyphMap> 
 const itemSelectSoundSource = require("../../assets/sounds/item-select.wav");
 
 export default function Screen() {
-  const { colors, isDark } = useTheme();
-  const styles = createStyles(colors);
+  const theme = useTheme();
+  const { colors, isDark } = theme;
+  const styles = createStyles(theme);
   const { width: screenWidth } = useWindowDimensions();
   const { user, accessToken } = useAuth();
   const { isConnected } = useNetworkStatus();
@@ -620,7 +621,7 @@ export default function Screen() {
               <Text style={styles.topActionText}>{syncingQueued ? "Syncing..." : "Sync Queued"}</Text>
             </Pressable>
             <Pressable onPress={restoreLastHeld} style={[styles.topActionButton, styles.topActionButtonSecondary]}>
-              <Ionicons name="refresh" size={18} color="#0F172A" />
+              <Ionicons name="refresh" size={18} color={isDark ? colors.text : "#0F172A"} />
               <Text style={styles.topActionTextDark}>Restore Hold</Text>
             </Pressable>
           </View>
@@ -714,7 +715,7 @@ export default function Screen() {
                         }}
                         style={styles.stepperButton}
                       >
-                        <Ionicons name="remove" size={16} color="#0F172A" />
+                        <Ionicons name="remove" size={16} color={isDark ? colors.text : "#0F172A"} />
                       </Pressable>
                       <Text style={styles.stepperValue}>{qty}</Text>
                       <Pressable
@@ -724,7 +725,7 @@ export default function Screen() {
                         }}
                         style={styles.stepperButton}
                       >
-                        <Ionicons name="add" size={16} color="#0F172A" />
+                        <Ionicons name="add" size={16} color={isDark ? colors.text : "#0F172A"} />
                       </Pressable>
                     </View>
                   </View>
@@ -795,7 +796,7 @@ export default function Screen() {
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Order Summary</Text>
               <Pressable onPress={() => setCartSummaryVisible(false)} style={styles.modalCloseButton}>
-                <Ionicons name="close" size={20} color="#0F172A" />
+                <Ionicons name="close" size={20} color={isDark ? colors.text : "#0F172A"} />
               </Pressable>
             </View>
 
@@ -811,7 +812,7 @@ export default function Screen() {
                 </View>
                 <View style={styles.orderSummaryMetric}>
                   <Text style={styles.orderSummaryMetricLabel}>Grand Total</Text>
-                  <Text style={[styles.orderSummaryMetricValue, { color: "#FF6B35" }]}>₹ {grandTotal.toFixed(2)}</Text>
+                  <Text style={[styles.orderSummaryMetricValue, { color: isDark ? colors.primary : "#FF6B35" }]}>₹ {grandTotal.toFixed(2)}</Text>
                 </View>
               </View>
 
@@ -904,7 +905,7 @@ export default function Screen() {
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Complete Payment</Text>
               <Pressable onPress={() => setPaymentModalVisible(false)} style={styles.modalCloseButton}>
-                <Ionicons name="close" size={20} color="#0F172A" />
+                <Ionicons name="close" size={20} color={isDark ? colors.text : "#0F172A"} />
               </Pressable>
             </View>
 
@@ -1039,7 +1040,7 @@ export default function Screen() {
   );
 }
 
-const createStyles = (colors: any) => StyleSheet.create({
+const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => ({
   screen: {
     flex: 1,
     backgroundColor: colors.background
@@ -1080,7 +1081,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     backgroundColor: colors.surfaceAlt
   },
   statPillAmber: {
-    backgroundColor: "#FFFBEB"
+    backgroundColor: isDark ? 'rgba(245, 158, 11, 0.1)' : "#FFFBEB"
   },
   statLabel: {
     color: colors.textSecondary,
@@ -1108,12 +1109,12 @@ const createStyles = (colors: any) => StyleSheet.create({
     flex: 1
   },
   topActionButtonPrimary: {
-    backgroundColor: "#FF6B35"
+    backgroundColor: isDark ? colors.primary : "#FF6B35"
   },
   topActionButtonSecondary: {
     backgroundColor: colors.background,
     borderWidth: 1,
-    borderColor: "#F1F5F9"
+    borderColor: isDark ? colors.border : "#F1F5F9"
   },
   topActionButtonDisabled: {
     backgroundColor: "#94A3B8"
@@ -1150,19 +1151,19 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   errorCard: {
     borderWidth: 1,
-    borderColor: "#FCA5A5",
-    backgroundColor: "#FEF2F2",
+    borderColor: isDark ? '#B91C1C' : "#FCA5A5",
+    backgroundColor: isDark ? 'rgba(239, 68, 68, 0.1)' : "#FEF2F2",
     borderRadius: moderateScale(16),
     padding: moderateScale(14),
     gap: moderateScale(10)
   },
   errorText: {
-    color: "#991B1B",
+    color: isDark ? '#F87171' : "#991B1B",
     fontWeight: "700"
   },
   retryButton: {
     alignSelf: "flex-start",
-    backgroundColor: "#991B1B",
+    backgroundColor: isDark ? '#DC2626' : "#991B1B",
     borderRadius: moderateScale(10),
     paddingHorizontal: moderateScale(14),
     paddingVertical: moderateScale(8)
@@ -1184,8 +1185,8 @@ const createStyles = (colors: any) => StyleSheet.create({
     borderColor: colors.border
   },
   categoryChipActive: {
-    backgroundColor: "#FF6B35",
-    borderColor: "#FF6B35"
+    backgroundColor: isDark ? colors.primary : "#FF6B35",
+    borderColor: isDark ? colors.primary : "#FF6B35"
   },
   categoryChipText: {
     color: colors.textSecondary,
@@ -1239,7 +1240,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     fontSize: fontScale(13)
   },
   itemPrice: {
-    color: "#FF6B35",
+    color: isDark ? colors.primary : "#FF6B35",
     fontWeight: "800",
     fontSize: fontScale(16)
   },
@@ -1255,20 +1256,20 @@ const createStyles = (colors: any) => StyleSheet.create({
     paddingHorizontal: moderateScale(8)
   },
   stockPillNormal: {
-    backgroundColor: "#ECFDF5"
+    backgroundColor: isDark ? 'rgba(16, 185, 129, 0.1)' : "#ECFDF5"
   },
   stockPillLow: {
-    backgroundColor: "#FEF2F2"
+    backgroundColor: isDark ? 'rgba(239, 68, 68, 0.1)' : "#FEF2F2"
   },
   stockText: {
     fontSize: fontScale(11),
     fontWeight: "800"
   },
   stockTextNormal: {
-    color: "#059669"
+    color: isDark ? '#34D399' : "#059669"
   },
   stockTextLow: {
-    color: "#DC2626"
+    color: isDark ? '#F87171' : "#DC2626"
   },
   stepperWrap: {
     flexDirection: "row",
@@ -1347,7 +1348,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     width: moderateScale(44),
     height: moderateScale(44),
     borderRadius: moderateScale(22),
-    backgroundColor: "#FF6B35",
+    backgroundColor: isDark ? colors.primary : "#FF6B35",
     alignItems: "center",
     justifyContent: "center"
   },
@@ -1362,7 +1363,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderWidth: 2,
-    borderColor: "white"
+    borderColor: isDark ? colors.card : "white"
   },
   cartCountText: {
     color: "white",
@@ -1406,11 +1407,11 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   resetButton: {
     width: moderateScale(56),
-    backgroundColor: "#FEF2F2"
+    backgroundColor: isDark ? 'rgba(239, 68, 68, 0.1)' : "#FEF2F2"
   },
   payButton: {
     flex: 2,
-    backgroundColor: "#10B981",
+    backgroundColor: isDark ? '#059669' : "#10B981",
     borderRadius: moderateScale(16),
     padding: moderateScale(14),
     alignItems: "center",
@@ -1540,7 +1541,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     paddingVertical: moderateScale(14),
     paddingHorizontal: moderateScale(14),
     borderBottomWidth: 1,
-    borderBottomColor: "#F1F5F9"
+    borderBottomColor: isDark ? colors.border : "#F1F5F9"
   },
   emptyTableText: {
     padding: moderateScale(20),
@@ -1582,7 +1583,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     textAlignVertical: "top"
   },
   paymentAmountBanner: {
-    backgroundColor: "#ECFDF5",
+    backgroundColor: isDark ? 'rgba(16, 185, 129, 0.1)' : "#ECFDF5",
     borderRadius: moderateScale(16),
     paddingVertical: moderateScale(16),
     paddingHorizontal: moderateScale(16),
@@ -1591,12 +1592,12 @@ const createStyles = (colors: any) => StyleSheet.create({
     alignItems: "center"
   },
   paymentAmountLabel: {
-    color: "#065F46",
+    color: isDark ? '#34D399' : "#065F46",
     fontWeight: "800",
     fontSize: fontScale(15)
   },
   paymentAmountValue: {
-    color: "#059669",
+    color: isDark ? '#10B981' : "#059669",
     fontWeight: "900",
     fontSize: fontScale(26)
   },
@@ -1638,8 +1639,8 @@ const createStyles = (colors: any) => StyleSheet.create({
     flexBasis: "48%"
   },
   segmentButtonActive: {
-    backgroundColor: "#FF6B35",
-    borderColor: "#FF6B35"
+    backgroundColor: isDark ? colors.primary : "#FF6B35",
+    borderColor: isDark ? colors.primary : "#FF6B35"
   },
   segmentButtonText: {
     color: colors.textSecondary,
@@ -1651,7 +1652,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   doneButton: {
     flexDirection: "row",
-    backgroundColor: "#FF6B35",
+    backgroundColor: isDark ? colors.primary : "#FF6B35",
     borderRadius: moderateScale(12),
     padding: moderateScale(16),
     alignItems: "center"
@@ -1709,7 +1710,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     backgroundColor: colors.surfaceAlt
   },
   printButton: {
-    backgroundColor: "#FF6B35"
+    backgroundColor: isDark ? colors.primary : "#FF6B35"
   },
   paymentActionText: {
     color: "white",

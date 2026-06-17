@@ -57,8 +57,9 @@ type MenuItem = {
 const formatCurrency = (value: number): string => `₹ ${value.toFixed(2)}`;
 
 export default function Screen() {
-  const { colors, isDark } = useTheme();
-  const styles = createStyles(colors);
+  const theme = useTheme();
+  const { colors, isDark } = theme;
+  const styles = createStyles(theme);
   const router = useRouter();
   const { width: screenWidth } = useWindowDimensions();
   const insets = useSafeAreaInsets();
@@ -273,27 +274,27 @@ export default function Screen() {
         <Pressable
           onPress={() => router.back()}
           style={styles.iconButton}
-          android_ripple={{ color: "#F1F5F9", borderless: true }}
+          android_ripple={{ color: isDark ? colors.border : "#F1F5F9", borderless: true }}
         >
-          <Ionicons name="chevron-back" size={22} color="#1E293B" />
+          <Ionicons name="chevron-back" size={22} color={colors.text} />
         </Pressable>
         <TextInput
           ref={searchInputRef}
           value={query}
           onChangeText={setQuery}
           placeholder="Search for snacks, meals..."
-          placeholderTextColor="#94A3B8"
+          placeholderTextColor={colors.textMuted}
           style={styles.searchInput}
           autoFocus
           returnKeyType="search"
         />
         {query ? (
           <Pressable onPress={() => setQuery("")} style={styles.iconButton}>
-            <Ionicons name="close-circle" size={20} color="#94A3B8" />
+            <Ionicons name="close-circle" size={20} color={colors.textMuted} />
           </Pressable>
         ) : (
           <Pressable onPress={onMicPress} style={styles.iconButton}>
-            <Ionicons name={isListening ? "stop-circle-outline" : "mic-outline"} size={20} color="#334155" />
+            <Ionicons name={isListening ? "stop-circle-outline" : "mic-outline"} size={20} color={colors.textSecondary} />
           </Pressable>
         )}
       </View>
@@ -318,7 +319,7 @@ export default function Screen() {
                     <Image source={{ uri: category.imageUrl }} style={styles.discoveryImage} resizeMode="cover" />
                   ) : (
                     <View style={styles.discoveryFallback}>
-                      <Ionicons name="fast-food-outline" size={24} color="#94A3B8" />
+                      <Ionicons name="fast-food-outline" size={24} color={colors.textMuted} />
                     </View>
                   )}
                 </View>
@@ -341,7 +342,7 @@ export default function Screen() {
                     onPress={() => setQuery(category.name)}
                     style={styles.suggestionChip}
                   >
-                    <Ionicons name="pricetag-outline" size={13} color="#334155" />
+                    <Ionicons name="pricetag-outline" size={13} color={colors.textSecondary} />
                     <Text style={styles.suggestionChipText} numberOfLines={1}>
                       {category.name}
                     </Text>
@@ -382,7 +383,7 @@ export default function Screen() {
                         <Image source={{ uri: item.image }} style={[styles.itemImage, { height: itemImageHeight }]} resizeMode="cover" />
                       ) : (
                         <View style={[styles.itemImageFallback, { height: itemImageHeight }]}>
-                          <Ionicons name="fast-food-outline" size={22} color="#94A3B8" />
+                          <Ionicons name="fast-food-outline" size={22} color={colors.textMuted} />
                         </View>
                       )}
                       <View style={styles.itemBody}>
@@ -423,7 +424,7 @@ export default function Screen() {
             </View>
           ) : (
             <View style={styles.emptyCard}>
-              <Ionicons name="search-outline" size={18} color="#64748B" />
+              <Ionicons name="search-outline" size={18} color={colors.textSecondary} />
               <Text style={styles.emptyText}>No matching items found.</Text>
             </View>
           )}
@@ -434,7 +435,7 @@ export default function Screen() {
   );
 }
 
-const createStyles = (colors: any) => StyleSheet.create({
+const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => ({
   screen: {
     flex: 1,
     backgroundColor: colors.background
@@ -454,7 +455,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: moderateScale(8),
-    shadowColor: "#0F172A",
+    shadowColor: colors.text,
     shadowOpacity: 0.04,
     shadowRadius: moderateScale(8),
     shadowOffset: { width: 0, height: 3 },
@@ -516,7 +517,7 @@ const createStyles = (colors: any) => StyleSheet.create({
     justifyContent: "center"
   },
   discoveryName: {
-    color: "#1F2937",
+    color: colors.text,
     fontWeight: "700",
     fontSize: fontScale(14),
     textAlign: "center"
@@ -592,7 +593,7 @@ const createStyles = (colors: any) => StyleSheet.create({
   itemImage: {
     width: "100%",
     borderRadius: moderateScale(10),
-    backgroundColor: "#E2E8F0"
+    backgroundColor: colors.border
   },
   itemImageFallback: {
     width: "100%",
@@ -617,11 +618,11 @@ const createStyles = (colors: any) => StyleSheet.create({
     flex: 1
   },
   itemPrice: {
-    color: "#C2410C",
+    color: isDark ? "#FDBA74" : "#C2410C",
     fontWeight: "800",
-    backgroundColor: "#FFF7ED",
+    backgroundColor: isDark ? "rgba(253, 186, 116, 0.1)" : "#FFF7ED",
     borderWidth: 1,
-    borderColor: "#FED7AA",
+    borderColor: isDark ? "rgba(253, 186, 116, 0.3)" : "#FED7AA",
     borderRadius: moderateScale(999),
     paddingHorizontal: moderateScale(8),
     paddingVertical: moderateScale(3),
@@ -630,12 +631,12 @@ const createStyles = (colors: any) => StyleSheet.create({
   categoryPill: {
     alignSelf: "flex-start",
     borderRadius: moderateScale(999),
-    backgroundColor: "#EEF2FF",
+    backgroundColor: isDark ? "rgba(129, 140, 248, 0.1)" : "#EEF2FF",
     paddingHorizontal: moderateScale(8),
     paddingVertical: moderateScale(3)
   },
   categoryPillText: {
-    color: "#3730A3",
+    color: isDark ? "#A5B4FC" : "#3730A3",
     fontWeight: "700",
     fontSize: fontScale(12)
   },
@@ -652,22 +653,22 @@ const createStyles = (colors: any) => StyleSheet.create({
     fontWeight: "700"
   },
   itemStockIn: {
-    color: "#047857"
+    color: isDark ? "#34D399" : "#047857"
   },
   itemStockOut: {
-    color: "#B91C1C"
+    color: isDark ? "#F87171" : "#B91C1C"
   },
   addBtn: {
     marginTop: verticalScale(8),
     borderRadius: moderateScale(10),
-    backgroundColor: "#FF6B35",
+    backgroundColor: isDark ? "#FF6B35" : "#FF6B35",
     paddingVertical: moderateScale(10)
   },
   addBtnDisabled: {
-    backgroundColor: "#9CA3AF"
+    backgroundColor: isDark ? colors.surfaceAlt : "#9CA3AF"
   },
   addBtnText: {
-    color: "white",
+    color: isDark ? colors.background : "white",
     textAlign: "center",
     fontWeight: "800"
   },

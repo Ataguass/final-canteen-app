@@ -14,6 +14,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "../../hooks/useAuth";
+import { useTheme } from "../../hooks/useTheme";
 import { CanteenHeader } from "../../components/CanteenHeader";
 import { menuService } from "../../services/menuService";
 import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../utils/responsive';
@@ -46,6 +47,9 @@ const isRenderableImageUri = (uri?: string | null): boolean => {
 };
 
 export default function Screen() {
+  const theme = useTheme();
+  const { colors, isDark } = theme;
+  const styles = createStyles(theme);
   const { width: screenWidth } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const { user, accessToken } = useAuth();
@@ -57,15 +61,16 @@ export default function Screen() {
   const [items, setItems] = useState<MenuItem[]>([]);
   const [failedImageMap, setFailedImageMap] = useState<Record<string, true>>({});
   const categoryColumns = screenWidth >= 1000 ? 4 : screenWidth >= 760 ? 3 : 2;
-  const gap = 12;
-  const availableWidth = screenWidth - 32; // 16px padding on left/right
-  // Fix precision issues by flooring the width, preventing accidental wrapping
+  const gap = moderateScale(12);
+  const paddingX = moderateScale(16) * 2;
+  const availableWidth = screenWidth - paddingX;
+  // Fix precision issues by flooring the width and subtracting 1px to prevent accidental wrapping
   const categoryCardWidth =
     categoryColumns === 4
-      ? Math.floor((availableWidth - gap * 3) / 4)
+      ? Math.floor((availableWidth - gap * 3) / 4) - 1
       : categoryColumns === 3
-      ? Math.floor((availableWidth - gap * 2) / 3)
-      : Math.floor((availableWidth - gap) / 2);
+      ? Math.floor((availableWidth - gap * 2) / 3) - 1
+      : Math.floor((availableWidth - gap) / 2) - 1;
   const categoryImageHeight = categoryColumns >= 3 ? 96 : 118;
 
   const onCategoryImageError = useCallback((categoryId: string) => {
@@ -152,7 +157,7 @@ export default function Screen() {
       >
         <CanteenHeader showBackButton title="Menu" subtitle="Categories & Items" />
         <View style={styles.searchBarCard}>
-          <Ionicons name="search-outline" size={20} color="#64748B" />
+          <Ionicons name="search-outline" size={20} color={colors.textSecondary} />
           <TextInput
             value={query}
             onChangeText={(text) => {
@@ -162,7 +167,7 @@ export default function Screen() {
               }
             }}
             placeholder="Search categories..."
-            placeholderTextColor="#94A3B8"
+            placeholderTextColor={colors.textMuted}
             style={styles.searchInput}
           />
           {query.trim() ? (
@@ -173,7 +178,7 @@ export default function Screen() {
               }}
               style={styles.clearBtn}
             >
-              <Ionicons name="close-circle" size={18} color="#94A3B8" />
+              <Ionicons name="close-circle" size={18} color={colors.textMuted} />
             </Pressable>
           ) : null}
         </View>
@@ -185,7 +190,7 @@ export default function Screen() {
           <Pressable
             onPress={() => setSelectedCategoryId("ALL")}
             style={[styles.jumpChip, selectedCategoryId === "ALL" && styles.jumpChipActive]}
-            android_ripple={{ color: "#DBEAFE" }}
+            android_ripple={{ color: isDark ? colors.border : "#DBEAFE" }}
           >
             <Text style={[styles.jumpChipText, selectedCategoryId === "ALL" && styles.jumpChipTextActive]}>
               All
@@ -198,7 +203,7 @@ export default function Screen() {
                 key={category.id}
                 onPress={() => setSelectedCategoryId(category.id)}
                 style={[styles.jumpChip, selected && styles.jumpChipActive]}
-                android_ripple={{ color: "#DBEAFE" }}
+                android_ripple={{ color: isDark ? colors.border : "#DBEAFE" }}
               >
                 <Text style={[styles.jumpChipText, selected && styles.jumpChipTextActive]} numberOfLines={1}>
                   {category.name}
@@ -210,14 +215,14 @@ export default function Screen() {
 
       {loading ? (
         <View style={styles.emptyCard}>
-          <Ionicons name="hourglass-outline" size={18} color="#64748B" />
+          <Ionicons name="hourglass-outline" size={18} color={colors.textSecondary} />
           <Text style={styles.emptyText}>Loading categories...</Text>
         </View>
       ) : null}
 
       {!loading && filtered.length === 0 ? (
         <View style={styles.emptyCard}>
-          <Ionicons name="search-outline" size={18} color="#64748B" />
+          <Ionicons name="search-outline" size={18} color={colors.textSecondary} />
           <Text style={styles.emptyText}>No categories found.</Text>
         </View>
       ) : null}
@@ -239,7 +244,7 @@ export default function Screen() {
                 }}
                 asChild
               >
-                <Pressable android_ripple={{ color: "#E2E8F0" }}>
+                <Pressable android_ripple={{ color: isDark ? colors.surfaceAlt : "#E2E8F0" }}>
                   <View style={styles.categoryImageWrap}>
                     {canShowImage ? (
                       <Image
@@ -250,7 +255,7 @@ export default function Screen() {
                       />
                     ) : (
                       <View style={[styles.categoryImageFallback, { height: categoryImageHeight }]}>
-                        <Ionicons name="fast-food-outline" size={24} color="#94A3B8" />
+                        <Ionicons name="fast-food-outline" size={24} color={colors.textMuted} />
                       </View>
                     )}
                     <View style={styles.categoryItemBadge}>
@@ -280,10 +285,10 @@ export default function Screen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => ({
   screen: {
     flex: 1,
-    backgroundColor: "#EEF2F7"
+    backgroundColor: colors.background
   },
   content: {
     padding: moderateScale(16),
@@ -292,8 +297,8 @@ const styles = StyleSheet.create({
   },
   searchBarCard: {
     borderWidth: 1,
-    borderColor: "#E2E8F0",
-    backgroundColor: "#FFFFFF",
+    borderColor: colors.border,
+    backgroundColor: colors.card,
     borderRadius: moderateScale(16),
     paddingHorizontal: moderateScale(16),
     flexDirection: "row",
@@ -311,9 +316,9 @@ const styles = StyleSheet.create({
 
   headerCard: {
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: colors.border,
     borderRadius: moderateScale(18),
-    backgroundColor: "white",
+    backgroundColor: colors.card,
     padding: moderateScale(14),
     gap: moderateScale(10),
     shadowColor: "#0F172A",
@@ -331,9 +336,9 @@ const styles = StyleSheet.create({
     width: moderateScale(40),
     height: moderateScale(40),
     borderRadius: moderateScale(12),
-    backgroundColor: "#EFF6FF",
+    backgroundColor: isDark ? "rgba(37, 99, 235, 0.2)" : "#EFF6FF",
     borderWidth: 1,
-    borderColor: "#DBEAFE",
+    borderColor: isDark ? "rgba(37, 99, 235, 0.4)" : "#DBEAFE",
     alignItems: "center",
     justifyContent: "center"
   },
@@ -345,36 +350,36 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: moderateScale(12),
     borderWidth: 1,
-    borderColor: "#E2E8F0",
-    backgroundColor: "#F8FAFC",
+    borderColor: colors.border,
+    backgroundColor: colors.surfaceAlt,
     paddingVertical: moderateScale(8),
     paddingHorizontal: moderateScale(10)
   },
   metricLabel: {
-    color: "#64748B",
+    color: colors.textSecondary,
     fontWeight: "600",
     fontSize: fontScale(12)
   },
   metricValue: {
-    color: "#0F172A",
+    color: colors.text,
     fontWeight: "800",
     fontSize: fontScale(18),
     marginTop: 1
   },
   title: {
-    color: "#0F172A",
+    color: colors.text,
     fontSize: fontScale(23),
     fontWeight: "800"
   },
   subtitle: {
-    color: "#64748B",
+    color: colors.textSecondary,
     fontWeight: "600"
   },
   searchWrap: {
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: colors.border,
     borderRadius: moderateScale(12),
-    backgroundColor: "#F8FAFC",
+    backgroundColor: colors.surfaceAlt,
     paddingHorizontal: moderateScale(10),
     flexDirection: "row",
     alignItems: "center",
@@ -382,12 +387,12 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     flex: 1,
-    color: "#0F172A",
+    color: colors.text,
     paddingVertical: moderateScale(10),
     fontWeight: "600"
   },
   filterLabel: {
-    color: "#475569",
+    color: colors.textSecondary,
     fontWeight: "700",
     fontSize: fontScale(12)
   },
@@ -400,23 +405,23 @@ const styles = StyleSheet.create({
     minHeight: moderateScale(40),
     borderRadius: moderateScale(12),
     borderWidth: 1,
-    borderColor: "#CBD5E1",
-    backgroundColor: "#FFFFFF",
+    borderColor: colors.border,
+    backgroundColor: colors.card,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     gap: moderateScale(6)
   },
   segmentButtonActive: {
-    borderColor: "#BFDBFE",
-    backgroundColor: "#EFF6FF"
+    borderColor: isDark ? colors.border : "#BFDBFE",
+    backgroundColor: isDark ? colors.surfaceAlt : "#EFF6FF"
   },
   segmentButtonText: {
-    color: "#475569",
+    color: colors.textSecondary,
     fontWeight: "700"
   },
   segmentButtonTextActive: {
-    color: "#1E3A8A"
+    color: isDark ? "#60A5FA" : "#1E3A8A"
   },
   jumpBarRow: {
     gap: moderateScale(8),
@@ -425,34 +430,34 @@ const styles = StyleSheet.create({
   jumpChip: {
     borderRadius: moderateScale(999),
     borderWidth: 1,
-    borderColor: "#CBD5E1",
-    backgroundColor: "#FFFFFF",
+    borderColor: colors.border,
+    backgroundColor: colors.card,
     paddingHorizontal: moderateScale(12),
     paddingVertical: moderateScale(8),
     maxWidth: moderateScale(168)
   },
   jumpChipActive: {
-    borderColor: "#1D4ED8",
-    backgroundColor: "#DBEAFE"
+    borderColor: colors.accent,
+    backgroundColor: isDark ? "rgba(37, 99, 235, 0.2)" : "#DBEAFE"
   },
   jumpChipText: {
-    color: "#334155",
+    color: colors.textSecondary,
     fontWeight: "700",
     fontSize: fontScale(13)
   },
   jumpChipTextActive: {
-    color: "#1E3A8A"
+    color: isDark ? "#93C5FD" : "#1E3A8A"
   },
   showingText: {
-    color: "#64748B",
+    color: colors.textSecondary,
     fontWeight: "600",
     fontSize: fontScale(12)
   },
   emptyCard: {
     borderRadius: moderateScale(14),
     borderWidth: 1,
-    borderColor: "#CBD5E1",
-    backgroundColor: "#F8FAFC",
+    borderColor: colors.border,
+    backgroundColor: colors.surfaceAlt,
     padding: moderateScale(14),
     flexDirection: "row",
     alignItems: "center",
@@ -460,9 +465,9 @@ const styles = StyleSheet.create({
   },
   categorySectionCard: {
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: colors.border,
     borderRadius: moderateScale(16),
-    backgroundColor: "white",
+    backgroundColor: colors.card,
     padding: moderateScale(12),
     shadowColor: "#0F172A",
     shadowOpacity: 0.04,
@@ -482,24 +487,24 @@ const styles = StyleSheet.create({
     justifyContent: "space-between"
   },
   gridHeaderTitle: {
-    color: "#0F172A",
+    color: colors.text,
     fontSize: fontScale(20),
     fontWeight: "800"
   },
   gridHeaderMeta: {
-    color: "#64748B",
+    color: colors.textSecondary,
     fontWeight: "700"
   },
   emptyText: {
-    color: "#64748B",
+    color: colors.textSecondary,
     fontWeight: "600"
   },
   categoryCard: {
     position: "relative",
     borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderColor: colors.border,
     borderRadius: moderateScale(14),
-    backgroundColor: "white",
+    backgroundColor: colors.card,
     overflow: "hidden",
     marginBottom: verticalScale(12),
     shadowColor: "#0F172A",
@@ -514,11 +519,11 @@ const styles = StyleSheet.create({
   },
   categoryImage: {
     width: "100%",
-    backgroundColor: "#F1F5F9"
+    backgroundColor: colors.surfaceAlt
   },
   categoryImageFallback: {
     width: "100%",
-    backgroundColor: "#F8FAFC",
+    backgroundColor: colors.background,
     alignItems: "center",
     justifyContent: "center"
   },
@@ -547,7 +552,7 @@ const styles = StyleSheet.create({
     gap: moderateScale(8)
   },
   categoryName: {
-    color: "#0F172A",
+    color: colors.text,
     fontSize: fontScale(16),
     fontWeight: "800"
   },
@@ -556,20 +561,20 @@ const styles = StyleSheet.create({
     borderRadius: moderateScale(999),
     paddingVertical: moderateScale(3),
     paddingHorizontal: moderateScale(8),
-    backgroundColor: "#EEF2FF"
+    backgroundColor: isDark ? "rgba(55, 48, 163, 0.3)" : "#EEF2FF"
   },
   categoryMeta: {
-    color: "#3730A3",
+    color: isDark ? "#A5B4FC" : "#3730A3",
     fontWeight: "700",
     fontSize: fontScale(12)
   },
   categoryDescription: {
-    color: "#64748B",
+    color: colors.textSecondary,
     fontSize: fontScale(13),
     lineHeight: 18
   },
   categoryDescriptionMuted: {
-    color: "#94A3B8",
+    color: colors.textMuted,
     fontSize: fontScale(13),
     fontWeight: "500"
   }
