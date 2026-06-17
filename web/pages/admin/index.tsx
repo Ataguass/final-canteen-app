@@ -108,7 +108,26 @@ type InvoiceSettings = {
   invoiceFooterNote?: string | null;
 };
 
-type View = "dashboard" | "pos" | "orders" | "menu" | "stock" | "reports" | "users" | "banners" | "invoice" | "backups";
+type CommunityPost = {
+  id: string;
+  title: string;
+  body: string;
+  mediaUrl?: string | null;
+  isPinned: boolean;
+  isVisible: boolean;
+  createdAt: string;
+  author?: { name: string; role: string } | null;
+};
+
+type WalletUser = {
+  id: string;
+  name: string;
+  phone?: string | null;
+  role: string;
+  walletBalance: number;
+};
+
+type View = "dashboard" | "pos" | "orders" | "menu" | "stock" | "reports" | "users" | "banners" | "invoice" | "backups" | "community" | "wallet";
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api";
 const sessionKey = "canteen-web-admin-session";
@@ -124,7 +143,9 @@ const navIcons: Record<string, JSX.Element> = {
   users: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>,
   banners: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="13" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/></svg>,
   invoice: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>,
-  backups: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+  backups: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>,
+  community: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
+  wallet: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M16 12h2"/></svg>
 };
 
 const views: Array<{ id: View; label: string; hint: string }> = [
@@ -137,7 +158,9 @@ const views: Array<{ id: View; label: string; hint: string }> = [
   { id: "users", label: "Users", hint: "Teacher and staff access" },
   { id: "banners", label: "Banners", hint: "Student app promotions" },
   { id: "invoice", label: "Invoice", hint: "Receipt logo and fields" },
-  { id: "backups", label: "Backups", hint: "Download and restore data" }
+  { id: "backups", label: "Backups", hint: "Download and restore data" },
+  { id: "community", label: "Community", hint: "Announcements and posts" },
+  { id: "wallet", label: "Wallets", hint: "Teacher and staff wallet top-up" }
 ];
 
 const money = (value: number) =>
@@ -178,6 +201,17 @@ export default function AdminWebPage() {
   const [banners, setBanners] = useState<Banner[]>([]);
   const [backups, setBackups] = useState<Backup[]>([]);
   const [invoiceSettings, setInvoiceSettings] = useState<InvoiceSettings | null>(null);
+  const [communityPosts, setCommunityPosts] = useState<CommunityPost[]>([]);
+  const [walletUsers, setWalletUsers] = useState<WalletUser[]>([]);
+
+  // Community form
+  const [postTitle, setPostTitle] = useState("");
+  const [postBody, setPostBody] = useState("");
+
+  // Wallet topup form
+  const [topupUserId, setTopupUserId] = useState("");
+  const [topupAmount, setTopupAmount] = useState("");
+  const [topupNote, setTopupNote] = useState("");
 
   const [categoryName, setCategoryName] = useState("");
   const [categoryDescription, setCategoryDescription] = useState("");
@@ -189,6 +223,22 @@ export default function AdminWebPage() {
   const [itemCategoryId, setItemCategoryId] = useState("");
   const [itemImageUrl, setItemImageUrl] = useState("");
   const [uploadingItemImage, setUploadingItemImage] = useState(false);
+
+  // Edit state – categories
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const [editCatName, setEditCatName] = useState("");
+  const [editCatDesc, setEditCatDesc] = useState("");
+  const [editCatImage, setEditCatImage] = useState("");
+  const [uploadingEditCatImage, setUploadingEditCatImage] = useState(false);
+
+  // Edit state – items
+  const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
+  const [editItemName, setEditItemName] = useState("");
+  const [editItemPrice, setEditItemPrice] = useState("");
+  const [editItemStock, setEditItemStock] = useState("");
+  const [editItemCategoryId, setEditItemCategoryId] = useState("");
+  const [editItemImage, setEditItemImage] = useState("");
+  const [uploadingEditItemImage, setUploadingEditItemImage] = useState(false);
   const [userName, setUserName] = useState("");
   const [userPhone, setUserPhone] = useState("");
   const [userPassword, setUserPassword] = useState("");
@@ -238,14 +288,16 @@ export default function AdminWebPage() {
     setLoading(true);
     setError("");
     try {
-      const [orderRes, categoryRes, itemRes, userRes, bannerRes, backupRes, invoiceRes] = await Promise.all([
+      const [orderRes, categoryRes, itemRes, userRes, bannerRes, backupRes, invoiceRes, communityRes, walletRes] = await Promise.all([
         api<{ data: Order[] }>("/orders"),
         api<{ data: Category[] }>("/menu/categories"),
         api<{ data: MenuItem[] }>("/menu/items?includeAll=true"),
         api<{ data: ManagedUser[] }>("/users"),
         api<{ data: Banner[] }>("/banners?includeInactive=true"),
         api<{ data: Backup[] }>("/backups/me"),
-        api<{ data: InvoiceSettings }>("/tenants/me/invoice-settings")
+        api<{ data: InvoiceSettings }>("/tenants/me/invoice-settings"),
+        api<{ data: CommunityPost[] }>("/community/posts").catch(() => ({ data: [] as CommunityPost[] })),
+        api<{ data: WalletUser[] }>("/users/wallets").catch(() => ({ data: [] as WalletUser[] }))
       ]);
       setOrders(orderRes.data);
       setCategories(categoryRes.data);
@@ -254,6 +306,8 @@ export default function AdminWebPage() {
       setBanners(bannerRes.data);
       setBackups(backupRes.data);
       setInvoiceSettings(invoiceRes.data);
+      setCommunityPosts(communityRes.data);
+      setWalletUsers(walletRes.data);
       if (!itemCategoryId && categoryRes.data[0]) {
         setItemCategoryId(categoryRes.data[0].id);
       }
@@ -342,7 +396,7 @@ export default function AdminWebPage() {
     setError("");
     try {
       const isEmail = loginIdentifier.includes("@");
-      const tenantInput = loginId.trim();
+      const tenantInput = "ataguas";
       let resolvedTenantId = tenantInput;
 
       const tenantResponse = await fetch(`${apiBaseUrl}/tenants/resolve?code=${encodeURIComponent(tenantInput)}`);
@@ -355,9 +409,9 @@ export default function AdminWebPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          tenantId: resolvedTenantId,
+          phone: loginIdentifier.trim(),
           password: loginPassword,
-          ...(isEmail ? { email: loginIdentifier.trim() } : { phone: loginIdentifier.trim() })
+          isAdminLogin: true
         })
       });
       const json = await response.json().catch(() => ({}));
@@ -444,6 +498,116 @@ export default function AdminWebPage() {
       setItemStock("");
       setItemImageUrl("");
     });
+  };
+
+  // ── Open edit dialogs ──────────────────────────────────────────────────────
+  const openEditCategory = (cat: Category) => {
+    setEditingCategory(cat);
+    setEditCatName(cat.name);
+    setEditCatDesc(cat.description ?? "");
+    setEditCatImage(cat.imageUrl ?? "");
+  };
+
+  const openEditItem = (item: MenuItem) => {
+    setEditingItem(item);
+    setEditItemName(item.name);
+    setEditItemPrice(String(item.price));
+    setEditItemStock(String(item.stockQty));
+    setEditItemCategoryId(item.categoryId);
+    setEditItemImage(item.image ?? "");
+  };
+
+  // ── Save edits ─────────────────────────────────────────────────────────────
+  const saveCategory = (event: FormEvent) => {
+    event.preventDefault();
+    if (!editingCategory) return;
+    mutate("Category updated", async () => {
+      await api(`/menu/categories/${editingCategory.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({
+          name: editCatName,
+          description: editCatDesc || undefined,
+          imageUrl: editCatImage || undefined
+        })
+      });
+      setEditingCategory(null);
+    });
+  };
+
+  const saveItem = (event: FormEvent) => {
+    event.preventDefault();
+    if (!editingItem) return;
+    mutate("Item updated", async () => {
+      await api(`/menu/items/${editingItem.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({
+          name: editItemName,
+          price: Number(editItemPrice),
+          stockQty: Number(editItemStock || 0),
+          categoryId: editItemCategoryId,
+          image: editItemImage || undefined
+        })
+      });
+      setEditingItem(null);
+    });
+  };
+
+  // ── Delete ─────────────────────────────────────────────────────────────────
+  const deleteCategory = (cat: Category) => {
+    setConfirmAction({
+      title: "Delete Category?",
+      message: `"${cat.name}" and all its items will be permanently deleted. This cannot be undone.`,
+      onConfirm: () => {
+        setConfirmAction(null);
+        mutate("Category deleted", () => api(`/menu/categories/${cat.id}`, { method: "DELETE" }));
+      }
+    });
+  };
+
+  const deleteItem = (item: MenuItem) => {
+    setConfirmAction({
+      title: "Delete Item?",
+      message: `"${item.name}" will be permanently deleted.`,
+      onConfirm: () => {
+        setConfirmAction(null);
+        mutate("Item deleted", () => api(`/menu/items/${item.id}`, { method: "DELETE" }));
+      }
+    });
+  };
+
+  // ── Edit-modal image upload ────────────────────────────────────────────────
+  const uploadEditCatImage = async (file?: File) => {
+    if (!file) return;
+    setUploadingEditCatImage(true);
+    try {
+      const dataUrl = await readFileAsDataUrl(file);
+      const res = await api<{ data: { imageUrl: string } }>("/menu/upload-image", {
+        method: "POST",
+        body: JSON.stringify({ dataUrl, target: "CATEGORY" })
+      });
+      setEditCatImage(res.data.imageUrl);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Upload failed");
+    } finally {
+      setUploadingEditCatImage(false);
+    }
+  };
+
+  const uploadEditItemImage = async (file?: File) => {
+    if (!file) return;
+    setUploadingEditItemImage(true);
+    try {
+      const dataUrl = await readFileAsDataUrl(file);
+      const res = await api<{ data: { imageUrl: string } }>("/menu/upload-image", {
+        method: "POST",
+        body: JSON.stringify({ dataUrl, target: "ITEM" })
+      });
+      setEditItemImage(res.data.imageUrl);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Upload failed");
+    } finally {
+      setUploadingEditItemImage(false);
+    }
   };
 
   const uploadMenuImage = async (file: File | undefined, target: "ITEM" | "CATEGORY") => {
@@ -713,20 +877,12 @@ export default function AdminWebPage() {
         <main className="loginShell">
           <section className="loginPanel">
             <div>
+              <img src="/canteen_logo_final.png" alt="Canteen Logo" style={{ width: 64, height: 64, marginBottom: 16, borderRadius: 12 }} />
               <p className="eyebrow">Canteen Admin</p>
               <h1>Operations console</h1>
               <p className="muted">Manage orders, menu, stock, users, banners, and backups from a browser.</p>
             </div>
             <form onSubmit={handleLogin} className="form">
-              <label>
-                School Code or Slug
-                <input
-                  value={loginId}
-                  onChange={(event) => setLoginId(event.target.value)}
-                  placeholder="Enter school code"
-                  required
-                />
-              </label>
               <label>
                 Phone or Email
                 <input value={loginIdentifier} onChange={(event) => setLoginIdentifier(event.target.value)} required />
@@ -953,6 +1109,10 @@ export default function AdminWebPage() {
                         <strong>{category.name}</strong>
                         <span>{category.description || "No description"}</span>
                       </div>
+                      <div className="rowActions">
+                        <button className="miniButton" onClick={() => openEditCategory(category)}>✏️ Edit</button>
+                        <button className="miniButton ghost" onClick={() => deleteCategory(category)}>🗑 Delete</button>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -1003,7 +1163,7 @@ export default function AdminWebPage() {
                     </button>
                   </div>
                 </form>
-                <MenuTable items={items} categories={categories} toggleItem={toggleItem} toggleSpecial={toggleSpecial} />
+                <MenuTable items={items} categories={categories} toggleItem={toggleItem} toggleSpecial={toggleSpecial} onEdit={openEditItem} onDelete={deleteItem} />
               </div>
             </section>
           ) : null}
@@ -1151,6 +1311,117 @@ export default function AdminWebPage() {
               )}
             </section>
           ) : null}
+
+          {/* ── Community Posts ── */}
+          {activeView === "community" ? (
+            <section className="splitLayout">
+              <div className="section">
+                <SectionHeading title="New Post" meta="Announcements" />
+                <form className="form" onSubmit={(e) => {
+                  e.preventDefault();
+                  mutate("Post created", async () => {
+                    await api("/community/posts", {
+                      method: "POST",
+                      body: JSON.stringify({ title: postTitle, body: postBody })
+                    });
+                    setPostTitle(""); setPostBody("");
+                  });
+                }}>
+                  <input placeholder="Post title" value={postTitle} onChange={(e) => setPostTitle(e.target.value)} required />
+                  <textarea placeholder="Post content…" value={postBody} onChange={(e) => setPostBody(e.target.value)} required rows={5} />
+                  <button className="primaryButton">Publish Post</button>
+                </form>
+              </div>
+              <div className="section">
+                <SectionHeading title="Posts" meta={`${communityPosts.length} total`} />
+                <div className="list">
+                  {communityPosts.length === 0 && (
+                    <div className="emptyStateCard"><div style={{ fontSize: 32 }}>💬</div><strong>No posts yet</strong><small>Create the first announcement</small></div>
+                  )}
+                  {communityPosts.map((post) => (
+                    <div key={post.id} className="rowItem communityRow">
+                      <div className="communityRowMeta">
+                        {post.isPinned && <span className="badge pinBadge">📌 Pinned</span>}
+                        {!post.isVisible && <span className="badge hiddenBadge">Hidden</span>}
+                      </div>
+                      <strong className="communityRowTitle">{post.title}</strong>
+                      <p className="communityRowBody">{post.body.substring(0, 120)}{post.body.length > 120 ? "…" : ""}</p>
+                      <div className="rowActions">
+                        <button className="miniButton" onClick={() => mutate(post.isPinned ? "Unpinned" : "Pinned", () =>
+                          api(`/community/posts/${post.id}/pin`, { method: "PATCH" }))}>
+                          {post.isPinned ? "Unpin" : "📌 Pin"}
+                        </button>
+                        <button className="miniButton ghost" onClick={() => mutate(post.isVisible ? "Hidden" : "Visible", () =>
+                          api(`/community/posts/${post.id}/visibility`, { method: "PATCH" }))}>
+                          {post.isVisible ? "Hide" : "Show"}
+                        </button>
+                        <button className="miniButton ghost" onClick={() => setConfirmAction({
+                          title: "Delete Post?",
+                          message: `"${post.title}" will be permanently deleted.`,
+                          onConfirm: () => { setConfirmAction(null); mutate("Post deleted", () => api(`/community/posts/${post.id}`, { method: "DELETE" })); }
+                        })}>🗑 Del</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
+          ) : null}
+
+          {/* ── Wallet Top-up ── */}
+          {activeView === "wallet" ? (
+            <section className="splitLayout">
+              <div className="section">
+                <SectionHeading title="Top-up Wallet" meta="Teacher & Staff" />
+                <form className="form" onSubmit={(e) => {
+                  e.preventDefault();
+                  if (!topupUserId) { setError("Select a user"); return; }
+                  mutate("Wallet topped up", async () => {
+                    await api(`/users/${topupUserId}/wallet-topup`, {
+                      method: "PATCH",
+                      body: JSON.stringify({ amount: Number(topupAmount), note: topupNote || undefined })
+                    });
+                    setTopupAmount(""); setTopupNote("");
+                  });
+                }}>
+                  <select value={topupUserId} onChange={(e) => setTopupUserId(e.target.value)} required>
+                    <option value="">Select user…</option>
+                    {walletUsers.map((u) => (
+                      <option key={u.id} value={u.id}>{u.name} ({u.role}) — ₹{u.walletBalance.toFixed(2)}</option>
+                    ))}
+                  </select>
+                  <input placeholder="Amount (₹)" type="number" min="1" max="50000" value={topupAmount}
+                    onChange={(e) => setTopupAmount(e.target.value)} required />
+                  <input placeholder="Note (optional)" value={topupNote} onChange={(e) => setTopupNote(e.target.value)} />
+                  <button className="primaryButton">Add Balance</button>
+                </form>
+              </div>
+              <div className="section">
+                <SectionHeading title="Wallet Balances" meta={`${walletUsers.length} users`} />
+                <div className="tableWrap">
+                  <table>
+                    <thead><tr><th>Name</th><th>Role</th><th>Phone</th><th>Balance</th></tr></thead>
+                    <tbody>
+                      {walletUsers.map((u) => (
+                        <tr key={u.id}>
+                          <td><strong>{u.name}</strong></td>
+                          <td><span className="roleBadge">{u.role}</span></td>
+                          <td>{u.phone ?? "—"}</td>
+                          <td><strong style={{ color: u.walletBalance > 0 ? "#10b981" : "var(--muted)" }}>
+                            {money(u.walletBalance)}
+                          </strong></td>
+                        </tr>
+                      ))}
+                      {walletUsers.length === 0 && (
+                        <tr><td colSpan={4} style={{ textAlign: "center", padding: "24px", color: "var(--muted)" }}>No teacher or staff accounts</td></tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </section>
+          ) : null}
+
         </section>
       </main>
       
@@ -1166,7 +1437,97 @@ export default function AdminWebPage() {
           </div>
         </div>
       )}
-      
+
+      {/* ── Edit Category Modal ── */}
+      {editingCategory && (
+        <div className="modalOverlay" onClick={() => setEditingCategory(null)}>
+          <div className="modalContent editModal" onClick={(e) => e.stopPropagation()}>
+            <h2>✏️ Edit Category</h2>
+            <form onSubmit={saveCategory} className="editModalForm">
+              {/* Image picker */}
+              <div className="imgPickerWrap">
+                <label className="imgPickerLabel" htmlFor="edit-cat-img">
+                  {editCatImage
+                    ? <img src={editCatImage} alt="Category" className="imgPickerPreview" />
+                    : <div className="imgPickerPlaceholder">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                        <span>{uploadingEditCatImage ? "Uploading..." : "Change Photo"}</span>
+                      </div>
+                  }
+                  <input id="edit-cat-img" type="file" accept="image/png,image/jpeg,image/webp"
+                    style={{ display: "none" }} disabled={uploadingEditCatImage}
+                    onChange={(e) => uploadEditCatImage(e.target.files?.[0])} />
+                </label>
+                {editCatImage && (
+                  <button type="button" className="imgPickerRemove" onClick={() => setEditCatImage("")}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                  </button>
+                )}
+              </div>
+              <input placeholder="Category name" value={editCatName}
+                onChange={(e) => setEditCatName(e.target.value)} required />
+              <input placeholder="Description (optional)" value={editCatDesc}
+                onChange={(e) => setEditCatDesc(e.target.value)} />
+              <div className="modalActions">
+                <button type="button" className="secondaryButton" onClick={() => setEditingCategory(null)}>Cancel</button>
+                <button type="submit" className="primaryButton" disabled={loading || uploadingEditCatImage}>
+                  {loading ? "Saving…" : "Save Changes"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ── Edit Item Modal ── */}
+      {editingItem && (
+        <div className="modalOverlay" onClick={() => setEditingItem(null)}>
+          <div className="modalContent editModal" onClick={(e) => e.stopPropagation()}>
+            <h2>✏️ Edit Item</h2>
+            <form onSubmit={saveItem} className="editModalForm">
+              {/* Image picker */}
+              <div className="imgPickerWrap">
+                <label className="imgPickerLabel" htmlFor="edit-item-img">
+                  {editItemImage
+                    ? <img src={editItemImage} alt="Item" className="imgPickerPreview" />
+                    : <div className="imgPickerPlaceholder">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                        <span>{uploadingEditItemImage ? "Uploading..." : "Change Photo"}</span>
+                      </div>
+                  }
+                  <input id="edit-item-img" type="file" accept="image/png,image/jpeg,image/webp"
+                    style={{ display: "none" }} disabled={uploadingEditItemImage}
+                    onChange={(e) => uploadEditItemImage(e.target.files?.[0])} />
+                </label>
+                {editItemImage && (
+                  <button type="button" className="imgPickerRemove" onClick={() => setEditItemImage("")}>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                  </button>
+                )}
+              </div>
+              <input placeholder="Item name" value={editItemName}
+                onChange={(e) => setEditItemName(e.target.value)} required />
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px" }}>
+                <input placeholder="Price (₹)" type="number" value={editItemPrice}
+                  onChange={(e) => setEditItemPrice(e.target.value)} required />
+                <input placeholder="Stock qty" type="number" value={editItemStock}
+                  onChange={(e) => setEditItemStock(e.target.value)} />
+              </div>
+              <select value={editItemCategoryId} onChange={(e) => setEditItemCategoryId(e.target.value)} required>
+                <option value="">Select category</option>
+                {categories.map((cat) => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
+              </select>
+              <div className="modalActions">
+                <button type="button" className="secondaryButton" onClick={() => setEditingItem(null)}>Cancel</button>
+                <button type="submit" className="primaryButton" disabled={loading || uploadingEditItemImage}>
+                  {loading ? "Saving…" : "Save Changes"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {sidebarOpen && <div className="sidebarBackdrop" onClick={() => setSidebarOpen(false)} />}
       <style jsx global>{globalCss}</style>
     </>
@@ -2146,12 +2507,16 @@ function MenuTable({
   items,
   categories,
   toggleItem,
-  toggleSpecial
+  toggleSpecial,
+  onEdit,
+  onDelete,
 }: {
   items: MenuItem[];
   categories: Category[];
   toggleItem: (item: MenuItem) => void;
   toggleSpecial: (item: MenuItem) => void;
+  onEdit: (item: MenuItem) => void;
+  onDelete: (item: MenuItem) => void;
 }) {
   const getCategoryName = (id: string) => categories.find((c) => c.id === id)?.name ?? "Uncategorized";
   return (
@@ -2194,6 +2559,8 @@ function MenuTable({
                 <button className="miniButton ghost" onClick={() => toggleItem(item)}>
                   {item.isAvailable ? "Hide" : "Show"}
                 </button>
+                <button className="miniButton" onClick={() => onEdit(item)}>✏️ Edit</button>
+                <button className="miniButton ghost" onClick={() => onDelete(item)}>🗑 Del</button>
               </td>
             </tr>
           ))}
@@ -2868,6 +3235,8 @@ const globalCss = `
 
   /* Category row with thumbnail */
   .categoryRow { display: flex; align-items: center; gap: 12px; }
+  .categoryRowInfo { flex: 1; min-width: 0; }
+  .rowActions { display: flex; gap: 6px; flex-shrink: 0; }
   .categoryRowThumb {
     width: 42px; height: 42px;
     border-radius: 10px;
@@ -3012,6 +3381,18 @@ const globalCss = `
   }
   .emptyStateCard strong { font-size: 15px; font-weight: 700; }
   .emptyStateCard small { color: var(--muted); font-size: 13px; }
+
+  /* ─── COMMUNITY ─── */
+  .communityRow { display: flex; flex-direction: column; gap: 6px; }
+  .communityRowMeta { display: flex; gap: 6px; }
+  .communityRowTitle { font-size: 15px; font-weight: 700; }
+  .communityRowBody { font-size: 13px; color: var(--muted); line-height: 1.5; margin: 0; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+  .pinBadge { background: rgba(245,158,11,.12); color: #d97706; border: 1px solid rgba(245,158,11,.25); }
+  .hiddenBadge { background: rgba(100,116,139,.15); color: var(--muted); border: 1px solid var(--line); }
+
+  /* ─── WALLET ─── */
+  .roleBadge { background: var(--surface2); border: 1px solid var(--line); color: var(--text); border-radius: 6px; padding: 2px 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
 
   /* ─── TABLES ─── */
   .tableWrap {
@@ -3219,11 +3600,12 @@ const globalCss = `
 
   /* ─── INVOICE ─── */
   .invoiceLogoCard { display: grid; grid-template-columns: 1fr auto auto; gap: 16px; align-items: center; background: var(--surface2); border: 1.5px solid var(--line); border-radius: var(--radius-sm); padding: 16px; }
-  .invoiceLogoCard img { height: 60px; border-radius: 6px; object-fit: contain; }
+  .invoiceLogoCard img { height: 56px; max-width: 120px; border-radius: 6px; object-fit: contain; flex-shrink: 0; }
   .logoPlaceholder { width: 60px; height: 60px; background: var(--line); border-radius: 6px; display: grid; place-items: center; font-size: 11px; color: var(--muted); text-align: center; padding: 8px; }
   .invoicePreview { }
-  .receiptPaper { background: white; border: 1.5px solid var(--line); border-radius: var(--radius); padding: 24px; font-size: 13px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 8px; }
-  .receiptPaper h3 { text-align: center; font-size: 16px; font-weight: 800; }
+  .receiptPaper { background: white; border: 1.5px solid var(--line); border-radius: var(--radius); padding: 24px; font-size: 13px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 8px; overflow: hidden; }
+  .receiptPaper img { display: block; max-height: 72px; max-width: 160px; width: auto; height: auto; object-fit: contain; margin: 0 auto 4px; }
+  .receiptPaper h3 { text-align: center; font-size: 16px; font-weight: 800; color: #111; }
   .receiptPaper p { color: var(--muted); font-size: 12px; }
   .receiptLine { display: flex; justify-content: space-between; font-size: 13px; }
   .receiptLine.muted span { color: var(--muted); }
@@ -3252,6 +3634,10 @@ const globalCss = `
   .modalContent h2 { font-size: 20px; font-weight: 800; letter-spacing: -.02em; }
   .modalContent p { color: var(--muted); font-size: 14px; line-height: 1.6; }
   .modalActions { display: flex; gap: 10px; justify-content: flex-end; }
+  .editModal { width: min(500px, 92vw) !important; }
+  .editModalForm { display: flex; flex-direction: column; gap: 12px; }
+  .editModalForm input, .editModalForm select { background: var(--surface2); border: 1.5px solid var(--line); border-radius: var(--radius-sm); padding: 10px 12px; font-size: 14px; color: var(--text); outline: none; }
+  .editModalForm input:focus, .editModalForm select:focus { border-color: var(--accent); }
 
   /* ─── STATUS PILLS (detailed) ─── */
   .statusPill { display: inline-block; padding: 3px 10px; border-radius: 99px; font-size: 11.5px; font-weight: 700; }

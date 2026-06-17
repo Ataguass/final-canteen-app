@@ -532,3 +532,58 @@ export const updateUserPassword = async (req: Request, res: Response): Promise<v
 
   res.status(200).json({ success: true, data: toPublicUser(updated) });
 };
+
+export const topupUserWallet = async (req: Request, res: Response): Promise<void> => {
+  const tenantId = req.tenantId as string;
+  const { id } = req.params;
+  const { amount, note } = req.body as { amount?: number; note?: string };
+
+  const numericAmount = Number(amount);
+  if (!Number.isFinite(numericAmount) || numericAmount <= 0) {
+    throw new AppError("amount must be a valid number greater than 0", 400);
+  }
+  if (numericAmount > 50000) {
+    throw new AppError("Top-up limit is ₹50,000 per transaction", 400);
+  }
+
+  const user = await prisma.user.findFirst({
+    where: { id, tenantId, role: { in: manageableRoles } },
+    select: { id: true, name: true, walletBalance: true, isActive: true, isApproved: true }
+  });
+  if (!user) throw new AppError("User not found", 404);
+  if (!user.isActive || !user.isApproved) throw new AppError("User is inactive or unapproved", 403);
+
+  const topup = Number(numericAmount.toFixed(2));
+  const result = await prisma.$transaction(async (tx) => {
+    const updated = await tx.user.update({
+      where: { id },
+      data: { walletBalance: { increment: topup } },
+      select: { walletBalance: true }
+    });
+    await tx.walletTransaction.create({
+      data: {
+        tenantId,
+        userId: id,
+        amount: topup,
+        balanceAfter: updated.walletBalance,
+        type: "TOPUP",
+        note: note?.trim() || `Admin top-up of ₹${topup}`
+      }
+    });
+    return { balance: updated.walletBalance };
+  });
+
+  res.status(200).json({ success: true, data: { userId: id, name: user.name, ...result } });
+};
+
+export const getUserWalletBalance = async (req: Request, res: Response): Promise<void> => {
+  const tenantId = req.tenantId as string;
+
+  const users = await prisma.user.findMany({
+    where: { tenantId, role: { in: manageableRoles }, isActive: true },
+    select: { id: true, name: true, phone: true, role: true, walletBalance: true },
+    orderBy: { name: "asc" }
+  });
+
+  res.status(200).json({ success: true, data: users });
+};

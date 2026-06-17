@@ -7,7 +7,9 @@ import {
   bulkImportUsers,
   createUser,
   getMyProfile,
+  getUserWalletBalance,
   listUsers,
+  topupUserWallet,
   updateMyPassword,
   updateMyProfile,
   updateUserActive,
@@ -45,3 +47,6 @@ usersRouter.patch(
   roleGuard("ADMIN", "SUPER_ADMIN"),
   asyncHandler(updateUserPassword)
 );
+
+usersRouter.get("/wallets", auth, tenantResolver, roleGuard("ADMIN", "SUPER_ADMIN"), asyncHandler(getUserWalletBalance));
+usersRouter.patch("/:id/wallet-topup", auth, tenantResolver, roleGuard("ADMIN", "SUPER_ADMIN"), asyncHandler(topupUserWallet));

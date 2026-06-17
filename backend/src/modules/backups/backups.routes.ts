@@ -3,7 +3,13 @@ import { auth } from "../../middleware/auth.js";
 import { asyncHandler } from "../../middleware/asyncHandler.js";
 import { roleGuard } from "../../middleware/roleGuard.js";
 import { tenantResolver } from "../../middleware/tenantResolver.js";
-import { createBackup, deleteBackup, downloadBackup, listBackups, restoreBackup } from "./backups.controller.js";
+import { createBackup, deleteBackup, downloadBackup, listBackups, restoreBackup, uploadBackup } from "./backups.controller.js";
+import multer from "multer";
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 50 * 1024 * 1024 } // 50MB limit for JSON backups
+});
 
 export const backupsRouter = Router();
 
@@ -20,6 +26,14 @@ backupsRouter.post(
   tenantResolver,
   roleGuard("ADMIN", "SUPER_ADMIN"),
   asyncHandler(createBackup)
+);
+backupsRouter.post(
+  "/me/upload",
+  auth,
+  tenantResolver,
+  roleGuard("ADMIN", "SUPER_ADMIN"),
+  upload.single("file"),
+  asyncHandler(uploadBackup)
 );
 backupsRouter.post(
   "/me/restore",

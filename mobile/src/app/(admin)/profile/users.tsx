@@ -16,14 +16,14 @@ type ParsedBulkRow = {
 
 const cardShadow = {
   borderWidth: 1,
-  borderColor: "#E5E7EB",
-  borderRadius: 16,
+  borderColor: "#F1F5F9",
+  borderRadius: 20,
   backgroundColor: "white",
-  shadowColor: "#0F172A",
-  shadowOpacity: 0.06,
-  shadowRadius: 8,
+  shadowColor: "#000",
+  shadowOpacity: 0.04,
+  shadowRadius: 12,
   shadowOffset: { width: 0, height: 4 },
-  elevation: 2
+  elevation: 3
 } as const;
 
 const parseCsvCells = (line: string): string[] => {
@@ -316,99 +316,77 @@ export default function Screen() {
 
   return (
     <>
-      <ScrollView style={{ flex: 1, backgroundColor: "#F8FAFC" }} contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: 24 }}>
-        <View style={{ gap: 4 }}>
-          <Text style={{ fontSize: 28, fontWeight: "800", color: "#0F172A" }}>Users</Text>
-          <Text style={{ color: "#64748B", fontSize: 13 }}>
-            Last updated: {lastUpdated ? lastUpdated.toLocaleString() : "Not loaded yet"}
-          </Text>
-        </View>
-
-        <Pressable
-          onPress={() => loadUsers().catch(() => undefined)}
-          style={{
-            borderRadius: 12,
-            paddingVertical: 12,
-            backgroundColor: "#0F172A",
-            alignItems: "center",
-            justifyContent: "center",
-            flexDirection: "row",
-            gap: 8
-          }}
-        >
-          <Ionicons name="refresh-outline" size={16} color="white" />
-          <Text style={{ color: "white", fontWeight: "800" }}>{refreshing ? "Refreshing..." : "Refresh Users"}</Text>
-        </Pressable>
-
-        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
-          <View style={{ width: "48%", ...cardShadow, padding: 12 }}>
-            <Text style={{ color: "#475569", fontWeight: "700", fontSize: 12 }}>Total</Text>
-            <Text style={{ fontSize: 24, fontWeight: "800", color: "#0F172A", marginTop: 4 }}>{stats.total}</Text>
+      <ScrollView style={{ flex: 1, backgroundColor: "#F8FAFC" }} contentContainerStyle={{ padding: 16, gap: 16, paddingBottom: 32 }}>
+        
+        {/* STATS ROW */}
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 12, paddingBottom: 8 }}>
+          <View style={{ ...cardShadow, padding: 14, minWidth: 100 }}>
+            <Text style={{ color: "#64748B", fontWeight: "700", fontSize: 12, textTransform: "uppercase" }}>Total</Text>
+            <Text style={{ fontSize: 26, fontWeight: "900", color: "#0F172A", marginTop: 4 }}>{stats.total}</Text>
           </View>
-          <View style={{ width: "48%", ...cardShadow, padding: 12 }}>
-            <Text style={{ color: "#475569", fontWeight: "700", fontSize: 12 }}>Teachers</Text>
-            <Text style={{ fontSize: 24, fontWeight: "800", color: "#4338CA", marginTop: 4 }}>{stats.teachers}</Text>
+          <View style={{ ...cardShadow, padding: 14, minWidth: 100 }}>
+            <Text style={{ color: "#64748B", fontWeight: "700", fontSize: 12, textTransform: "uppercase" }}>Teachers</Text>
+            <Text style={{ fontSize: 26, fontWeight: "900", color: "#4F46E5", marginTop: 4 }}>{stats.teachers}</Text>
           </View>
-          <View style={{ width: "48%", ...cardShadow, padding: 12 }}>
-            <Text style={{ color: "#475569", fontWeight: "700", fontSize: 12 }}>Staff</Text>
-            <Text style={{ fontSize: 24, fontWeight: "800", color: "#0E7490", marginTop: 4 }}>{stats.staff}</Text>
+          <View style={{ ...cardShadow, padding: 14, minWidth: 100 }}>
+            <Text style={{ color: "#64748B", fontWeight: "700", fontSize: 12, textTransform: "uppercase" }}>Staff</Text>
+            <Text style={{ fontSize: 26, fontWeight: "900", color: "#0891B2", marginTop: 4 }}>{stats.staff}</Text>
           </View>
-          <View style={{ width: "48%", ...cardShadow, padding: 12 }}>
-            <Text style={{ color: "#475569", fontWeight: "700", fontSize: 12 }}>Pending</Text>
-            <Text style={{ fontSize: 24, fontWeight: "800", color: "#B91C1C", marginTop: 4 }}>{stats.pending}</Text>
+          <View style={{ ...cardShadow, padding: 14, minWidth: 100 }}>
+            <Text style={{ color: "#64748B", fontWeight: "700", fontSize: 12, textTransform: "uppercase" }}>Pending</Text>
+            <Text style={{ fontSize: 26, fontWeight: "900", color: "#DC2626", marginTop: 4 }}>{stats.pending}</Text>
           </View>
-        </View>
+        </ScrollView>
 
-        <View style={{ ...cardShadow, padding: 12, gap: 10 }}>
-          <Text style={{ fontSize: 16, fontWeight: "800", color: "#0F172A" }}>Create User</Text>
-          <TextInput
-            placeholder="Full name"
-            value={name}
-            onChangeText={setName}
-            style={{ borderWidth: 1, borderColor: "#D1D5DB", borderRadius: 12, paddingHorizontal: 12, paddingVertical: 10, backgroundColor: "#F8FAFC" }}
-          />
-          <TextInput
-            placeholder="Phone"
-            value={phone}
-            onChangeText={setPhone}
-            keyboardType="phone-pad"
-            style={{ borderWidth: 1, borderColor: "#D1D5DB", borderRadius: 12, paddingHorizontal: 12, paddingVertical: 10, backgroundColor: "#F8FAFC" }}
-          />
-          <TextInput
-            placeholder="Temporary password"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-            style={{ borderWidth: 1, borderColor: "#D1D5DB", borderRadius: 12, paddingHorizontal: 12, paddingVertical: 10, backgroundColor: "#F8FAFC" }}
-          />
-
-          <View style={{ flexDirection: "row", gap: 8 }}>
-            {(["TEACHER", "STAFF"] as ManageableUserRole[]).map((value) => {
-              const active = role === value;
-              return (
-                <Pressable
-                  key={value}
-                  onPress={() => setRole(value)}
-                  style={{
-                    flex: 1,
-                    borderRadius: 10,
-                    paddingVertical: 10,
-                    alignItems: "center",
-                    backgroundColor: active ? "#0F172A" : "#EEF2F7"
-                  }}
-                >
-                  <Text style={{ color: active ? "white" : "#334155", fontWeight: "700" }}>{value === "TEACHER" ? "Teacher" : "Staff"}</Text>
-                </Pressable>
-              );
-            })}
+        {/* CREATE USER */}
+        <View style={{ ...cardShadow, padding: 16, gap: 12 }}>
+          <Text style={{ fontSize: 16, fontWeight: "800", color: "#0F172A" }}>Add New User</Text>
+          <View style={{ flexDirection: "row", gap: 10 }}>
+            <TextInput
+              placeholder="Full name"
+              value={name}
+              onChangeText={setName}
+              style={{ flex: 1, borderWidth: 1, borderColor: "#E2E8F0", borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, backgroundColor: "#F8FAFC", fontSize: 14 }}
+            />
+            <TextInput
+              placeholder="Phone"
+              value={phone}
+              onChangeText={setPhone}
+              keyboardType="phone-pad"
+              style={{ flex: 1, borderWidth: 1, borderColor: "#E2E8F0", borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, backgroundColor: "#F8FAFC", fontSize: 14 }}
+            />
           </View>
-
+          <View style={{ flexDirection: "row", gap: 10, alignItems: "center" }}>
+            <TextInput
+              placeholder="Temporary password"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+              style={{ flex: 3, borderWidth: 1, borderColor: "#E2E8F0", borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, backgroundColor: "#F8FAFC", fontSize: 14 }}
+            />
+            <View style={{ flex: 2, flexDirection: "row", backgroundColor: "#F1F5F9", borderRadius: 12, padding: 4 }}>
+              {(["TEACHER", "STAFF"] as ManageableUserRole[]).map((value) => {
+                const active = role === value;
+                return (
+                  <Pressable
+                    key={value}
+                    onPress={() => setRole(value)}
+                    style={{ flex: 1, borderRadius: 8, paddingVertical: 8, alignItems: "center", backgroundColor: active ? "white" : "transparent", shadowColor: active ? "#000" : "transparent", shadowOpacity: 0.05, shadowRadius: 4, elevation: active ? 1 : 0 }}
+                  >
+                    <Text style={{ color: active ? "#0F172A" : "#64748B", fontWeight: active ? "800" : "600", fontSize: 12 }}>
+                      {value === "TEACHER" ? "Teacher" : "Staff"}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </View>
           <Pressable
             onPress={onCreate}
             disabled={creating}
-            style={{ borderRadius: 12, paddingVertical: 11, alignItems: "center", backgroundColor: "#FF6B35" }}
+            style={{ borderRadius: 12, paddingVertical: 14, alignItems: "center", backgroundColor: "#FF6B35", marginTop: 4 }}
           >
-            <Text style={{ color: "white", fontWeight: "800" }}>{creating ? "Creating..." : "Add User"}</Text>
+            <Text style={{ color: "white", fontWeight: "800", fontSize: 15 }}>{creating ? "Creating..." : "Create User"}</Text>
           </Pressable>
         </View>
 
@@ -446,20 +424,22 @@ export default function Screen() {
             placeholder={"name,phone,password,role\nAnanya,9000000001,pass123,TEACHER\nRahul,9000000002,pass123,STAFF"}
             style={{
               borderWidth: 1,
-              borderColor: "#D1D5DB",
+              borderColor: "#E2E8F0",
               borderRadius: 12,
-              paddingHorizontal: 12,
-              paddingVertical: 10,
+              paddingHorizontal: 14,
+              paddingVertical: 14,
               minHeight: 120,
               textAlignVertical: "top",
-              backgroundColor: "#F8FAFC"
+              backgroundColor: "#F8FAFC",
+              fontSize: 13,
+              fontFamily: "monospace"
             }}
           />
           <View style={{ flexDirection: "row", gap: 8 }}>
             <Pressable
               onPress={onImportBulk}
               disabled={bulkImporting}
-              style={{ flex: 1, borderRadius: 12, paddingVertical: 11, alignItems: "center", backgroundColor: "#0F172A" }}
+              style={{ flex: 1, borderRadius: 12, paddingVertical: 11, alignItems: "center", backgroundColor: "#FF6B35" }}
             >
               <Text style={{ color: "white", fontWeight: "800" }}>{bulkImporting ? "Importing..." : "Import CSV"}</Text>
             </Pressable>
@@ -472,23 +452,31 @@ export default function Screen() {
           </View>
         </View>
 
-        <View style={{ ...cardShadow, padding: 12, gap: 10 }}>
-          <Text style={{ fontSize: 16, fontWeight: "800", color: "#0F172A" }}>Search & Filter</Text>
-          <View style={{ flexDirection: "row", gap: 8 }}>
-            <View style={{ flex: 1, borderWidth: 1, borderColor: "#D1D5DB", borderRadius: 12, backgroundColor: "#F8FAFC", flexDirection: "row", alignItems: "center", paddingHorizontal: 10 }}>
-              <Ionicons name="search-outline" size={16} color="#64748B" />
+        {/* SEARCH & FILTER */}
+        <View style={{ ...cardShadow, padding: 16, gap: 14 }}>
+          <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+            <Text style={{ fontSize: 16, fontWeight: "800", color: "#0F172A" }}>Users Directory</Text>
+            <Text style={{ color: "#64748B", fontSize: 12, fontWeight: "600" }}>
+              {lastUpdated ? `Updated ${lastUpdated.toLocaleTimeString()}` : ""}
+            </Text>
+          </View>
+          
+          <View style={{ flexDirection: "row", gap: 10 }}>
+            <View style={{ flex: 1, borderWidth: 1, borderColor: "#E2E8F0", borderRadius: 12, backgroundColor: "#F8FAFC", flexDirection: "row", alignItems: "center", paddingHorizontal: 12 }}>
+              <Ionicons name="search-outline" size={18} color="#94A3B8" />
               <TextInput
                 placeholder="Search by name or phone"
+                placeholderTextColor="#94A3B8"
                 value={query}
                 onChangeText={setQuery}
-                style={{ flex: 1, paddingVertical: 10, paddingHorizontal: 8, color: "#0F172A" }}
+                style={{ flex: 1, paddingVertical: 12, paddingHorizontal: 10, color: "#0F172A", fontSize: 15 }}
               />
             </View>
             <Pressable
               onPress={() => loadUsers().catch(() => undefined)}
-              style={{ borderRadius: 12, backgroundColor: "#0F172A", paddingHorizontal: 12, alignItems: "center", justifyContent: "center" }}
+              style={{ borderRadius: 12, backgroundColor: "#F1F5F9", width: 48, alignItems: "center", justifyContent: "center" }}
             >
-              <Ionicons name="refresh" size={17} color="white" />
+              <Ionicons name="refresh" size={20} color="#0F172A" />
             </Pressable>
           </View>
 
@@ -551,51 +539,50 @@ export default function Screen() {
         {filteredUsers.map((item) => {
           const roleBadge = getRoleBadgeStyle(item.role);
           return (
-            <View key={item.id} style={{ ...cardShadow, padding: 12, gap: 8 }}>
-              <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
-                <Text style={{ color: "#0F172A", fontSize: 16, fontWeight: "800", flex: 1 }}>{item.name}</Text>
-                <View style={{ borderRadius: 999, backgroundColor: roleBadge.backgroundColor, paddingHorizontal: 9, paddingVertical: 4 }}>
+            <View key={item.id} style={{ ...cardShadow, padding: 16, gap: 12 }}>
+              <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" }}>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: "#0F172A", fontSize: 17, fontWeight: "800" }}>{item.name}</Text>
+                  <Text style={{ color: "#64748B", fontSize: 13, marginTop: 2, fontWeight: "500" }}>{item.phone ?? "No phone"}</Text>
+                </View>
+                <View style={{ borderRadius: 8, backgroundColor: roleBadge.backgroundColor, paddingHorizontal: 10, paddingVertical: 4 }}>
                   <Text style={{ color: roleBadge.color, fontWeight: "800", fontSize: 12 }}>{item.role}</Text>
                 </View>
               </View>
 
-              <Text style={{ color: "#334155" }}>Phone: {item.phone ?? "-"}</Text>
-
               <View style={{ flexDirection: "row", gap: 8 }}>
-                <View style={{ borderRadius: 999, backgroundColor: item.isApproved ? "#ECFDF5" : "#FEF2F2", paddingHorizontal: 9, paddingVertical: 4 }}>
-                  <Text style={{ color: item.isApproved ? "#059669" : "#DC2626", fontWeight: "800", fontSize: 12 }}>
-                    {item.isApproved ? "Approved" : "Pending Approval"}
+                <View style={{ borderRadius: 8, backgroundColor: item.isApproved ? "#ECFDF5" : "#FEF2F2", paddingHorizontal: 10, paddingVertical: 4 }}>
+                  <Text style={{ color: item.isApproved ? "#059669" : "#DC2626", fontWeight: "700", fontSize: 12 }}>
+                    {item.isApproved ? "Approved" : "Pending"}
                   </Text>
                 </View>
-                <View style={{ borderRadius: 999, backgroundColor: item.isActive ? "#EEF2FF" : "#F1F5F9", paddingHorizontal: 9, paddingVertical: 4 }}>
-                  <Text style={{ color: item.isActive ? "#1D4ED8" : "#64748B", fontWeight: "800", fontSize: 12 }}>
+                <View style={{ borderRadius: 8, backgroundColor: item.isActive ? "#F1F5F9" : "#F8FAFC", paddingHorizontal: 10, paddingVertical: 4 }}>
+                  <Text style={{ color: item.isActive ? "#0F172A" : "#94A3B8", fontWeight: "700", fontSize: 12 }}>
                     {item.isActive ? "Active" : "Inactive"}
                   </Text>
                 </View>
               </View>
 
-              <Text style={{ color: "#64748B", fontSize: 12 }}>
-                Created: {new Date(item.createdAt).toLocaleDateString()}
-              </Text>
+              <View style={{ height: 1, backgroundColor: "#F1F5F9", marginVertical: 4 }} />
 
               <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
                 <Pressable
                   onPress={() => onToggleApproval(item)}
-                  style={{ flex: 1, minWidth: 100, borderRadius: 10, backgroundColor: "#0F172A", paddingVertical: 9, alignItems: "center" }}
+                  style={{ flex: 1, minWidth: "30%", borderRadius: 10, backgroundColor: item.isApproved ? "#FEF2F2" : "#ECFDF5", paddingVertical: 10, alignItems: "center" }}
                 >
-                  <Text style={{ color: "white", fontWeight: "800" }}>{item.isApproved ? "Revoke Approval" : "Approve"}</Text>
+                  <Text style={{ color: item.isApproved ? "#DC2626" : "#059669", fontWeight: "700", fontSize: 13 }}>{item.isApproved ? "Revoke" : "Approve"}</Text>
                 </Pressable>
                 <Pressable
                   onPress={() => onToggleActive(item)}
-                  style={{ flex: 1, minWidth: 100, borderRadius: 10, backgroundColor: "#B91C1C", paddingVertical: 9, alignItems: "center" }}
+                  style={{ flex: 1, minWidth: "30%", borderRadius: 10, backgroundColor: item.isActive ? "#F8FAFC" : "#0F172A", paddingVertical: 10, alignItems: "center" }}
                 >
-                  <Text style={{ color: "white", fontWeight: "800" }}>{item.isActive ? "Deactivate" : "Activate"}</Text>
+                  <Text style={{ color: item.isActive ? "#64748B" : "white", fontWeight: "700", fontSize: 13 }}>{item.isActive ? "Deactivate" : "Activate"}</Text>
                 </Pressable>
                 <Pressable
                   onPress={() => onOpenResetPassword(item)}
-                  style={{ flex: 1, minWidth: 100, borderRadius: 10, backgroundColor: "#4F46E5", paddingVertical: 9, alignItems: "center" }}
+                  style={{ flex: 1, minWidth: "30%", borderRadius: 10, backgroundColor: "#EEF2F7", paddingVertical: 10, alignItems: "center" }}
                 >
-                  <Text style={{ color: "white", fontWeight: "800" }}>Reset Password</Text>
+                  <Text style={{ color: "#334155", fontWeight: "700", fontSize: 13 }}>Reset Pass</Text>
                 </Pressable>
               </View>
             </View>
@@ -621,7 +608,7 @@ export default function Screen() {
               <Pressable
                 onPress={onSaveResetPassword}
                 disabled={savingPassword}
-                style={{ flex: 1, backgroundColor: "#0F172A", borderRadius: 10, paddingVertical: 10, alignItems: "center" }}
+                style={{ flex: 1, backgroundColor: "#FF6B35", borderRadius: 10, paddingVertical: 10, alignItems: "center" }}
               >
                 <Text style={{ color: "white", fontWeight: "800" }}>{savingPassword ? "Saving..." : "Save Password"}</Text>
               </Pressable>

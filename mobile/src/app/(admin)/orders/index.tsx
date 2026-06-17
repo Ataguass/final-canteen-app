@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Alert, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View, RefreshControl } from "react-native";
 import { useAuth } from "../../../hooks/useAuth";
 import { useOrderSocket } from "../../../hooks/useOrderSocket";
 import { Order, orderService } from "../../../services/orderService";
@@ -28,17 +28,15 @@ const statusColorMap: Record<string, string> = {
   REFUNDED: "#6B7280"
 };
 
-const cardShadow = {
-  borderWidth: 1,
-  borderColor: "#E5E7EB",
-  borderRadius: 16,
-  backgroundColor: "white",
-  shadowColor: "#0F172A",
-  shadowOpacity: 0.06,
-  shadowRadius: 8,
-  shadowOffset: { width: 0, height: 4 },
-  elevation: 2
-} as const;
+const statusBgMap: Record<string, string> = {
+  PENDING: "#FEF3C7",
+  ACCEPTED: "#DBEAFE",
+  PREPARING: "#EDE9FE",
+  READY: "#CFFAFE",
+  COMPLETED: "#D1FAE5",
+  CANCELLED: "#FEE2E2",
+  REFUNDED: "#F3F4F6"
+};
 
 const formatCurrency = (value: number): string => `₹ ${value.toFixed(2)}`;
 
@@ -112,154 +110,376 @@ export default function Screen() {
   }, [orders, query, statusFilter]);
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: "#F8FAFC" }} contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: 22 }}>
-      <View style={{ gap: 4 }}>
-        <Text style={{ fontSize: 28, fontWeight: "800", color: "#0F172A" }}>Orders</Text>
-        <Text style={{ color: "#64748B", fontSize: 13 }}>
-          Last updated: {lastUpdated ? lastUpdated.toLocaleString() : "Not loaded yet"}
-        </Text>
-      </View>
-
-      <Pressable
-        onPress={() => load().catch(() => undefined)}
-        style={{
-          borderRadius: 12,
-          paddingVertical: 12,
-          backgroundColor: "#0F172A",
-          alignItems: "center",
-          justifyContent: "center",
-          flexDirection: "row",
-          gap: 8
-        }}
+    <View style={styles.screen}>
+      <ScrollView 
+        style={styles.scroll} 
+        contentContainerStyle={styles.content}
+        refreshControl={<RefreshControl refreshing={loading} onRefresh={load} colors={["#1D4ED8"]} />}
       >
-        <Ionicons name="refresh-outline" size={16} color="white" />
-        <Text style={{ color: "white", fontWeight: "800" }}>{loading ? "Refreshing..." : "Refresh Orders"}</Text>
-      </Pressable>
-
-      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
-        <View style={{ width: "48%", ...cardShadow, padding: 12 }}>
-          <Text style={{ color: "#475569", fontWeight: "700", fontSize: 12 }}>Total Orders</Text>
-          <Text style={{ color: "#0F172A", fontWeight: "800", fontSize: 24, marginTop: 4 }}>{stats.total}</Text>
-        </View>
-        <View style={{ width: "48%", ...cardShadow, padding: 12 }}>
-          <Text style={{ color: "#475569", fontWeight: "700", fontSize: 12 }}>Active Orders</Text>
-          <Text style={{ color: "#D97706", fontWeight: "800", fontSize: 24, marginTop: 4 }}>{stats.active}</Text>
-        </View>
-        <View style={{ width: "48%", ...cardShadow, padding: 12 }}>
-          <Text style={{ color: "#475569", fontWeight: "700", fontSize: 12 }}>Completed</Text>
-          <Text style={{ color: "#059669", fontWeight: "800", fontSize: 24, marginTop: 4 }}>{stats.completed}</Text>
-        </View>
-        <View style={{ width: "48%", ...cardShadow, padding: 12 }}>
-          <Text style={{ color: "#475569", fontWeight: "700", fontSize: 12 }}>Today Sales</Text>
-          <Text style={{ color: "#1D4ED8", fontWeight: "800", fontSize: 21, marginTop: 5 }}>{formatCurrency(stats.todaySales)}</Text>
-        </View>
-      </View>
-
-      <View style={{ ...cardShadow, padding: 12, gap: 10 }}>
-        <Text style={{ fontSize: 16, fontWeight: "800", color: "#0F172A" }}>Search & Filter</Text>
-        <View
-          style={{
-            borderWidth: 1,
-            borderColor: "#E2E8F0",
-            borderRadius: 12,
-            backgroundColor: "#F8FAFC",
-            flexDirection: "row",
-            alignItems: "center",
-            paddingHorizontal: 10
-          }}
-        >
-          <Ionicons name="search-outline" size={16} color="#64748B" />
-          <TextInput
-            placeholder="Search by order number, status, payment"
-            placeholderTextColor="#94A3B8"
-            value={query}
-            onChangeText={setQuery}
-            style={{ flex: 1, paddingVertical: 10, paddingHorizontal: 8, color: "#0F172A" }}
-          />
-          {query ? (
-            <Pressable onPress={() => setQuery("")}>
-              <Ionicons name="close-circle" size={18} color="#94A3B8" />
-            </Pressable>
-          ) : null}
+        
+        {/* Top Header */}
+        <View style={styles.headerRow}>
+          <View>
+            <Text style={styles.pageTitle}>Live Orders</Text>
+            <Text style={styles.lastUpdatedText}>
+              {loading ? "Updating..." : `Last updated: ${lastUpdated ? lastUpdated.toLocaleTimeString() : "--"}`}
+            </Text>
+          </View>
         </View>
 
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
-          {filters.map((item) => {
-            const active = statusFilter === item;
-            return (
-              <Pressable
-                key={item}
-                onPress={() => setStatusFilter(item)}
-                style={{
-                  borderRadius: 999,
-                  borderWidth: 1,
-                  borderColor: active ? "#0F172A" : "#E2E8F0",
-                  backgroundColor: active ? "#0F172A" : "white",
-                  paddingHorizontal: 14,
-                  paddingVertical: 8
-                }}
-              >
-                <Text style={{ color: active ? "white" : "#334155", fontWeight: "700" }}>{item}</Text>
+        {/* Stats Grid */}
+        <View style={styles.statsGrid}>
+          <View style={styles.statCard}>
+            <Text style={styles.statLabel}>Total Orders</Text>
+            <Text style={[styles.statValue, { color: "#0F172A" }]}>{stats.total}</Text>
+          </View>
+          <View style={styles.statCard}>
+            <Text style={styles.statLabel}>Active Orders</Text>
+            <Text style={[styles.statValue, { color: "#D97706" }]}>{stats.active}</Text>
+          </View>
+          <View style={styles.statCard}>
+            <Text style={styles.statLabel}>Completed</Text>
+            <Text style={[styles.statValue, { color: "#059669" }]}>{stats.completed}</Text>
+          </View>
+          <View style={styles.statCard}>
+            <Text style={styles.statLabel}>Today Sales</Text>
+            <Text style={[styles.statValue, { color: "#1D4ED8", fontSize: 20 }]}>{formatCurrency(stats.todaySales)}</Text>
+          </View>
+        </View>
+
+        {/* Search & Filters */}
+        <View style={styles.filterSection}>
+          <View style={styles.searchContainer}>
+            <Ionicons name="search" size={18} color="#64748B" />
+            <TextInput
+              placeholder="Search ID, status, payment..."
+              placeholderTextColor="#94A3B8"
+              value={query}
+              onChangeText={setQuery}
+              style={styles.searchInput}
+            />
+            {query ? (
+              <Pressable onPress={() => setQuery("")} style={{ padding: 4 }}>
+                <Ionicons name="close-circle" size={18} color="#94A3B8" />
               </Pressable>
-            );
-          })}
-        </ScrollView>
-      </View>
+            ) : null}
+          </View>
 
-      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-        <Text style={{ fontSize: 18, fontWeight: "800", color: "#0F172A" }}>Order List</Text>
-        <Text style={{ color: "#64748B", fontWeight: "700" }}>{filteredOrders.length} found</Text>
-      </View>
-
-      {filteredOrders.length === 0 ? (
-        <View style={{ ...cardShadow, padding: 14 }}>
-          <Text style={{ color: "#64748B" }}>No orders match current filters.</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filterScroll}>
+            {filters.map((item) => {
+              const active = statusFilter === item;
+              return (
+                <Pressable
+                  key={item}
+                  onPress={() => setStatusFilter(item)}
+                  style={[
+                    styles.filterChip,
+                    active ? styles.filterChipActive : styles.filterChipInactive
+                  ]}
+                >
+                  <Text style={[styles.filterChipText, active ? styles.filterChipTextActive : styles.filterChipTextInactive]}>
+                    {item}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </ScrollView>
         </View>
-      ) : (
-        filteredOrders.map((order) => {
-          const statusColor = statusColorMap[order.status] ?? "#334155";
-          return (
-            <Pressable
-              key={order.id}
-              onPress={() => router.push({ pathname: "/(admin)/orders/[id]", params: { id: order.id } })}
-              style={{ ...cardShadow, padding: 12, gap: 7 }}
+
+        {/* Orders List */}
+        <View style={styles.listHeader}>
+          <View>
+            <Text style={styles.listTitle}>Results</Text>
+            <Text style={styles.listSubtitle}>{filteredOrders.length} found</Text>
+          </View>
+          {filteredOrders.length > 3 && (
+            <Pressable 
+              onPress={() => router.push("/(admin)/orders/all")} 
+              style={{ paddingHorizontal: 12, paddingVertical: 6, backgroundColor: "#E2E8F0", borderRadius: 8 }}
             >
-              <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-                <Text style={{ fontWeight: "800", fontSize: 15, color: "#0F172A" }}>{order.orderNumber}</Text>
-                <View style={{ borderRadius: 999, backgroundColor: `${statusColor}1A`, paddingHorizontal: 8, paddingVertical: 4 }}>
-                  <Text style={{ color: statusColor, fontWeight: "800", fontSize: 12 }}>{order.status}</Text>
-                </View>
-              </View>
-              <Text style={{ color: "#64748B", fontSize: 12 }}>{new Date(order.createdAt).toLocaleString()}</Text>
-              {order.laneToken || order.isPreOrder ? (
-                <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 6 }}>
-                  {order.serviceLane === "TEACHER_PRIORITY" ? (
-                    <View style={{ borderRadius: 999, backgroundColor: "#DBEAFE", paddingHorizontal: 8, paddingVertical: 4 }}>
-                      <Text style={{ color: "#1E40AF", fontWeight: "800", fontSize: 11 }}>Teacher Priority</Text>
-                    </View>
-                  ) : null}
-                  {order.laneToken ? (
-                    <View style={{ borderRadius: 999, backgroundColor: "#E2E8F0", paddingHorizontal: 8, paddingVertical: 4 }}>
-                      <Text style={{ color: "#334155", fontWeight: "700", fontSize: 11 }}>{order.laneToken}</Text>
-                    </View>
-                  ) : null}
-                  {order.isPreOrder && order.pickupSlotLabel ? (
-                    <View style={{ borderRadius: 999, backgroundColor: "#DCFCE7", paddingHorizontal: 8, paddingVertical: 4 }}>
-                      <Text style={{ color: "#166534", fontWeight: "700", fontSize: 11 }}>{order.pickupSlotLabel}</Text>
-                    </View>
-                  ) : null}
-                </View>
-              ) : null}
-              <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-                <Text style={{ color: "#334155", fontWeight: "600" }}>
-                  {order.items.length} item{order.items.length > 1 ? "s" : ""} · {order.paymentMethod}
-                </Text>
-                <Text style={{ color: "#0F172A", fontWeight: "800" }}>{formatCurrency(order.totalAmount)}</Text>
-              </View>
+              <Text style={{ fontSize: 13, fontWeight: "700", color: "#0F172A" }}>
+                View All
+              </Text>
             </Pressable>
-          );
-        })
-      )}
-    </ScrollView>
+          )}
+        </View>
+
+        {filteredOrders.length === 0 ? (
+          <View style={styles.emptyCard}>
+            <Ionicons name="receipt-outline" size={32} color="#94A3B8" />
+            <Text style={styles.emptyText}>No orders match your search.</Text>
+          </View>
+        ) : (
+          <View style={styles.orderList}>
+            {filteredOrders.slice(0, 5).map((order) => {
+              const statusColor = statusColorMap[order.status] ?? "#334155";
+              const statusBg = statusBgMap[order.status] ?? "#F8FAFC";
+              return (
+                <Pressable
+                  key={order.id}
+                  onPress={() => router.push({ pathname: "/(admin)/orders/[id]", params: { id: order.id } })}
+                  style={({ pressed }) => [
+                    styles.orderCard,
+                    pressed && { opacity: 0.85, transform: [{ scale: 0.98 }] }
+                  ]}
+                >
+                  <View style={styles.orderCardTop}>
+                    <View>
+                      <Text style={styles.orderNumber}>{order.orderNumber}</Text>
+                      <Text style={styles.orderDate}>{new Date(order.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} • {new Date(order.createdAt).toLocaleDateString()}</Text>
+                    </View>
+                    <View style={[styles.statusPill, { backgroundColor: statusBg }]}>
+                      <Text style={[styles.statusText, { color: statusColor }]}>{order.status}</Text>
+                    </View>
+                  </View>
+
+                  {(order.laneToken || order.isPreOrder) ? (
+                    <View style={styles.laneTagsRow}>
+                      {order.serviceLane === "TEACHER_PRIORITY" ? (
+                        <View style={[styles.tagPill, { backgroundColor: "#DBEAFE" }]}>
+                          <Text style={[styles.tagText, { color: "#1E40AF" }]}>Priority</Text>
+                        </View>
+                      ) : null}
+                      {order.laneToken ? (
+                        <View style={[styles.tagPill, { backgroundColor: "#F1F5F9" }]}>
+                          <Text style={[styles.tagText, { color: "#334155" }]}>Token: {order.laneToken}</Text>
+                        </View>
+                      ) : null}
+                      {order.isPreOrder && order.pickupSlotLabel ? (
+                        <View style={[styles.tagPill, { backgroundColor: "#DCFCE7" }]}>
+                          <Text style={[styles.tagText, { color: "#166534" }]}>{order.pickupSlotLabel}</Text>
+                        </View>
+                      ) : null}
+                    </View>
+                  ) : null}
+
+                  <View style={styles.orderCardBottom}>
+                    <Text style={styles.orderItemsText}>
+                      {order.items.length} item{order.items.length > 1 ? "s" : ""} • {order.paymentMethod}
+                    </Text>
+                    <Text style={styles.orderTotalText}>{formatCurrency(order.totalAmount)}</Text>
+                  </View>
+                </Pressable>
+              );
+            })}
+          </View>
+        )}
+      </ScrollView>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    backgroundColor: "#F8FAFC"
+  },
+  scroll: {
+    flex: 1
+  },
+  content: {
+    padding: 16,
+    gap: 20,
+    paddingBottom: 40
+  },
+  headerRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center"
+  },
+  pageTitle: {
+    fontSize: 24,
+    fontWeight: "900",
+    color: "#0F172A"
+  },
+  lastUpdatedText: {
+    color: "#64748B",
+    fontSize: 13,
+    fontWeight: "500",
+    marginTop: 2
+  },
+  statsGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 12
+  },
+  statCard: {
+    width: "48%",
+    backgroundColor: "white",
+    borderRadius: 16,
+    padding: 14,
+    shadowColor: "#000",
+    shadowOpacity: 0.04,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 2
+  },
+  statLabel: {
+    color: "#64748B",
+    fontWeight: "700",
+    fontSize: 12
+  },
+  statValue: {
+    fontWeight: "900",
+    fontSize: 24,
+    marginTop: 6
+  },
+  filterSection: {
+    gap: 12
+  },
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "white",
+    borderRadius: 16,
+    paddingHorizontal: 14,
+    height: 50,
+    shadowColor: "#000",
+    shadowOpacity: 0.03,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 1
+  },
+  searchInput: {
+    flex: 1,
+    height: "100%",
+    marginLeft: 10,
+    fontSize: 15,
+    fontWeight: "500",
+    color: "#0F172A"
+  },
+  filterScroll: {
+    gap: 8
+  },
+  filterChip: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 999,
+    borderWidth: 1,
+    justifyContent: "center",
+    alignItems: "center"
+  },
+  filterChipActive: {
+    backgroundColor: "#0F172A",
+    borderColor: "#0F172A"
+  },
+  filterChipInactive: {
+    backgroundColor: "white",
+    borderColor: "#E2E8F0"
+  },
+  filterChipText: {
+    fontWeight: "800",
+    fontSize: 13
+  },
+  filterChipTextActive: {
+    color: "white"
+  },
+  filterChipTextInactive: {
+    color: "#475569"
+  },
+  listHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: 4
+  },
+  listTitle: {
+    fontSize: 18,
+    fontWeight: "900",
+    color: "#0F172A"
+  },
+  listSubtitle: {
+    color: "#64748B",
+    fontWeight: "700",
+    fontSize: 13
+  },
+  emptyCard: {
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 30,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 12,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    borderStyle: "dashed"
+  },
+  emptyText: {
+    color: "#64748B",
+    fontWeight: "600",
+    fontSize: 15
+  },
+  orderList: {
+    gap: 12
+  },
+  orderCard: {
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 16,
+    gap: 12,
+    shadowColor: "#000",
+    shadowOpacity: 0.04,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 2
+  },
+  orderCardTop: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start"
+  },
+  orderNumber: {
+    fontSize: 18,
+    fontWeight: "900",
+    color: "#0F172A"
+  },
+  orderDate: {
+    color: "#64748B",
+    fontSize: 12,
+    fontWeight: "500",
+    marginTop: 2
+  },
+  statusPill: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 999
+  },
+  statusText: {
+    fontWeight: "800",
+    fontSize: 11,
+    letterSpacing: 0.5
+  },
+  laneTagsRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 6,
+    marginTop: 2
+  },
+  tagPill: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 6
+  },
+  tagText: {
+    fontSize: 11,
+    fontWeight: "800"
+  },
+  orderCardBottom: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderColor: "#F1F5F9"
+  },
+  orderItemsText: {
+    color: "#475569",
+    fontWeight: "600",
+    fontSize: 13
+  },
+  orderTotalText: {
+    color: "#0F172A",
+    fontWeight: "900",
+    fontSize: 18
+  }
+});

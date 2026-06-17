@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .status-pulse {
+      animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    @keyframes pulse-ring {
+      0% { transform: scale(0.8); opacity: 0.5; }
+      50% { transform: scale(1.2); opacity: 0; }
+      100% { transform: scale(0.8); opacity: 0; }
+    }
+    .map-mask {
+      mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+    }
+  </style>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "on-primary-fixed": "#351000",
+            "on-secondary-fixed": "#1a1c1e",
+            "on-primary-fixed-variant": "#7a3000",
+            "on-secondary-container": "#636467",
+            "surface-container-lowest": "#ffffff",
+            "surface-tint": "#a04100",
+            "inverse-surface": "#2e3132",
+            "surface-variant": "#e1e3e4",
+            "outline-variant": "#e2bfb0",
+            "on-secondary": "#ffffff",
+            "on-primary": "#ffffff",
+            "surface-container": "#edeeef",
+            "primary-container": "#ff6b00",
+            "on-surface-variant": "#5a4136",
+            "surface-container-low": "#f3f4f5",
+            "secondary": "#5d5e61",
+            "primary-fixed": "#ffdbcc",
+            "on-background": "#191c1d",
+            "surface-dim": "#d9dadb",
+            "background": "#f8f9fa",
+            "primary": "#a04100",
+            "surface": "#f8f9fa",
+            "error-container": "#ffdad6",
+            "tertiary-fixed": "#dee1ff",
+            "inverse-on-surface": "#f0f1f2",
+            "on-tertiary": "#ffffff",
+            "secondary-fixed-dim": "#c6c6c9",
+            "on-secondary-fixed-variant": "#454749",
+            "tertiary-fixed-dim": "#bac3ff",
+            "surface-container-high": "#e7e8e9",
+            "on-tertiary-container": "#00218e",
+            "on-primary-container": "#572000",
+            "secondary-fixed": "#e2e2e5",
+            "outline": "#8e7164",
+            "primary-fixed-dim": "#ffb693",
+            "on-tertiary-fixed-variant": "#0031c4",
+            "surface-bright": "#f8f9fa",
+            "inverse-primary": "#ffb693",
+            "on-tertiary-fixed": "#001159",
+            "on-error-container": "#93000a",
+            "error": "#ba1a1a",
+            "secondary-container": "#e2e2e5",
+            "tertiary-container": "#7c91ff",
+            "tertiary": "#2e4edc",
+            "on-surface": "#191c1d",
+            "surface-container-highest": "#e1e3e4",
+            "on-error": "#ffffff"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "stack-lg": "1.5rem",
+            "stack-sm": "0.5rem",
+            "margin-mobile": "1rem",
+            "stack-md": "1rem",
+            "margin-desktop": "2.5rem",
+            "gutter": "1rem"
+          },
+          "fontFamily": {
+            "headline-md": ["Plus Jakarta Sans"],
+            "body-md": ["Plus Jakarta Sans"],
+            "label-md": ["Plus Jakarta Sans"],
+            "label-lg": ["Plus Jakarta Sans"],
+            "headline-xl": ["Plus Jakarta Sans"],
+            "headline-lg-mobile": ["Plus Jakarta Sans"],
+            "body-lg": ["Plus Jakarta Sans"],
+            "headline-lg": ["Plus Jakarta Sans"]
+          },
+          "fontSize": {
+            "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+            "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+            "label-md": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+            "label-lg": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+            "headline-xl": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+            "headline-lg-mobile": ["22px", {"lineHeight": "28px", "fontWeight": "700"}],
+            "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+            "headline-lg": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700"}]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen flex flex-col">
+<!-- TopAppBar (Transactional Screen: No Nav Links, No FAB) -->
+<header class="bg-surface flex justify-between items-center w-full px-margin-mobile h-14 top-0 docked full-width z-50">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" data-icon="restaurant">restaurant</span>
+<h1 class="font-headline-lg-mobile text-headline-lg-mobile font-bold text-primary">CampusCrave</h1>
+</div>
+<button class="font-label-lg text-label-lg text-secondary transition-opacity duration-200 hover:opacity-80">Skip</button>
+</header>
+<main class="flex-grow flex flex-col px-margin-mobile pt-stack-lg pb-32">
+<!-- Hero Text Section -->
+<div class="mb-stack-lg">
+<h2 class="font-headline-xl text-headline-xl text-on-surface mb-stack-sm">Track Your Order</h2>
+<p class="font-body-lg text-body-lg text-secondary">Get real-time updates from the kitchen to your doorstep.</p>
+</div>
+<!-- Tracking Visual / Map Card -->
+<div class="relative w-full aspect-[4/5] bg-surface-container rounded-[32px] overflow-hidden shadow-sm mb-stack-lg border border-outline-variant/30">
+<!-- Simulated Map Layer -->
+<div class="absolute inset-0 map-mask">
+<img class="w-full h-full object-cover grayscale-[0.2] opacity-80" data-alt="A high-quality, top-down minimalist street map rendering of a vibrant urban campus area. The aesthetic is clean and modern, featuring soft light-mode colors like off-whites and pale greys with smooth vector-style road layouts. Tiny glowing orange markers represent active food delivery routes, creating a sense of dynamic movement and real-time logistics. The lighting is bright and airy, reflecting a professional corporate design system." data-location="San Francisco" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDL-HnQiLsSqn48E-Fdb8hbAPIAK1sC0het8RwW8u4YtCD0Mwc0pShbjTXLHbqzhdNmyZK_pRdzcNkrbwIDKHbLar_QK-15zoIbJdg5G__KCkcVliBRi3PUUYL_rsenM07LgEOAyifBBCR6chwO9VRqYFJrn_2zHfZPaNkRlI9y3BdTRsy0YzBAMD2Rehc4JU3I8B7eYLp8MYj2MsliTk8UeXscxuZ2RFrfKWl7hJE0Bid_Qiq-SNA-U9FmVbS9sG8H4hwabNGoRxI"/>
+</div>
+<!-- Live Tracking Overlay Elements -->
+<div class="absolute inset-0 p-gutter flex flex-col">
+<!-- Top Status Badge -->
+<div class="self-start bg-surface-container-highest/90 backdrop-blur-md px-4 py-2 rounded-full flex items-center gap-2 shadow-sm">
+<div class="w-2 h-2 rounded-full bg-primary relative">
+<div class="absolute inset-0 rounded-full bg-primary status-pulse"></div>
+</div>
+<span class="font-label-md text-label-md text-on-surface-variant font-bold">Delivery in 12 mins</span>
+</div>
+<!-- Floating Driver Card (Bento Style) -->
+<div class="mt-auto bg-surface/95 backdrop-blur-xl p-4 rounded-[24px] shadow-lg border border-outline-variant/20">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-primary-fixed overflow-hidden ring-2 ring-primary-container">
+<img class="w-full h-full object-cover" data-alt="A professional headshot of a friendly delivery courier smiling, set against a clean, neutral studio background. The courier is wearing a modern, minimalist orange branded polo shirt. The lighting is soft and flattering, emphasizing a trustworthy and welcoming personality. The overall visual style is polished and high-end, fitting a premium service app identity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCkd8Ed_uOc7-KKbt5mU1esVVqSVbQZEzS_0MtfiPOdZCjakmK67wPOb3aXFdTwSlho43m6XYyqzpSxvj2pmSniB3MlE-RuyO7FpVemvyEokRZN61AP5IIs6rEy5UAEzqKrJ-Do7MzKnFlhWlNS8uv4DAJ4tipbmJti8iazJ85e2SDXgUjrjqnldpy-Rm6JIV-DZ5F3GCi1i2rWdHvZfez5gzKVtu-6I1IHJbrRzhjV75UkkVx0_L2GI6CUsH8tQR0tdL5AoGj15JU"/>
+</div>
+<div class="flex-grow">
+<h3 class="font-label-lg text-label-lg text-on-surface">David Wilson</h3>
+<p class="font-label-md text-label-md text-secondary">Campus Courier • 4.9 ★</p>
+</div>
+<button class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container">
+<span class="material-symbols-outlined" data-icon="call">call</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Progress & Action Section -->
+<div class="space-y-stack-lg">
+<!-- Tracking Stepper -->
+<div class="flex flex-col gap-stack-md bg-surface-container-low p-stack-md rounded-xl">
+<div class="flex justify-between items-center mb-1">
+<span class="font-label-lg text-label-lg text-primary">On the way</span>
+<span class="font-label-md text-label-md text-secondary">Step 3 of 4</span>
+</div>
+<!-- Progress Dots -->
+<div class="flex gap-2">
+<div class="h-2 flex-grow rounded-full bg-primary"></div>
+<div class="h-2 flex-grow rounded-full bg-primary"></div>
+<div class="h-2 flex-grow rounded-full bg-primary relative">
+<div class="absolute inset-0 bg-primary rounded-full animate-pulse"></div>
+</div>
+<div class="h-2 flex-grow rounded-full bg-outline-variant"></div>
+</div>
+<!-- Status List -->
+<div class="flex flex-col gap-4 mt-2">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary font-bold" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="font-body-md text-body-md text-on-surface">Order Confirmed</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary font-bold" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span class="font-body-md text-body-md text-on-surface">Preparing your meal</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary font-bold" data-icon="directions_bike">directions_bike</span>
+<span class="font-body-md text-body-md text-on-surface font-bold">Courier is nearby</span>
+</div>
+</div>
+</div>
+<!-- Primary Action -->
+<div class="fixed bottom-0 left-0 w-full p-margin-mobile bg-gradient-to-t from-background via-background to-transparent pt-8">
+<button class="w-full h-14 bg-primary-container text-on-primary-container font-headline-md text-headline-md rounded-[16px] flex items-center justify-center gap-2 shadow-lg shadow-primary-container/30 transition-transform active:scale-[0.98]">
+          Next
+          <span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</div>
+</main>
+<!-- BottomNavBar (Suppressed for Transactional/Focused Tracking Journey as per Filter Rules) -->
+<script>
+    // Micro-interaction: Update time every minute
+    function updateTrackingTime() {
+      const timeElement = document.querySelector('.font-label-md.text-on-surface-variant.font-bold');
+      if (timeElement) {
+        let currentTime = parseInt(timeElement.innerText.match(/\d+/)[0]);
+        if (currentTime > 1) {
+          timeElement.innerHTML = `<div class="w-2 h-2 rounded-full bg-primary relative"><div class="absolute inset-0 rounded-full bg-primary status-pulse"></div></div>Delivery in ${currentTime - 1} mins`;
+        }
+      }
+    }
+    setInterval(updateTrackingTime, 60000);
+
+    // Button click effect
+    document.querySelector('button').addEventListener('mousedown', function() {
+      this.classList.add('scale-95');
+    });
+    document.querySelector('button').addEventListener('mouseup', function() {
+      this.classList.remove('scale-95');
+    });
+  </script>
+</body></html>

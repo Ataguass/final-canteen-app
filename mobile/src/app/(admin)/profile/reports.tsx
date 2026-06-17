@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Alert, Pressable, ScrollView, Share, Text, TextInput, View } from "react-native";
+import { Alert, Pressable, ScrollView, Share, Text, TextInput, View, RefreshControl } from "react-native";
 import { useAuth } from "../../../hooks/useAuth";
 import { orderService, type Order } from "../../../services/orderService";
 import type { PaymentMethod, PaymentStatus } from "../../../services/types";
@@ -264,17 +264,37 @@ export default function Screen() {
   }
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: "#F8FAFC" }} contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: 22 }}>
-      <View style={{ gap: 4 }}>
-        <Text style={{ fontSize: 28, fontWeight: "800", color: "#0F172A" }}>Reports</Text>
-        <Text style={{ color: "#64748B", fontSize: 13 }}>
-          Last updated: {lastUpdated ? lastUpdated.toLocaleString() : "Not loaded yet"}
-        </Text>
-      </View>
+    <ScrollView 
+      style={{ flex: 1, backgroundColor: "#F8FAFC" }} 
+      contentContainerStyle={{ padding: 16, gap: 16, paddingBottom: 40 }}
+      refreshControl={<RefreshControl refreshing={loading} onRefresh={() => loadOrders().catch(() => undefined)} />}
+    >
+      <View style={{ gap: 12 }}>
+        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+          <Text style={{ fontSize: 16, fontWeight: "800", color: "#0F172A" }}>Date Range</Text>
+          <Pressable
+            onPress={exportCsv}
+            style={{
+              backgroundColor: "#065F46",
+              borderRadius: 999,
+              paddingVertical: 8,
+              paddingHorizontal: 14,
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 6,
+              shadowColor: "#065F46",
+              shadowOpacity: 0.2,
+              shadowRadius: 4,
+              shadowOffset: { width: 0, height: 2 },
+              elevation: 2
+            }}
+          >
+            <Ionicons name="download-outline" size={16} color="white" />
+            <Text style={{ color: "white", fontWeight: "800", fontSize: 12 }}>Export CSV</Text>
+          </Pressable>
+        </View>
 
-      <View style={{ ...cardShadow, padding: 12, gap: 10 }}>
-        <Text style={{ fontSize: 16, fontWeight: "800", color: "#0F172A" }}>Range</Text>
-        <View style={{ flexDirection: "row", gap: 8, flexWrap: "wrap" }}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
           {[
             ["TODAY", "Today"],
             ["WEEK", "7 Days"],
@@ -289,27 +309,29 @@ export default function Screen() {
                 onPress={() => setRange(key as RangeKey)}
                 style={{
                   borderRadius: 999,
+                  borderWidth: 1,
+                  borderColor: active ? "#0F172A" : "#E2E8F0",
+                  backgroundColor: active ? "#0F172A" : "white",
                   paddingVertical: 8,
-                  paddingHorizontal: 12,
-                  backgroundColor: active ? "#0F172A" : "#EEF2F7"
+                  paddingHorizontal: 16
                 }}
               >
-                <Text style={{ color: active ? "white" : "#334155", fontWeight: "700" }}>{label}</Text>
+                <Text style={{ color: active ? "white" : "#475569", fontWeight: "700", fontSize: 13 }}>{label}</Text>
               </Pressable>
             );
           })}
-        </View>
+        </ScrollView>
 
         {range === "CUSTOM" ? (
-          <View style={{ gap: 8, borderWidth: 1, borderColor: "#E2E8F0", borderRadius: 12, padding: 10, backgroundColor: "#F8FAFC" }}>
-            <Text style={{ color: "#334155", fontWeight: "700" }}>Custom Date Range</Text>
+          <View style={{ flexDirection: "row", gap: 12, marginTop: 4 }}>
             <TextInput
               value={fromDate}
               onChangeText={setFromDate}
               placeholder="From (YYYY-MM-DD)"
               autoCapitalize="none"
               autoCorrect={false}
-              style={{ borderWidth: 1, borderColor: "#D1D5DB", borderRadius: 10, padding: 10, backgroundColor: "white" }}
+              style={{ flex: 1, borderWidth: 1, borderColor: "#E2E8F0", borderRadius: 12, padding: 12, backgroundColor: "white", color: "#0F172A", fontSize: 14, fontWeight: "600" }}
+              placeholderTextColor="#94A3B8"
             />
             <TextInput
               value={toDate}
@@ -317,155 +339,115 @@ export default function Screen() {
               placeholder="To (YYYY-MM-DD)"
               autoCapitalize="none"
               autoCorrect={false}
-              style={{ borderWidth: 1, borderColor: "#D1D5DB", borderRadius: 10, padding: 10, backgroundColor: "white" }}
+              style={{ flex: 1, borderWidth: 1, borderColor: "#E2E8F0", borderRadius: 12, padding: 12, backgroundColor: "white", color: "#0F172A", fontSize: 14, fontWeight: "600" }}
+              placeholderTextColor="#94A3B8"
             />
-            {customDateError ? <Text style={{ color: "#B91C1C" }}>{customDateError}</Text> : null}
           </View>
         ) : null}
-
-        <View style={{ flexDirection: "row", gap: 8 }}>
-          <Pressable
-            onPress={() => loadOrders().catch(() => Alert.alert("Error", "Failed to refresh reports"))}
-            style={{
-              backgroundColor: "#0F172A",
-              borderRadius: 12,
-              paddingVertical: 11,
-              flex: 1,
-              alignItems: "center",
-              justifyContent: "center",
-              flexDirection: "row",
-              gap: 8
-            }}
-          >
-            <Ionicons name="refresh-outline" size={16} color="white" />
-            <Text style={{ color: "white", fontWeight: "800" }}>{loading ? "Refreshing..." : "Refresh"}</Text>
-          </Pressable>
-          <Pressable
-            onPress={exportCsv}
-            style={{
-              backgroundColor: "#065F46",
-              borderRadius: 12,
-              paddingVertical: 11,
-              flex: 1,
-              alignItems: "center",
-              justifyContent: "center",
-              flexDirection: "row",
-              gap: 8
-            }}
-          >
-            <Ionicons name="download-outline" size={16} color="white" />
-            <Text style={{ color: "white", fontWeight: "800" }}>Export CSV</Text>
-          </Pressable>
-        </View>
+        {customDateError ? <Text style={{ color: "#B91C1C", fontSize: 12, marginTop: -4, fontWeight: "600" }}>{customDateError}</Text> : null}
       </View>
 
       <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
-        <View style={{ width: "48%", ...cardShadow, padding: 12 }}>
-          <Text style={{ color: "#475569", fontWeight: "700", fontSize: 12 }}>Orders</Text>
-          <Text style={{ fontSize: 24, fontWeight: "800", color: "#0F172A", marginTop: 4 }}>{summary.totalOrders}</Text>
+        <View style={{ width: "31%", ...cardShadow, padding: 12, alignItems: "center" }}>
+          <Text style={{ color: "#64748B", fontWeight: "700", fontSize: 10, textTransform: "uppercase" }}>Orders</Text>
+          <Text style={{ fontSize: 20, fontWeight: "800", color: "#0F172A", marginTop: 2 }}>{summary.totalOrders}</Text>
         </View>
-        <View style={{ width: "48%", ...cardShadow, padding: 12 }}>
-          <Text style={{ color: "#475569", fontWeight: "700", fontSize: 12 }}>Gross Sales</Text>
-          <Text style={{ fontSize: 20, fontWeight: "800", color: "#065F46", marginTop: 4 }}>{formatCurrency(summary.grossSales)}</Text>
+        <View style={{ width: "31%", ...cardShadow, padding: 12, alignItems: "center" }}>
+          <Text style={{ color: "#64748B", fontWeight: "700", fontSize: 10, textTransform: "uppercase" }}>Paid</Text>
+          <Text style={{ fontSize: 20, fontWeight: "800", color: "#4338CA", marginTop: 2 }}>{formatCurrency(summary.paidSales)}</Text>
         </View>
-        <View style={{ width: "48%", ...cardShadow, padding: 12 }}>
-          <Text style={{ color: "#475569", fontWeight: "700", fontSize: 12 }}>Today Sales</Text>
-          <Text style={{ fontSize: 20, fontWeight: "800", color: "#1D4ED8", marginTop: 4 }}>{formatCurrency(fixedSales.todaySales)}</Text>
+        <View style={{ width: "31%", ...cardShadow, padding: 12, alignItems: "center" }}>
+          <Text style={{ color: "#64748B", fontWeight: "700", fontSize: 10, textTransform: "uppercase" }}>Avg</Text>
+          <Text style={{ fontSize: 20, fontWeight: "800", color: "#92400E", marginTop: 2 }}>{formatCurrency(summary.avgTicket)}</Text>
         </View>
-        <View style={{ width: "48%", ...cardShadow, padding: 12 }}>
-          <Text style={{ color: "#475569", fontWeight: "700", fontSize: 12 }}>Monthly Sales</Text>
-          <Text style={{ fontSize: 20, fontWeight: "800", color: "#5B21B6", marginTop: 4 }}>{formatCurrency(fixedSales.monthSales)}</Text>
+
+        <View style={{ width: "100%", ...cardShadow, padding: 16, backgroundColor: "#065F46" }}>
+          <Text style={{ color: "#A7F3D0", fontWeight: "700", fontSize: 12, textTransform: "uppercase" }}>Gross Sales</Text>
+          <Text style={{ fontSize: 32, fontWeight: "900", color: "white", marginTop: 4 }}>{formatCurrency(summary.grossSales)}</Text>
         </View>
-        <View style={{ width: "48%", ...cardShadow, padding: 12 }}>
-          <Text style={{ color: "#475569", fontWeight: "700", fontSize: 12 }}>Paid Sales</Text>
-          <Text style={{ fontSize: 20, fontWeight: "800", color: "#4338CA", marginTop: 4 }}>{formatCurrency(summary.paidSales)}</Text>
+
+        <View style={{ width: "48%", ...cardShadow, padding: 14 }}>
+          <Text style={{ color: "#64748B", fontWeight: "700", fontSize: 11, textTransform: "uppercase" }}>Today Sales</Text>
+          <Text style={{ fontSize: 18, fontWeight: "800", color: "#1D4ED8", marginTop: 2 }}>{formatCurrency(fixedSales.todaySales)}</Text>
         </View>
-        <View style={{ width: "48%", ...cardShadow, padding: 12 }}>
-          <Text style={{ color: "#475569", fontWeight: "700", fontSize: 12 }}>Avg Ticket</Text>
-          <Text style={{ fontSize: 20, fontWeight: "800", color: "#92400E", marginTop: 4 }}>{formatCurrency(summary.avgTicket)}</Text>
+        <View style={{ width: "48%", ...cardShadow, padding: 14 }}>
+          <Text style={{ color: "#64748B", fontWeight: "700", fontSize: 11, textTransform: "uppercase" }}>Monthly Sales</Text>
+          <Text style={{ fontSize: 18, fontWeight: "800", color: "#5B21B6", marginTop: 2 }}>{formatCurrency(fixedSales.monthSales)}</Text>
         </View>
       </View>
 
-      <View style={{ ...cardShadow, padding: 12, gap: 8 }}>
-        <Text style={{ fontSize: 17, fontWeight: "800", color: "#0F172A" }}>Order & Payment Status</Text>
-        <View style={{ flexDirection: "row", gap: 8 }}>
-          <View style={{ flex: 1, borderRadius: 12, backgroundColor: "#FEF3C7", padding: 10 }}>
-            <Text style={{ color: "#92400E", fontSize: 12, fontWeight: "700" }}>Pending</Text>
-            <Text style={{ color: "#78350F", fontSize: 22, fontWeight: "800" }}>{summary.pendingOrders}</Text>
+      <View style={{ ...cardShadow, padding: 16, gap: 12 }}>
+        <Text style={{ fontSize: 16, fontWeight: "800", color: "#0F172A" }}>Order & Payment Status</Text>
+        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
+          <View style={{ width: "48%", borderRadius: 12, backgroundColor: "#FEF3C7", padding: 12, borderWidth: 1, borderColor: "#FDE68A" }}>
+            <Text style={{ color: "#92400E", fontSize: 11, fontWeight: "800", textTransform: "uppercase" }}>Pending</Text>
+            <Text style={{ color: "#78350F", fontSize: 22, fontWeight: "800", marginTop: 2 }}>{summary.pendingOrders}</Text>
           </View>
-          <View style={{ flex: 1, borderRadius: 12, backgroundColor: "#ECFDF5", padding: 10 }}>
-            <Text style={{ color: "#047857", fontSize: 12, fontWeight: "700" }}>Completed</Text>
-            <Text style={{ color: "#065F46", fontSize: 22, fontWeight: "800" }}>{summary.completedOrders}</Text>
+          <View style={{ width: "48%", borderRadius: 12, backgroundColor: "#ECFDF5", padding: 12, borderWidth: 1, borderColor: "#A7F3D0" }}>
+            <Text style={{ color: "#047857", fontSize: 11, fontWeight: "800", textTransform: "uppercase" }}>Completed</Text>
+            <Text style={{ color: "#065F46", fontSize: 22, fontWeight: "800", marginTop: 2 }}>{summary.completedOrders}</Text>
+          </View>
+          <View style={{ width: "48%", borderRadius: 12, backgroundColor: "#EEF2FF", padding: 12, borderWidth: 1, borderColor: "#C7D2FE" }}>
+            <Text style={{ color: "#3730A3", fontSize: 11, fontWeight: "800", textTransform: "uppercase" }}>Paid</Text>
+            <Text style={{ color: "#312E81", fontSize: 22, fontWeight: "800", marginTop: 2 }}>{paymentStatusBreakdown.find(s => s.status === 'PAID')?.count || 0}</Text>
+          </View>
+          <View style={{ width: "48%", borderRadius: 12, backgroundColor: "#FEF2F2", padding: 12, borderWidth: 1, borderColor: "#FECACA" }}>
+            <Text style={{ color: "#991B1B", fontSize: 11, fontWeight: "800", textTransform: "uppercase" }}>Unpaid</Text>
+            <Text style={{ color: "#7F1D1D", fontSize: 22, fontWeight: "800", marginTop: 2 }}>{paymentStatusBreakdown.find(s => s.status === 'UNPAID')?.count || 0}</Text>
           </View>
         </View>
-
-        {paymentStatusBreakdown.map((entry) => {
-          const color = statusColorMap[entry.status] ?? "#334155";
-          const max = Math.max(1, ...paymentStatusBreakdown.map((x) => x.count));
-          const width = Math.max(8, Math.round((entry.count / max) * 100));
-          return (
-            <View key={entry.status} style={{ gap: 4 }}>
-              <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-                <Text style={{ color: "#334155", fontWeight: "700" }}>{entry.status}</Text>
-                <Text style={{ color: "#0F172A", fontWeight: "800" }}>{entry.count}</Text>
-              </View>
-              <View style={{ height: 9, borderRadius: 999, backgroundColor: "#E2E8F0", overflow: "hidden" }}>
-                <View style={{ width: `${width}%`, height: 9, borderRadius: 999, backgroundColor: color }} />
-              </View>
-            </View>
-          );
-        })}
       </View>
 
-      <View style={{ ...cardShadow, padding: 12, gap: 8 }}>
-        <Text style={{ fontSize: 17, fontWeight: "800", color: "#0F172A" }}>Payment Methods</Text>
-        {paymentBreakdown.map((entry) => {
-          const width = Math.max(8, Math.round((entry.amount / maxPaymentAmount) * 100));
-          return (
-            <View key={entry.method} style={{ gap: 4 }}>
-              <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-                <Text style={{ color: "#334155", fontWeight: "700" }}>
-                  {entry.method} ({entry.count})
-                </Text>
-                <Text style={{ color: "#0F172A", fontWeight: "800" }}>{formatCurrency(entry.amount)}</Text>
+      <View style={{ ...cardShadow, padding: 16, gap: 12 }}>
+        <Text style={{ fontSize: 16, fontWeight: "800", color: "#0F172A" }}>Payment Methods</Text>
+        <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
+          {paymentBreakdown.filter(e => e.count > 0).length === 0 ? (
+            <Text style={{ color: "#64748B", fontSize: 13, fontWeight: "500" }}>No payment data available.</Text>
+          ) : (
+            paymentBreakdown.filter(e => e.count > 0).map((entry) => (
+              <View key={entry.method} style={{ width: "48%", padding: 12, backgroundColor: "#F8FAFC", borderRadius: 12, borderWidth: 1, borderColor: "#E2E8F0" }}>
+                <Text style={{ color: "#475569", fontWeight: "700", fontSize: 11, textTransform: "uppercase" }}>{entry.method} ({entry.count})</Text>
+                <Text style={{ fontSize: 16, fontWeight: "800", color: "#0F172A", marginTop: 4 }}>{formatCurrency(entry.amount)}</Text>
               </View>
-              <View style={{ height: 8, borderRadius: 999, backgroundColor: "#E2E8F0", overflow: "hidden" }}>
-                <View style={{ width: `${width}%`, height: 8, borderRadius: 999, backgroundColor: "#1D4ED8" }} />
-              </View>
-            </View>
-          );
-        })}
+            ))
+          )}
+        </View>
       </View>
 
-      <View style={{ ...cardShadow, padding: 12, gap: 8 }}>
-        <Text style={{ fontSize: 17, fontWeight: "800", color: "#0F172A" }}>Top Items</Text>
-        {topItems.length === 0 ? <Text style={{ color: "#64748B" }}>No item sales in selected range.</Text> : null}
+      <View style={{ ...cardShadow, padding: 16, gap: 12 }}>
+        <Text style={{ fontSize: 16, fontWeight: "800", color: "#0F172A" }}>Top Items</Text>
+        {topItems.length === 0 ? <Text style={{ color: "#64748B", fontSize: 13, fontWeight: "500" }}>No item sales in selected range.</Text> : null}
         {topItems.map((item, index) => (
-          <View key={`${item.name}-${index}`} style={{ borderWidth: 1, borderColor: "#E2E8F0", borderRadius: 12, padding: 10, gap: 3 }}>
-            <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-              <Text style={{ color: "#0F172A", fontWeight: "800", flex: 1 }}>
-                {index + 1}. {item.name}
-              </Text>
-              <Text style={{ color: "#0F172A", fontWeight: "800" }}>{formatCurrency(item.amount)}</Text>
+          <View key={`${item.name}-${index}`} style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingVertical: 8, borderBottomWidth: index === topItems.length - 1 ? 0 : 1, borderBottomColor: "#E2E8F0" }}>
+            <View style={{ flex: 1, flexDirection: "row", alignItems: "center", gap: 8 }}>
+              <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: "#F1F5F9", alignItems: "center", justifyContent: "center" }}>
+                <Text style={{ color: "#475569", fontSize: 11, fontWeight: "800" }}>{index + 1}</Text>
+              </View>
+              <View style={{ flex: 1 }}>
+                <Text style={{ color: "#0F172A", fontWeight: "800", fontSize: 14 }} numberOfLines={1}>{item.name}</Text>
+                <Text style={{ color: "#64748B", fontSize: 12, fontWeight: "500", marginTop: 2 }}>{item.qty} sold</Text>
+              </View>
             </View>
-            <Text style={{ color: "#64748B" }}>Quantity sold: {item.qty}</Text>
+            <Text style={{ color: "#065F46", fontWeight: "800", fontSize: 15 }}>{formatCurrency(item.amount)}</Text>
           </View>
         ))}
       </View>
 
-      <View style={{ ...cardShadow, padding: 12, gap: 8 }}>
-        <Text style={{ fontSize: 17, fontWeight: "800", color: "#0F172A" }}>Recent Orders</Text>
-        {recentOrders.length === 0 ? <Text style={{ color: "#64748B" }}>No orders in selected range.</Text> : null}
-        {recentOrders.map((order) => (
-          <View key={order.id} style={{ borderWidth: 1, borderColor: "#E2E8F0", borderRadius: 12, padding: 10, gap: 3, backgroundColor: "#F8FAFC" }}>
+      <View style={{ ...cardShadow, padding: 16, gap: 12 }}>
+        <Text style={{ fontSize: 16, fontWeight: "800", color: "#0F172A" }}>Recent Orders</Text>
+        {recentOrders.length === 0 ? <Text style={{ color: "#64748B", fontSize: 13, fontWeight: "500" }}>No orders in selected range.</Text> : null}
+        {recentOrders.map((order, index) => (
+          <View key={order.id} style={{ paddingVertical: 10, borderBottomWidth: index === recentOrders.length - 1 ? 0 : 1, borderBottomColor: "#E2E8F0", gap: 4 }}>
             <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-              <Text style={{ fontWeight: "800", color: "#0F172A" }}>{order.orderNumber}</Text>
-              <Text style={{ color: "#334155", fontWeight: "700" }}>{formatCurrency(order.totalAmount)}</Text>
+              <Text style={{ fontWeight: "800", color: "#0F172A", fontSize: 14 }}>{order.orderNumber}</Text>
+              <Text style={{ color: "#0F172A", fontWeight: "800", fontSize: 15 }}>{formatCurrency(order.totalAmount)}</Text>
             </View>
-            <Text style={{ color: "#64748B" }}>
-              {order.status} · {order.paymentMethod} · {order.paymentStatus ?? "UNPAID"}
-            </Text>
-            <Text style={{ color: "#64748B" }}>{new Date(order.createdAt).toLocaleString()}</Text>
+            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+              <Text style={{ color: "#64748B", fontSize: 12, fontWeight: "600" }}>
+                {order.status} • {order.paymentMethod}
+              </Text>
+              <Text style={{ color: "#94A3B8", fontSize: 11, fontWeight: "500" }}>{new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</Text>
+            </View>
           </View>
         ))}
       </View>

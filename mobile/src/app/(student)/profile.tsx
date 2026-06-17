@@ -9,9 +9,14 @@ import {
   StyleSheet,
   Text,
   TextInput,
-  View
+  View,
+  RefreshControl,
+  KeyboardAvoidingView,
+  Platform
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "../../hooks/useAuth";
+import { CanteenHeader } from "../../components/CanteenHeader";
 import { Order, orderService } from "../../services/orderService";
 import { MyProfile, userService } from "../../services/userService";
 import { WalletTransaction, walletService } from "../../services/walletService";
@@ -31,7 +36,7 @@ const formatDate = (value?: string): string => {
 
 const statusColorMap: Record<string, string> = {
   PENDING: "#D97706",
-  ACCEPTED: "#2563EB",
+  ACCEPTED: "#FF6B35",
   PREPARING: "#7C3AED",
   READY: "#0891B2",
   COMPLETED: "#059669",
@@ -50,7 +55,9 @@ const roleLabelMap: Record<MyProfile["role"], string> = {
 
 export default function Screen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { user, accessToken, logout, setSessionUser } = useAuth();
+
   const [profile, setProfile] = useState<MyProfile | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
   const [walletBalance, setWalletBalance] = useState<number | null>(null);
@@ -140,13 +147,6 @@ export default function Screen() {
     return { totalOrders, activeOrders, completedOrders, totalSpend, monthlySpend };
   }, [orders]);
 
-  const recentOrders = useMemo(
-    () =>
-      [...orders]
-        .sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt))
-        .slice(0, 4),
-    [orders]
-  );
 
   const recentWalletTransactions = useMemo(
     () => walletTransactions.slice(0, 3),
@@ -170,29 +170,8 @@ export default function Screen() {
     } as MyProfile;
   }, [profile, user]);
 
-  const completionPercent = useMemo(() => {
-    const checks = profileView.role === "STUDENT"
-      ? [
-          Boolean(profileView.name?.trim()),
-          Boolean(profileView.phone?.trim()),
-          Boolean(profileView.rollNumber?.trim()),
-          Boolean(profileView.email?.trim())
-        ]
-      : [
-          Boolean(profileView.name?.trim()),
-          Boolean(profileView.phone?.trim()),
-          Boolean(profileView.email?.trim())
-        ];
-    const completed = checks.filter(Boolean).length;
-    return Math.round((completed / checks.length) * 100);
-  }, [profileView.email, profileView.name, profileView.phone, profileView.role, profileView.rollNumber]);
-
   const isStudentRole = profileView.role === "STUDENT";
-  const canTopUpWallet = profileView.role === "TEACHER" || profileView.role === "STAFF";
   const profileIdLabel = isStudentRole ? "Roll Number" : "Employee ID";
-  const profileCompletionHint = isStudentRole
-    ? "Add phone, email and roll number for a complete student profile."
-    : "Add phone and email for a complete profile.";
 
   const onOpenEdit = () => {
     const source = profileView;
@@ -289,7 +268,6 @@ export default function Screen() {
   const onLogout = async () => {
     try {
       await logout();
-      router.replace("/(auth)/login");
     } catch (error) {
       Alert.alert(
         "Logout failed",
@@ -341,9 +319,11 @@ export default function Screen() {
     <>
       <ScrollView
         style={styles.screen}
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[styles.content, { paddingTop: insets.top + 16 }]}
         showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={loading} onRefresh={load} tintColor="#FF6B35" />}
       >
+        <CanteenHeader showBackButton title="My Profile" subtitle="Manage your account" />
         <View style={styles.heroCard}>
           <View style={styles.heroTopRow}>
             <View style={styles.avatarCircle}>
@@ -355,97 +335,40 @@ export default function Screen() {
                 {roleLabelMap[profileView.role]} • {profileView.phone ?? "No phone"}
               </Text>
             </View>
-            <Pressable
-              onPress={load}
-              style={styles.refreshBtn}
-              disabled={loading}
-            >
-              <Text style={styles.refreshBtnText}>
-                {loading ? "Refreshing..." : "Refresh"}
-              </Text>
-            </Pressable>
           </View>
+        </View>
 
-          <View style={styles.heroStatusRow}>
-            <View
-              style={[
-                styles.statusChip,
-                profileView.isActive ? styles.statusChipGreen : styles.statusChipRed
-              ]}
-            >
-              <Text style={styles.statusChipText}>
-                {profileView.isActive ? "Active" : "Inactive"}
-              </Text>
+        <View style={styles.statsRow}>
+          <View style={styles.statBox}>
+            <View style={[styles.statIconWrap, { backgroundColor: "#F1F5F9" }]}>
+              <Ionicons name="fast-food-outline" size={20} color="#FF6B35" />
             </View>
-            <View
-              style={[
-                styles.statusChip,
-                profileView.isApproved
-                  ? styles.statusChipBlue
-                  : styles.statusChipAmber
-              ]}
-            >
-              <Text style={styles.statusChipText}>
-                {profileView.isApproved ? "Approved" : "Approval Pending"}
-              </Text>
+            <View>
+              <Text style={styles.statLabel}>Total Orders</Text>
+              <Text style={styles.statValue}>{stats.totalOrders}</Text>
+            </View>
+          </View>
+          <View style={styles.statDivider} />
+          <View style={styles.statBox}>
+            <View style={[styles.statIconWrap, { backgroundColor: "#DCFCE7" }]}>
+              <Ionicons name="wallet-outline" size={20} color="#059669" />
+            </View>
+            <View>
+              <Text style={styles.statLabel}>Total Spent</Text>
+              <Text style={styles.statValue}>{formatCurrency(stats.totalSpend)}</Text>
             </View>
           </View>
         </View>
 
-        <View style={styles.completionCard}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Profile Completion</Text>
-            <Text style={styles.sectionMeta}>{completionPercent}%</Text>
-          </View>
-          <View style={styles.progressTrack}>
-            <View
-              style={[styles.progressFill, { width: `${completionPercent}%` }]}
-            />
-          </View>
-          <Text style={styles.helperText}>
-            {profileCompletionHint}
-          </Text>
-        </View>
-
-        <View style={styles.infoCard}>
-          <Text style={styles.sectionTitle}>Account Information</Text>
-          <Text style={styles.infoLine}>Account Type: {roleLabelMap[profileView.role]}</Text>
-          <Text style={styles.infoLine}>Tenant ID: {profileView.tenantId || "-"}</Text>
-          <Text style={styles.infoLine}>Phone: {profileView.phone || "-"}</Text>
-          <Text style={styles.infoLine}>Email: {profileView.email || "-"}</Text>
-          <Text style={styles.infoLine}>{profileIdLabel}: {profileView.rollNumber || "-"}</Text>
-          <Text style={styles.infoLine}>Member Since: {formatDate(profileView.createdAt)}</Text>
-          <Text style={styles.infoLine}>Last Updated: {formatDate(profileView.updatedAt)}</Text>
-        </View>
-
-        <View style={styles.statsGrid}>
-          <View style={[styles.statCard, styles.statBlue]}>
-            <Text style={styles.statLabel}>Total Orders</Text>
-            <Text style={styles.statValue}>{stats.totalOrders}</Text>
-          </View>
-          <View style={[styles.statCard, styles.statGreen]}>
-            <Text style={styles.statLabel}>Active Orders</Text>
-            <Text style={styles.statValue}>{stats.activeOrders}</Text>
-          </View>
-          <View style={[styles.statCard, styles.statAmber]}>
-            <Text style={styles.statLabel}>This Month</Text>
-            <Text style={styles.statValueSm}>{formatCurrency(stats.monthlySpend)}</Text>
-          </View>
-          <View style={[styles.statCard, styles.statPurple]}>
-            <Text style={styles.statLabel}>Total Spend</Text>
-            <Text style={styles.statValueSm}>{formatCurrency(stats.totalSpend)}</Text>
-          </View>
-        </View>
-
-        <View style={styles.walletCard}>
-          <View style={styles.sectionHeader}>
-            <Text style={styles.sectionTitle}>Wallet</Text>
-            <Text style={styles.walletBalanceText}>
-              {walletBalance === null ? "Not available" : formatCurrency(walletBalance)}
-            </Text>
-          </View>
-          <Text style={styles.helperText}>Use wallet for faster checkout in class or at canteen.</Text>
-          {canTopUpWallet ? (
+        {!isStudentRole && (
+          <View style={styles.walletCard}>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.sectionTitle}>Wallet</Text>
+              <Text style={styles.walletBalanceText}>
+                {walletBalance === null ? "Not available" : formatCurrency(walletBalance)}
+              </Text>
+            </View>
+            <Text style={styles.helperText}>Use wallet for faster checkout in class or at canteen.</Text>
             <Pressable
               onPress={() => setWalletModalVisible(true)}
               style={styles.walletTopupBtn}
@@ -453,99 +376,88 @@ export default function Screen() {
               <Ionicons name="add-circle-outline" size={16} color="white" />
               <Text style={styles.walletTopupBtnText}>Top Up via UPI</Text>
             </Pressable>
-          ) : null}
-          {recentWalletTransactions.length > 0 ? (
-            <View style={styles.walletTxnList}>
-              {recentWalletTransactions.map((txn) => {
-                const isCredit = txn.amount > 0;
-                return (
-                  <View key={txn.id} style={styles.walletTxnRow}>
-                    <View style={{ flex: 1 }}>
-                      <Text style={styles.walletTxnType}>{txn.type.replaceAll("_", " ")}</Text>
-                      <Text style={styles.walletTxnDate}>
-                        {new Date(txn.createdAt).toLocaleString()}
+            {recentWalletTransactions.length > 0 ? (
+              <View style={styles.walletTxnList}>
+                {recentWalletTransactions.map((txn) => {
+                  const isCredit = txn.amount > 0;
+                  return (
+                    <View key={txn.id} style={styles.walletTxnRow}>
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.walletTxnType}>{txn.type.replaceAll("_", " ")}</Text>
+                        <Text style={styles.walletTxnDate}>
+                          {new Date(txn.createdAt).toLocaleString()}
+                        </Text>
+                      </View>
+                      <Text style={[styles.walletTxnAmount, isCredit ? styles.walletTxnCredit : styles.walletTxnDebit]}>
+                        {isCredit ? "+" : ""}{formatCurrency(txn.amount)}
                       </Text>
                     </View>
-                    <Text style={[styles.walletTxnAmount, isCredit ? styles.walletTxnCredit : styles.walletTxnDebit]}>
-                      {isCredit ? "+" : ""}{formatCurrency(txn.amount)}
-                    </Text>
-                  </View>
-                );
-              })}
-            </View>
-          ) : (
-            <Text style={styles.helperText}>No wallet transactions yet.</Text>
-          )}
-        </View>
-
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Manage Account</Text>
-        </View>
-        <View style={styles.actionGrid}>
-          <Pressable onPress={onOpenEdit} style={[styles.actionBtn, { backgroundColor: "#1D4ED8" }]}>
-            <Ionicons name="create-outline" size={16} color="white" />
-            <Text style={styles.actionBtnText}>Edit Profile</Text>
-          </Pressable>
-          <Pressable
-            onPress={() => setPasswordVisible(true)}
-            style={[styles.actionBtn, { backgroundColor: "#4F46E5" }]}
-          >
-            <Ionicons name="key-outline" size={16} color="white" />
-            <Text style={styles.actionBtnText}>Change Password</Text>
-          </Pressable>
-        </View>
-
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Recent Orders</Text>
-          <Pressable onPress={() => router.push("/(student)/orders")}>
-            <Text style={styles.linkText}>View all</Text>
-          </Pressable>
-        </View>
-        {recentOrders.length === 0 ? (
-          <View style={styles.emptyCard}>
-            <Text style={styles.emptyTitle}>No orders yet.</Text>
+                  );
+                })}
+              </View>
+            ) : null}
           </View>
-        ) : (
-          recentOrders.map((order) => {
-            const statusColor = statusColorMap[order.status] ?? "#334155";
-            return (
-              <Pressable
-                key={order.id}
-                onPress={() =>
-                  router.push({
-                    pathname: "/(student)/orders/[id]",
-                    params: { id: order.id }
-                  })
-                }
-                style={styles.orderCard}
-              >
-                <View style={styles.orderTopRow}>
-                  <Text style={styles.orderNumber}>{order.orderNumber}</Text>
-                  <View
-                    style={[
-                      styles.orderStatusPill,
-                      { backgroundColor: `${statusColor}1A` }
-                    ]}
-                  >
-                    <Text style={[styles.orderStatusText, { color: statusColor }]}>
-                      {order.status}
-                    </Text>
-                  </View>
-                </View>
-                <Text style={styles.orderMeta}>
-                  {new Date(order.createdAt).toLocaleString()}
-                </Text>
-                <Text style={styles.orderTotal}>
-                  Total: {formatCurrency(order.totalAmount)}
-                </Text>
-              </Pressable>
-            );
-          })
         )}
 
+        <View style={styles.menuSection}>
+          <Text style={styles.sectionLabel}>ACCOUNT SETTINGS</Text>
+          <View style={styles.menuCard}>
+            <Pressable onPress={onOpenEdit} style={styles.menuItem}>
+              <View style={[styles.menuIcon, { backgroundColor: "#F3F4F6" }]}>
+                <Ionicons name="person-outline" size={18} color="#4B5563" />
+              </View>
+              <Text style={styles.menuText}>Edit Profile</Text>
+              <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
+            </Pressable>
+            
+            <View style={styles.menuDivider} />
+            
+            <Pressable onPress={() => setPasswordVisible(true)} style={styles.menuItem}>
+              <View style={[styles.menuIcon, { backgroundColor: "#F3F4F6" }]}>
+                <Ionicons name="lock-closed-outline" size={18} color="#4B5563" />
+              </View>
+              <Text style={styles.menuText}>Change Password</Text>
+              <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
+            </Pressable>
+
+            <View style={styles.menuDivider} />
+            
+            <Pressable onPress={() => Alert.alert("Coming Soon", "Notifications settings will be available soon.")} style={styles.menuItem}>
+              <View style={[styles.menuIcon, { backgroundColor: "#F3F4F6" }]}>
+                <Ionicons name="notifications-outline" size={18} color="#4B5563" />
+              </View>
+              <Text style={styles.menuText}>Notifications</Text>
+              <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
+            </Pressable>
+          </View>
+        </View>
+
+        <View style={styles.menuSection}>
+          <Text style={styles.sectionLabel}>SUPPORT & MORE</Text>
+          <View style={styles.menuCard}>
+            <Pressable onPress={() => Alert.alert("Help Center", "Support contact: support@collegecanteen.com")} style={styles.menuItem}>
+              <View style={[styles.menuIcon, { backgroundColor: "#F3F4F6" }]}>
+                <Ionicons name="help-circle-outline" size={18} color="#4B5563" />
+              </View>
+              <Text style={styles.menuText}>Help Center</Text>
+              <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
+            </Pressable>
+            
+            <View style={styles.menuDivider} />
+            
+            <Pressable onPress={() => Alert.alert("About", "Canteen App v1.0.0")} style={styles.menuItem}>
+              <View style={[styles.menuIcon, { backgroundColor: "#F3F4F6" }]}>
+                <Ionicons name="information-circle-outline" size={18} color="#4B5563" />
+              </View>
+              <Text style={styles.menuText}>About</Text>
+              <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
+            </Pressable>
+          </View>
+        </View>
+
         <Pressable onPress={onLogout} style={styles.logoutBtn}>
-          <Ionicons name="log-out-outline" size={17} color="white" />
-          <Text style={styles.logoutBtnText}>Logout</Text>
+          <Ionicons name="log-out-outline" size={18} color="#DC2626" />
+          <Text style={styles.logoutBtnText}>Log Out</Text>
         </Pressable>
       </ScrollView>
 
@@ -555,7 +467,7 @@ export default function Screen() {
         animationType="fade"
         onRequestClose={() => setEditVisible(false)}
       >
-        <View style={styles.modalBackdrop}>
+        <KeyboardAvoidingView style={styles.modalBackdrop} behavior={Platform.OS === "ios" ? "padding" : "height"}>
           <View style={styles.modalCard}>
             <Text style={styles.modalTitle}>Edit Profile</Text>
             <TextInput
@@ -603,7 +515,7 @@ export default function Screen() {
               </Pressable>
             </View>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
 
       <Modal
@@ -612,7 +524,7 @@ export default function Screen() {
         animationType="fade"
         onRequestClose={() => setPasswordVisible(false)}
       >
-        <View style={styles.modalBackdrop}>
+        <KeyboardAvoidingView style={styles.modalBackdrop} behavior={Platform.OS === "ios" ? "padding" : "height"}>
           <View style={styles.modalCard}>
             <Text style={styles.modalTitle}>Change Password</Text>
             <TextInput
@@ -654,7 +566,7 @@ export default function Screen() {
               </Pressable>
             </View>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
 
       <Modal
@@ -663,7 +575,7 @@ export default function Screen() {
         animationType="fade"
         onRequestClose={() => setWalletModalVisible(false)}
       >
-        <View style={styles.modalBackdrop}>
+        <KeyboardAvoidingView style={styles.modalBackdrop} behavior={Platform.OS === "ios" ? "padding" : "height"}>
           <View style={styles.modalCard}>
             <Text style={styles.modalTitle}>Top Up Wallet (UPI)</Text>
             <TextInput
@@ -697,7 +609,7 @@ export default function Screen() {
               </Pressable>
             </View>
           </View>
-        </View>
+        </KeyboardAvoidingView>
       </Modal>
     </>
   );
@@ -706,7 +618,7 @@ export default function Screen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#EEF2F7"
+    backgroundColor: "#F8FAFC"
   },
   content: {
     padding: 16,
@@ -714,49 +626,49 @@ const styles = StyleSheet.create({
     paddingBottom: 28
   },
   heroCard: {
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-    backgroundColor: "white",
-    padding: 12,
-    gap: 10
+    borderRadius: 20,
+    backgroundColor: "#0F172A",
+    padding: 20,
+    gap: 10,
+    shadowColor: "#0F172A",
+    shadowOpacity: 0.2,
+    shadowRadius: 15,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 8
   },
   heroTopRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 10
+    gap: 16
   },
   avatarCircle: {
-    width: 50,
-    height: 50,
-    borderRadius: 14,
-    backgroundColor: "#0F172A",
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: "#FF6B35",
     alignItems: "center",
-    justifyContent: "center"
+    justifyContent: "center",
+    shadowColor: "#FF6B35",
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 4
   },
   avatarText: {
     color: "white",
-    fontWeight: "800",
-    fontSize: 19
+    fontWeight: "900",
+    fontSize: 22
   },
   heroName: {
-    color: "#0F172A",
-    fontSize: 22,
-    fontWeight: "800"
+    color: "white",
+    fontSize: 24,
+    fontWeight: "900",
+    marginBottom: 2
   },
   heroRole: {
-    color: "#64748B",
-    fontWeight: "600"
-  },
-  refreshBtn: {
-    backgroundColor: "#0F172A",
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 9
-  },
-  refreshBtnText: {
-    color: "white",
-    fontWeight: "700"
+    color: "#94A3B8",
+    fontWeight: "600",
+    fontSize: 14
   },
   heroStatusRow: {
     flexDirection: "row",
@@ -776,7 +688,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#DCFCE7"
   },
   statusChipBlue: {
-    backgroundColor: "#DBEAFE"
+    backgroundColor: "#F1F5F9"
   },
   statusChipAmber: {
     backgroundColor: "#FEF3C7"
@@ -802,7 +714,7 @@ const styles = StyleSheet.create({
   progressFill: {
     height: "100%",
     borderRadius: 999,
-    backgroundColor: "#2563EB"
+    backgroundColor: "#FF6B35"
   },
   helperText: {
     color: "#64748B"
@@ -816,12 +728,15 @@ const styles = StyleSheet.create({
     gap: 6
   },
   walletCard: {
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
+    borderRadius: 20,
     backgroundColor: "white",
-    padding: 12,
-    gap: 8
+    padding: 16,
+    gap: 12,
+    shadowColor: "#0F172A",
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 2
   },
   walletBalanceText: {
     color: "#059669",
@@ -829,13 +744,18 @@ const styles = StyleSheet.create({
     fontSize: 18
   },
   walletTopupBtn: {
-    backgroundColor: "#0F172A",
-    borderRadius: 10,
-    paddingVertical: 10,
+    backgroundColor: "#FF6B35",
+    borderRadius: 14,
+    paddingVertical: 14,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 6
+    gap: 8,
+    shadowColor: "#FF6B35",
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 4
   },
   walletTopupBtnText: {
     color: "white",
@@ -887,190 +807,189 @@ const styles = StyleSheet.create({
     fontWeight: "800"
   },
   sectionMeta: {
-    color: "#2563EB",
+    color: "#FF6B35",
     fontWeight: "800"
   },
   infoLine: {
     color: "#475569",
     fontWeight: "600"
   },
-  statsGrid: {
+  statsRow: {
     flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 10
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 16,
+    alignItems: "center",
+    shadowColor: "#0F172A",
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 2
   },
-  statCard: {
-    width: "48%",
-    borderRadius: 12,
-    borderWidth: 1,
-    padding: 10
+  statBox: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12
   },
-  statBlue: {
-    backgroundColor: "#DBEAFE",
-    borderColor: "#BFDBFE"
-  },
-  statGreen: {
-    backgroundColor: "#DCFCE7",
-    borderColor: "#BBF7D0"
-  },
-  statAmber: {
-    backgroundColor: "#FEF3C7",
-    borderColor: "#FDE68A"
-  },
-  statPurple: {
-    backgroundColor: "#EDE9FE",
-    borderColor: "#DDD6FE"
+  statIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center"
   },
   statLabel: {
-    color: "#334155",
-    fontWeight: "700",
-    fontSize: 12
+    color: "#64748B",
+    fontSize: 12,
+    fontWeight: "600"
   },
   statValue: {
     color: "#0F172A",
-    fontSize: 24,
+    fontSize: 16,
     fontWeight: "800",
-    marginTop: 3
+    marginTop: 2
   },
-  statValueSm: {
-    color: "#0F172A",
-    fontSize: 17,
-    fontWeight: "800",
-    marginTop: 6
+  statDivider: {
+    width: 1,
+    height: 30,
+    backgroundColor: "#E2E8F0",
+    marginHorizontal: 16
   },
-  actionGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 10
+  menuSection: {
+    gap: 8,
+    marginTop: 4
   },
-  actionBtn: {
-    width: "48%",
-    borderRadius: 11,
-    paddingVertical: 11,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6
-  },
-  actionBtnText: {
-    color: "white",
-    textAlign: "center",
-    fontWeight: "700"
-  },
-  linkText: {
-    color: "#1D4ED8",
-    fontWeight: "700"
-  },
-  emptyCard: {
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "#CBD5E1",
-    backgroundColor: "#F8FAFC",
-    padding: 12
-  },
-  emptyTitle: {
-    color: "#0F172A",
-    fontWeight: "700"
-  },
-  orderCard: {
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-    backgroundColor: "white",
-    padding: 11,
-    gap: 4
-  },
-  orderTopRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 8
-  },
-  orderNumber: {
-    color: "#0F172A",
-    fontWeight: "800",
-    flex: 1
-  },
-  orderStatusPill: {
-    borderRadius: 999,
-    paddingHorizontal: 10,
-    paddingVertical: 4
-  },
-  orderStatusText: {
+  sectionLabel: {
     fontSize: 12,
-    fontWeight: "800"
-  },
-  orderMeta: {
+    fontWeight: "700",
     color: "#64748B",
-    fontWeight: "600"
+    marginLeft: 4,
+    letterSpacing: 0.5
   },
-  orderTotal: {
-    color: "#0F172A",
-    fontWeight: "700"
+  menuCard: {
+    backgroundColor: "white",
+    borderRadius: 20,
+    overflow: "hidden",
+    shadowColor: "#0F172A",
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 2
+  },
+  menuItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 16,
+    gap: 12
+  },
+  menuIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center"
+  },
+  menuText: {
+    flex: 1,
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#0F172A"
+  },
+  menuDivider: {
+    height: 1,
+    backgroundColor: "#F1F5F9",
+    marginLeft: 60
   },
   logoutBtn: {
-    backgroundColor: "#B91C1C",
-    borderRadius: 12,
-    paddingVertical: 12,
-    marginTop: 4,
+    backgroundColor: "#FFF1F2",
+    borderRadius: 20,
+    paddingVertical: 16,
+    marginTop: 8,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 6
+    gap: 8,
+    shadowColor: "#DC2626",
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 2
   },
   logoutBtnText: {
-    color: "white",
+    color: "#DC2626",
     textAlign: "center",
-    fontWeight: "800"
+    fontWeight: "700",
+    fontSize: 16
   },
   modalBackdrop: {
     flex: 1,
     justifyContent: "center",
-    backgroundColor: "rgba(17,24,39,0.45)",
-    padding: 16
+    backgroundColor: "rgba(15, 23, 42, 0.6)",
+    padding: 20
   },
   modalCard: {
     backgroundColor: "white",
-    borderRadius: 14,
-    padding: 14,
-    gap: 10
+    borderRadius: 28,
+    padding: 24,
+    gap: 16,
+    shadowColor: "#0F172A",
+    shadowOpacity: 0.15,
+    shadowRadius: 20,
+    shadowOffset: { width: 0, height: 10 },
+    elevation: 10
   },
   modalTitle: {
     color: "#0F172A",
-    fontSize: 20,
-    fontWeight: "800"
+    fontSize: 22,
+    fontWeight: "900",
+    textAlign: "center",
+    marginBottom: 4
   },
   modalInput: {
-    borderWidth: 1,
-    borderColor: "#D1D5DB",
-    borderRadius: 10,
-    paddingHorizontal: 10,
-    paddingVertical: 10,
-    color: "#0F172A"
+    borderWidth: 1.5,
+    borderColor: "#E2E8F0",
+    backgroundColor: "#F8FAFC",
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    fontSize: 16,
+    color: "#0F172A",
+    fontWeight: "500"
   },
   modalActions: {
     flexDirection: "row",
-    gap: 8
+    gap: 12,
+    marginTop: 8
   },
   modalActionBtn: {
     flex: 1,
-    borderRadius: 10,
-    paddingVertical: 10
+    borderRadius: 16,
+    paddingVertical: 16,
+    justifyContent: "center",
+    alignItems: "center"
   },
   modalActionPrimary: {
-    backgroundColor: "#0F172A"
+    backgroundColor: "#FF6B35",
+    shadowColor: "#FF6B35",
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 4
   },
   modalActionSecondary: {
-    backgroundColor: "#E2E8F0"
+    backgroundColor: "#F1F5F9"
   },
   modalActionPrimaryText: {
     color: "white",
     textAlign: "center",
-    fontWeight: "700"
+    fontWeight: "800",
+    fontSize: 16
   },
   modalActionSecondaryText: {
-    color: "#0F172A",
+    color: "#64748B",
     textAlign: "center",
-    fontWeight: "700"
+    fontWeight: "800",
+    fontSize: 16
   }
 });

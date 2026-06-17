@@ -17,6 +17,7 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "../../hooks/useAuth";
 import { useCart } from "../../hooks/useCart";
+import { useToast } from "../../components/Toast";
 import { menuService } from "../../services/menuService";
 
 type SpeechRecognitionModule = {
@@ -59,6 +60,7 @@ export default function Screen() {
   const insets = useSafeAreaInsets();
   const { user, accessToken } = useAuth();
   const { addItem } = useCart();
+  const { showToast } = useToast();
   const searchInputRef = useRef<TextInput>(null);
   const speechModuleRef = useRef<SpeechRecognitionModule | null>(null);
   const speechListenersRef = useRef<Array<{ remove: () => void }>>([]);
@@ -257,11 +259,11 @@ export default function Screen() {
       return;
     }
     addItem({ menuItemId: item.id, name: item.name, price: item.price }, 1);
-    Alert.alert("Added", `${item.name} added to cart.`);
+    showToast(`${item.name} added to cart.`, "success");
   };
 
   return (
-    <View style={[styles.screen, { paddingTop: Math.max(insets.top, 10) }]}>
+    <View style={[styles.screen, { paddingTop: insets.top > 0 ? insets.top + 10 : 48 }]}>
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
       <View style={styles.searchBarCard}>
         <Pressable
@@ -275,7 +277,7 @@ export default function Screen() {
           ref={searchInputRef}
           value={query}
           onChangeText={setQuery}
-          placeholder="Restaurant name or a dish..."
+          placeholder="Search for snacks, meals..."
           placeholderTextColor="#94A3B8"
           style={styles.searchInput}
           autoFocus
@@ -431,7 +433,7 @@ export default function Screen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#F1F5F9"
+    backgroundColor: "#F8FAFC"
   },
   content: {
     padding: 16,
@@ -442,12 +444,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#E2E8F0",
     backgroundColor: "#FFFFFF",
-    borderRadius: 18,
+    borderRadius: 24,
     minHeight: 56,
-    paddingHorizontal: 10,
+    paddingHorizontal: 12,
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
+    gap: 8,
     shadowColor: "#0F172A",
     shadowOpacity: 0.04,
     shadowRadius: 8,
@@ -472,10 +474,11 @@ const styles = StyleSheet.create({
     gap: 12
   },
   discoveryTitle: {
-    color: "#475569",
-    fontSize: 28 / 2,
-    letterSpacing: 2.5,
-    fontWeight: "800"
+    color: "#64748B",
+    fontSize: 14,
+    fontWeight: "800",
+    letterSpacing: 1,
+    textTransform: "uppercase"
   },
   discoveryGrid: {
     flexDirection: "row",
@@ -492,7 +495,7 @@ const styles = StyleSheet.create({
   discoveryImageWrap: {
     width: "100%",
     aspectRatio: 1,
-    borderRadius: 16,
+    borderRadius: 999,
     backgroundColor: "#FFFFFF",
     borderWidth: 1,
     borderColor: "#E2E8F0",
@@ -653,7 +656,7 @@ const styles = StyleSheet.create({
   addBtn: {
     marginTop: 8,
     borderRadius: 10,
-    backgroundColor: "#F97316",
+    backgroundColor: "#FF6B35",
     paddingVertical: 10
   },
   addBtnDisabled: {

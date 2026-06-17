@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs, usePathname, useRouter } from "expo-router";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Alert,
   Animated,
@@ -10,7 +10,8 @@ import {
   Pressable,
   ScrollView,
   Text,
-  View
+  View,
+  DeviceEventEmitter
 } from "react-native";
 import { useAuth } from "../../hooks/useAuth";
 import { useCart } from "../../hooks/useCart";
@@ -27,7 +28,9 @@ const drawerItems: DrawerItem[] = [
   { label: "Orders", path: "/(student)/orders", icon: "receipt-outline" },
   { label: "Community", path: "/(student)/community", icon: "chatbubbles-outline" },
   { label: "Profile", path: "/(student)/profile", icon: "person-outline" },
-  { label: "Cart", path: "/cart", icon: "cart-outline" }
+  { label: "Cart", path: "/cart", icon: "cart-outline" },
+  { label: "Settings", path: "/(student)/settings", icon: "settings-outline" },
+  { label: "Support", path: "/(student)/support", icon: "help-circle-outline" }
 ];
 
 const windowWidth = Dimensions.get("window").width;
@@ -106,6 +109,11 @@ export default function StudentLayout() {
     [drawerAnim]
   );
 
+  useEffect(() => {
+    const sub = DeviceEventEmitter.addListener("openStudentDrawer", openDrawer);
+    return () => sub.remove();
+  }, [openDrawer]);
+
   const navigateFromDrawer = useCallback(
     (targetPath: string) => {
       if (isPathActive(pathname, targetPath)) {
@@ -121,7 +129,6 @@ export default function StudentLayout() {
     setProfileMenuVisible(false);
     try {
       await logout();
-      router.replace("/(auth)/login");
     } catch (error) {
       Alert.alert("Logout failed", error instanceof Error ? error.message : "Please try again.");
     }
@@ -140,13 +147,14 @@ export default function StudentLayout() {
   return (
     <View style={{ flex: 1 }}>
       <Tabs
+        backBehavior="history"
         screenOptions={{
-          headerShown: true,
+          headerShown: false,
           headerStyle: { backgroundColor: "#F8FAFC" },
           headerShadowVisible: true,
           headerTitleStyle: { color: "#0F172A", fontWeight: "800", fontSize: 20 },
           headerTitle: headerTitle,
-          tabBarActiveTintColor: "#1D4ED8",
+          tabBarActiveTintColor: "#FF6B35",
           tabBarInactiveTintColor: "#6B7280",
           headerLeft: () => (
             <Pressable
@@ -245,6 +253,7 @@ export default function StudentLayout() {
           name="dashboard"
           options={{
             title: "Dashboard",
+            headerShown: false,
             tabBarIcon: ({ color, size, focused }) => (
               <Ionicons name={focused ? "home" : "home-outline"} size={size} color={color} />
             )
@@ -289,6 +298,8 @@ export default function StudentLayout() {
           }}
         />
         <Tabs.Screen name="orders/[id]" options={{ href: null }} />
+        <Tabs.Screen name="settings" options={{ href: null, headerShown: false }} />
+        <Tabs.Screen name="support" options={{ href: null, headerShown: false }} />
       </Tabs>
 
       <Modal
@@ -406,13 +417,13 @@ export default function StudentLayout() {
                   style={{
                     width: 48,
                     height: 48,
-                    borderRadius: 14,
-                    backgroundColor: "#1E293B",
+                    borderRadius: 24,
+                    backgroundColor: "#DBEAFE",
                     alignItems: "center",
                     justifyContent: "center"
                   }}
                 >
-                  <Text style={{ color: "white", fontWeight: "800", fontSize: 16 }}>{avatarText}</Text>
+                  <Text style={{ color: "#1D4ED8", fontWeight: "800", fontSize: 18 }}>{avatarText}</Text>
                 </View>
                 <View style={{ flex: 1 }}>
                   <Text style={{ color: "white", fontWeight: "800", fontSize: 18 }}>{user?.name ?? "Student"}</Text>
@@ -422,7 +433,7 @@ export default function StudentLayout() {
             </View>
 
             <View style={{ flex: 1 }}>
-              <ScrollView contentContainerStyle={{ paddingHorizontal: 12, paddingTop: 10, paddingBottom: 24, gap: 8 }}>
+              <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 24, paddingBottom: 24, gap: 12 }}>
                 {drawerItems.map((item) => {
                   const active = isPathActive(pathname, item.path);
                   return (
@@ -431,27 +442,30 @@ export default function StudentLayout() {
                       onPress={() => navigateFromDrawer(item.path)}
                       android_ripple={{ color: "#E2E8F0" }}
                       style={{
-                        borderRadius: 12,
-                        backgroundColor: active ? "#E0E7FF" : "white",
-                        borderWidth: 1,
-                        borderColor: active ? "#C7D2FE" : "#E2E8F0",
-                        paddingVertical: 11,
-                        paddingHorizontal: 12,
+                        borderRadius: 16,
+                        backgroundColor: active ? "rgba(255, 107, 53, 0.1)" : "transparent",
+                        paddingVertical: 14,
+                        paddingHorizontal: 16,
                         flexDirection: "row",
                         alignItems: "center",
-                        gap: 10
+                        gap: 14,
+                        overflow: "hidden"
                       }}
                     >
-                      <View
-                        style={{
-                          width: 3,
-                          height: 24,
-                          borderRadius: 999,
-                          backgroundColor: active ? "#1D4ED8" : "transparent"
-                        }}
-                      />
-                      <Ionicons name={item.icon} size={18} color={active ? "#1D4ED8" : "#334155"} />
-                      <Text style={{ color: active ? "#1E3A8A" : "#0F172A", fontWeight: active ? "800" : "700", fontSize: 14 }}>
+                      {active && (
+                        <View
+                          style={{
+                            position: "absolute",
+                            left: 0,
+                            top: 0,
+                            bottom: 0,
+                            width: 4,
+                            backgroundColor: "#FF6B35"
+                          }}
+                        />
+                      )}
+                      <Ionicons name={item.icon} size={22} color={active ? "#FF6B35" : "#64748B"} />
+                      <Text style={{ color: active ? "#FF6B35" : "#0F172A", fontWeight: active ? "800" : "600", fontSize: 15 }}>
                         {item.label}
                       </Text>
                     </Pressable>
@@ -463,30 +477,27 @@ export default function StudentLayout() {
                 style={{
                   borderTopWidth: 1,
                   borderTopColor: "#E2E8F0",
-                  paddingHorizontal: 12,
-                  paddingTop: 10,
-                  paddingBottom: 14,
+                  paddingHorizontal: 16,
+                  paddingTop: 16,
+                  paddingBottom: 24,
                   backgroundColor: "#F8FAFC"
                 }}
               >
                 <Pressable
                   onPress={() => closeDrawer(() => onLogout().catch(() => undefined))}
-                  android_ripple={{ color: "#FECACA" }}
+                  android_ripple={{ color: "#E2E8F0" }}
                   style={{
-                    borderRadius: 12,
-                    borderWidth: 1,
-                    borderColor: "#FECACA",
-                    backgroundColor: "#FEF2F2",
-                    paddingVertical: 11,
-                    paddingHorizontal: 12,
+                    borderRadius: 16,
+                    backgroundColor: "transparent",
+                    paddingVertical: 14,
+                    paddingHorizontal: 16,
                     flexDirection: "row",
                     alignItems: "center",
-                    justifyContent: "center",
-                    gap: 8
+                    gap: 14
                   }}
                 >
-                  <Ionicons name="log-out-outline" size={18} color="#B91C1C" />
-                  <Text style={{ color: "#B91C1C", fontWeight: "800", fontSize: 14 }}>Logout</Text>
+                  <Ionicons name="log-out-outline" size={22} color="#EF4444" />
+                  <Text style={{ color: "#EF4444", fontWeight: "700", fontSize: 15 }}>Logout</Text>
                 </Pressable>
               </View>
             </View>

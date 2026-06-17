@@ -12,3 +12,6 @@ web/.next
 mobile/.expo/
 coverage
 /backend/backups
+
+# Ignore log files
+*.log

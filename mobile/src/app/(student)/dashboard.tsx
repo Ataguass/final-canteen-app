@@ -1,4 +1,5 @@
 import { Link, useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 import { useCallback, useEffect, useMemo, useRef, useState, type MutableRefObject } from "react";
 import {
   Alert,
@@ -10,8 +11,10 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   View,
-  useWindowDimensions
+  useWindowDimensions,
+  DeviceEventEmitter
 } from "react-native";
 import { useAuth } from "../../hooks/useAuth";
 import { useCart } from "../../hooks/useCart";
@@ -19,6 +22,7 @@ import { bannerService, type Banner } from "../../services/bannerService";
 import { menuService } from "../../services/menuService";
 import { orderService, type Order } from "../../services/orderService";
 import { tenantService, type FeatureSettings } from "../../services/tenantService";
+import { useToast } from "../../components/Toast";
 
 type Category = {
   id: string;
@@ -48,7 +52,9 @@ export default function Screen() {
   const router = useRouter();
   const { width: screenWidth } = useWindowDimensions();
   const { user, accessToken } = useAuth();
-  const { addItem } = useCart();
+  const { items: cartItems, addItem } = useCart();
+  const { showToast } = useToast();
+  const cartItemsCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   const bannerScrollRef = useRef<ScrollView | null>(null);
   const specialScrollRef = useRef<ScrollView | null>(null);
   const bannerIndexRef = useRef(0);
@@ -134,11 +140,11 @@ export default function Screen() {
 
   const onAddToCart = (item: MenuItem) => {
     if (item.stockQty <= 0) {
-      Alert.alert("Out of stock", "This item is currently not available.");
+      showToast("This item is currently not available.", "error");
       return;
     }
     addItem({ menuItemId: item.id, name: item.name, price: item.price }, 1);
-    Alert.alert("Added", `${item.name} added to cart.`);
+    showToast(`${item.name} added to cart.`, "success");
   };
 
   const onOpenBanner = async (banner: Banner) => {
@@ -250,462 +256,444 @@ export default function Screen() {
   }, [todaySpecialItems.length]);
 
   return (
-    <ScrollView
-      style={styles.screen}
-      contentContainerStyle={styles.content}
-      showsVerticalScrollIndicator={false}
-    >
-      <View style={styles.heroCard}>
-        <View style={styles.heroTopRow}>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.heroTitle}>Welcome, {user?.name ?? "Student"}</Text>
-            <Text style={styles.heroSubtitle}>Order fresh meals in seconds</Text>
-          </View>
-          <Pressable
-            onPress={load}
-            style={styles.refreshButton}
-            disabled={loading}
-          >
-            <Text style={styles.refreshButtonText}>
-              {loading ? "Refreshing..." : "Refresh"}
-            </Text>
+    <View style={styles.screen}>
+      <View style={styles.topHeader}>
+        <View style={styles.headerLeft}>
+          <Pressable onPress={() => DeviceEventEmitter.emit("openStudentDrawer")}>
+            <Ionicons name="menu" size={28} color="#0F172A" />
+          </Pressable>
+          <Text style={styles.headerUserName}>Welcome, {user?.name?.split(" ")[0] ?? "Student"}</Text>
+          <Ionicons name="chevron-down" size={16} color="#0F172A" />
+        </View>
+        <View style={styles.headerRight}>
+          <Pressable onPress={() => router.push("/cart" as any)} style={styles.cartIconWrapper}>
+            <Ionicons name="cart-outline" size={26} color="#0F172A" />
+            {cartItemsCount > 0 && (
+              <View style={styles.cartBadge}>
+                <Text style={styles.cartBadgeText}>{cartItemsCount}</Text>
+              </View>
+            )}
+          </Pressable>
+          <Pressable onPress={() => router.push("/(student)/profile" as any)} style={styles.userAvatar}>
+            <Text style={styles.userAvatarText}>{user?.name?.[0]?.toUpperCase() ?? "S"}</Text>
           </Pressable>
         </View>
       </View>
 
-      <View style={styles.sectionWrap}>
-        <View style={styles.sectionHeaderRow}>
-          <Text style={styles.sectionTitle}>Banner Spotlight</Text>
-          <Text style={styles.sectionMeta}>{banners.length} active</Text>
-        </View>
-
-        {banners.length === 0 ? (
-          <View style={styles.emptyCard}>
-            <Text style={styles.emptyText}>No active banners right now.</Text>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
+        <Pressable 
+          style={styles.searchContainer} 
+          onPress={() => router.push("/(student)/search")}
+        >
+          <Ionicons name="search" size={20} color="#FF6B35" />
+          <TextInput 
+            placeholder="Search for snacks, lunch..." 
+            style={styles.searchInput} 
+            placeholderTextColor="#94A3B8" 
+            editable={false}
+            pointerEvents="none"
+          />
+          <View style={styles.micWrap}>
+            <Ionicons name="mic" size={18} color="#FF6B35" />
           </View>
-        ) : (
-          <ScrollView
-            ref={bannerScrollRef}
-            horizontal
-            snapToInterval={bannerPitch}
-            snapToAlignment="start"
-            decelerationRate="fast"
-            showsHorizontalScrollIndicator={false}
-            onScrollBeginDrag={() => {
-              bannerInteractingRef.current = true;
-            }}
-            onScrollEndDrag={() => {
-              setTimeout(() => {
-                bannerInteractingRef.current = false;
-              }, 240);
-            }}
-            onMomentumScrollEnd={onBannerMomentumEnd}
-            contentContainerStyle={styles.horizontalList}
-          >
-            {bannerLoopData.map((banner, index) => (
-              <Pressable
-                key={`${banner.id}-${index}`}
-                onPress={() => onOpenBanner(banner)}
-                style={[styles.bannerCard, { width: bannerCardWidth }]}
-              >
-                <Image
-                  source={{ uri: banner.imageUrl }}
-                  style={styles.bannerImage}
-                  resizeMode="cover"
-                />
-                <View style={styles.bannerOverlay}>
-                  <Text style={styles.bannerTitle}>{banner.title}</Text>
-                  {banner.actionUrl ? (
-                    <Text style={styles.bannerActionHint}>Tap to open</Text>
-                  ) : null}
-                </View>
-              </Pressable>
-            ))}
-          </ScrollView>
-        )}
-      </View>
+        </Pressable>
 
-      {(featureSettings?.todaySpecialsEnabled ?? true) ? (
-        <View style={styles.sectionWrap}>
-          <View style={styles.sectionHeaderRow}>
-            <Text style={styles.sectionTitle}>Today's Specials</Text>
-            <Pressable onPress={() => router.push("/(student)/search")}>
-              <Text style={styles.linkText}>Browse all</Text>
-            </Pressable>
-          </View>
-          {todaySpecialItems.length === 0 ? (
-            <View style={styles.emptyCard}>
-              <Text style={styles.emptyText}>No special items set for today.</Text>
-            </View>
-          ) : (
+        {banners.length > 0 ? (
+          <View style={styles.sectionWrap}>
             <ScrollView
-              ref={specialScrollRef}
+              ref={bannerScrollRef}
               horizontal
-              snapToInterval={SPECIAL_PITCH}
+              snapToInterval={bannerPitch}
               snapToAlignment="start"
               decelerationRate="fast"
               showsHorizontalScrollIndicator={false}
               onScrollBeginDrag={() => {
-                specialInteractingRef.current = true;
+                bannerInteractingRef.current = true;
               }}
               onScrollEndDrag={() => {
                 setTimeout(() => {
-                  specialInteractingRef.current = false;
+                  bannerInteractingRef.current = false;
                 }, 240);
               }}
-              onMomentumScrollEnd={onSpecialMomentumEnd}
-              contentContainerStyle={styles.horizontalList}
+              contentContainerStyle={{ paddingRight: 16 }}
             >
-              {specialLoopData.map((item, index) => (
-                <View key={`${item.id}-${index}`} style={styles.specialCard}>
-                  {item.image ? (
-                    <Image
-                      source={{ uri: item.image }}
-                      style={styles.specialCardImage}
-                      resizeMode="cover"
-                    />
-                  ) : null}
-                  <View style={styles.specialBadge}>
-                    <Text style={styles.specialBadgeText}>TODAY SPECIAL</Text>
-                  </View>
-                  <Text style={styles.specialCardName} numberOfLines={1}>
-                    {item.name}
-                  </Text>
-                  {item.description ? (
-                    <Text style={styles.specialCardDescription} numberOfLines={2}>
-                      {item.description}
-                    </Text>
-                  ) : (
-                    <View style={{ height: 34 }} />
-                  )}
-                  <Text style={styles.specialCardPrice}>{formatCurrency(item.price)}</Text>
-                  <View style={styles.specialActions}>
-                    <Link
-                      href={{
-                        pathname: "/menu/item/[id]",
-                        params: { id: item.id }
-                      }}
-                      asChild
-                    >
-                      <Pressable style={[styles.itemActionButton, styles.itemActionSecondary]}>
-                        <Text style={styles.itemActionText}>View</Text>
-                      </Pressable>
-                    </Link>
-                    <Pressable
-                      onPress={() => onAddToCart(item)}
-                      style={[styles.itemActionButton, styles.itemActionPrimary]}
-                    >
-                      <Text style={styles.itemActionText}>Add</Text>
+              {banners.map((banner, i) => (
+                <Pressable
+                  key={banner.id + "_" + i}
+                  onPress={() => onOpenBanner(banner)}
+                  style={[
+                    styles.bannerCard,
+                    { width: bannerPitch - 16, marginRight: 16 }
+                  ]}
+                >
+                  <Image
+                    source={{ uri: banner.imageUrl }}
+                    style={styles.bannerImage}
+                    resizeMode="cover"
+                  />
+                </Pressable>
+              ))}
+            </ScrollView>
+          </View>
+        ) : null}
+
+        {categories.length > 0 ? (
+          <View style={[styles.sectionWrap, { marginTop: 8 }]}>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.horizontalCategories}
+            >
+              {categories.map((category) => (
+                <Link
+                  key={category.id}
+                  href={{
+                    pathname: "/(student)/menu/[categoryId]",
+                    params: { categoryId: category.id }
+                  }}
+                  asChild
+                >
+                  <Pressable style={styles.categoryCircleItem}>
+                    <View style={styles.categoryCircleWrap}>
+                      {category.imageUrl ? (
+                        <Image
+                          source={{ uri: category.imageUrl }}
+                          style={styles.categoryCircleImage}
+                          resizeMode="cover"
+                        />
+                      ) : (
+                        <Ionicons name="fast-food" size={24} color="#94A3B8" />
+                      )}
+                    </View>
+                    <Text style={styles.categoryCircleName} numberOfLines={1}>{category.name}</Text>
+                  </Pressable>
+                </Link>
+              ))}
+            </ScrollView>
+          </View>
+        ) : null}
+
+
+
+        {todaySpecialItems.length > 0 ? (
+          <View style={styles.sectionWrap}>
+            <Text style={styles.sectionTitleRecommended}>RECOMMENDED FOR YOU</Text>
+            <View style={styles.gridContainer}>
+              {todaySpecialItems.slice(0, 6).map((item, i) => (
+                <View key={item.id + "_" + i} style={styles.gridCard}>
+                  <View style={styles.gridImageWrap}>
+                    <Image source={{ uri: item.image || "https://via.placeholder.com/150" }} style={styles.gridImage} />
+                    <Pressable style={styles.gridAddBtn} onPress={() => onAddToCart(item)}>
+                       <Ionicons name="add" size={20} color="#FF6B35" />
                     </Pressable>
+                  </View>
+                  <Text style={styles.gridName} numberOfLines={1}>{item.name}</Text>
+                  <View style={styles.gridMetaRow}>
+                    <Text style={styles.gridPriceText}>₹{item.price.toFixed(0)}</Text>
                   </View>
                 </View>
               ))}
-            </ScrollView>
-          )}
-        </View>
-      ) : null}
-
-      <View style={styles.sectionWrap}>
-        <View style={styles.sectionHeaderRow}>
-          <Text style={styles.sectionTitle}>Categories</Text>
-          <Pressable onPress={() => router.push("/(student)/menu/index")}>
-            <Text style={styles.linkText}>View all</Text>
-          </Pressable>
-        </View>
-        {categories.length === 0 ? (
-          <View style={styles.emptyCard}>
-            <Text style={styles.emptyText}>No categories available.</Text>
+            </View>
           </View>
-        ) : (
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.horizontalList}
-          >
-            {categories.map((category) => (
+        ) : null}
+        
+        <View style={styles.sectionWrap}>
+          <View style={styles.sectionHeaderRow}>
+            <Text style={styles.sectionTitleRecommended}>RECENT ORDERS</Text>
+            <Pressable onPress={() => router.push("/(student)/orders")}>
+              <Text style={styles.linkText}>View all</Text>
+            </Pressable>
+          </View>
+          {recentOrders.length === 0 ? (
+            <View style={styles.emptyCard}>
+              <Text style={styles.emptyText}>No orders yet.</Text>
+            </View>
+          ) : (
+            recentOrders.map((order) => (
               <Link
-                key={category.id}
+                key={order.id}
                 href={{
-                  pathname: "/(student)/menu/[categoryId]",
-                  params: { categoryId: category.id }
+                  pathname: "/(student)/orders/[id]",
+                  params: { id: order.id }
                 }}
                 asChild
               >
-                <Pressable style={styles.categoryCard}>
-                  {category.imageUrl ? (
-                    <Image
-                      source={{ uri: category.imageUrl }}
-                      style={styles.categoryImage}
-                      resizeMode="cover"
-                    />
-                  ) : null}
-                  <View style={styles.categoryBody}>
-                    <Text style={styles.categoryName}>{category.name}</Text>
-                    {category.description ? (
-                      <Text style={styles.categoryDescription} numberOfLines={2}>
-                        {category.description}
-                      </Text>
-                    ) : null}
+                <Pressable style={styles.orderCard}>
+                  <View>
+                    <Text style={styles.orderNumber}>{order.orderNumber}</Text>
+                    <Text style={styles.orderMeta}>Status: {order.status}</Text>
                   </View>
+                  <Text style={styles.orderPrice}>
+                    {formatCurrency(order.totalAmount)}
+                  </Text>
                 </Pressable>
               </Link>
-            ))}
-          </ScrollView>
-        )}
-      </View>
-
-      <View style={styles.sectionWrap}>
-        <View style={styles.sectionHeaderRow}>
-          <Text style={styles.sectionTitle}>Recent Orders</Text>
-          <Pressable onPress={() => router.push("/(student)/orders")}>
-            <Text style={styles.linkText}>View all</Text>
-          </Pressable>
+            ))
+          )}
         </View>
-        {recentOrders.length === 0 ? (
-          <View style={styles.emptyCard}>
-            <Text style={styles.emptyText}>No orders yet.</Text>
-          </View>
-        ) : (
-          recentOrders.map((order) => (
-            <Link
-              key={order.id}
-              href={{
-                pathname: "/(student)/orders/[id]",
-                params: { id: order.id }
-              }}
-              asChild
-            >
-              <Pressable style={styles.orderCard}>
-                <Text style={styles.orderNumber}>{order.orderNumber}</Text>
-                <Text style={styles.orderMeta}>Status: {order.status}</Text>
-                <Text style={styles.orderMeta}>
-                  Total: {formatCurrency(order.totalAmount)}
-                </Text>
-              </Pressable>
-            </Link>
-          ))
-        )}
-      </View>
-
-    </ScrollView>
+        <View style={{ height: 40 }} />
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#EEF2F7"
+    backgroundColor: "#F8FAFC",
   },
-  content: {
-    padding: 16,
-    paddingBottom: 28,
-    gap: 14
-  },
-  heroCard: {
-    borderRadius: 18,
-    padding: 14,
-    backgroundColor: "#FFFFFF",
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-    gap: 10
-  },
-  heroTopRow: {
-    flexDirection: "row",
-    gap: 10,
-    alignItems: "flex-start"
-  },
-  heroTitle: {
-    color: "#0F172A",
-    fontSize: 24,
-    fontWeight: "800"
-  },
-  heroSubtitle: {
-    color: "#64748B",
-    marginTop: 2,
-    fontWeight: "600"
-  },
-  refreshButton: {
-    backgroundColor: "#0F172A",
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 10
-  },
-  refreshButtonText: {
-    color: "white",
-    fontWeight: "700"
-  },
-  sectionWrap: {
-    gap: 10
-  },
-  sectionHeaderRow: {
+  topHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center"
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingTop: 54,
+    paddingBottom: 12,
+    backgroundColor: "#F8FAFC",
   },
-  sectionTitle: {
+  headerLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  headerUserName: {
     color: "#0F172A",
-    fontSize: 19,
-    fontWeight: "800"
+    fontSize: 18,
+    fontWeight: "800",
   },
-  sectionMeta: {
-    color: "#64748B",
-    fontWeight: "700",
-    fontSize: 12
+  headerRight: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 16,
   },
-  horizontalList: {
+  cartIconWrapper: {
+    position: "relative",
+  },
+  cartBadge: {
+    position: "absolute",
+    top: -4,
+    right: -6,
+    backgroundColor: "#EF4444",
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1.5,
+    borderColor: "#F8FAFC",
+  },
+  cartBadgeText: {
+    color: "white",
+    fontSize: 9,
+    fontWeight: "900",
+  },
+  userAvatar: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "#DBEAFE",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  userAvatarText: {
+    color: "#1D4ED8",
+    fontWeight: "800",
+    fontSize: 14,
+  },
+  content: {
+    paddingTop: 8,
+    paddingHorizontal: 16,
+    gap: 20,
+  },
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 999,
+    paddingHorizontal: 18,
+    paddingVertical: 14,
     gap: 12,
-    paddingRight: 8
+    shadowColor: "#0F172A",
+    shadowOpacity: 0.06,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 3
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#0F172A",
+    padding: 0,
+  },
+  micWrap: {
+    paddingLeft: 10,
+    borderLeftWidth: 1,
+    borderLeftColor: "#E2E8F0",
+  },
+  sectionWrap: {
+    gap: 16,
   },
   bannerCard: {
-    height: 200,
+    height: 160,
     borderRadius: 16,
     overflow: "hidden",
-    borderWidth: 1,
-    borderColor: "#CBD5E1",
-    backgroundColor: "#FFFFFF"
+    backgroundColor: "#FFFFFF",
   },
   bannerImage: {
     width: "100%",
     height: "100%",
-    backgroundColor: "#E2E8F0"
+    backgroundColor: "#E2E8F0",
   },
-  bannerOverlay: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    bottom: 0,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    backgroundColor: "rgba(15,23,42,0.5)"
+  horizontalCategories: {
+    gap: 20,
+    paddingRight: 16,
+    paddingVertical: 4,
   },
-  bannerTitle: {
-    color: "white",
+  categoryCircleItem: {
+    alignItems: "center",
+    width: 72,
+    gap: 8,
+  },
+  categoryCircleWrap: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: "#F1F5F9",
+    alignItems: "center",
+    justifyContent: "center",
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+  },
+  categoryCircleImage: {
+    width: "100%",
+    height: "100%",
+  },
+  categoryCircleName: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#0F172A",
+    textAlign: "center",
+  },
+
+  sectionTitleRecommended: {
+    color: "#64748B",
+    fontSize: 14,
     fontWeight: "800",
-    fontSize: 16
+    letterSpacing: 1,
+    textTransform: "uppercase",
   },
-  bannerActionHint: {
-    color: "#E2E8F0",
+  gridContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    rowGap: 24,
+  },
+  gridCard: {
+    width: "48%",
+    gap: 8,
+  },
+  gridImageWrap: {
+    width: "100%",
+    aspectRatio: 1,
+    borderRadius: 20,
+    backgroundColor: "#F1F5F9",
+    overflow: "hidden",
+  },
+  gridImage: {
+    width: "100%",
+    height: "100%",
+  },
+
+  gridAddBtn: {
+    position: "absolute",
+    bottom: 8,
+    right: 8,
+    backgroundColor: "white",
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
+  },
+  gridName: {
+    fontSize: 16,
+    fontWeight: "800",
+    color: "#0F172A",
     marginTop: 2,
+  },
+  gridMetaRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  gridMetaText: {
+    fontSize: 12,
     fontWeight: "600",
-    fontSize: 12
+    color: "#64748B",
+  },
+  gridPriceText: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#0F172A",
+  },
+  sectionHeaderRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  linkText: {
+    color: "#FF6B35",
+    fontWeight: "700",
   },
   emptyCard: {
     borderRadius: 12,
     padding: 14,
+    backgroundColor: "#F8FAFC",
     borderWidth: 1,
-    borderColor: "#CBD5E1",
-    backgroundColor: "#F8FAFC"
+    borderColor: "#E2E8F0",
   },
   emptyText: {
     color: "#64748B",
-    fontWeight: "600"
-  },
-  categoryCard: {
-    width: 230,
-    borderRadius: 14,
-    backgroundColor: "white",
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-    overflow: "hidden"
-  },
-  categoryImage: {
-    width: "100%",
-    height: 96,
-    backgroundColor: "#E2E8F0"
-  },
-  categoryBody: {
-    padding: 11,
-    gap: 4
-  },
-  categoryName: {
-    color: "#0F172A",
-    fontWeight: "800",
-    fontSize: 16
-  },
-  categoryDescription: {
-    color: "#64748B",
-    fontWeight: "500"
-  },
-  specialCard: {
-    width: 246,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: "#FDE68A",
-    backgroundColor: "#FFFBEB",
-    padding: 10,
-    gap: 7
-  },
-  specialCardImage: {
-    width: "100%",
-    height: 110,
-    borderRadius: 10,
-    backgroundColor: "#F1F5F9"
-  },
-  specialBadge: {
-    alignSelf: "flex-start",
-    borderRadius: 999,
-    backgroundColor: "#F59E0B",
-    paddingHorizontal: 8,
-    paddingVertical: 4
-  },
-  specialBadgeText: {
-    color: "white",
-    fontWeight: "800",
-    fontSize: 10
-  },
-  specialCardName: {
-    color: "#0F172A",
-    fontWeight: "800",
-    fontSize: 16
-  },
-  specialCardDescription: {
-    color: "#64748B",
-    minHeight: 34
-  },
-  specialCardPrice: {
-    color: "#92400E",
-    fontWeight: "800",
-    fontSize: 16
-  },
-  specialActions: {
-    flexDirection: "row",
-    gap: 8
-  },
-  linkText: {
-    color: "#2563EB",
-    fontWeight: "700"
-  },
-  itemActionButton: {
-    flex: 1,
-    borderRadius: 10,
-    paddingVertical: 10
-  },
-  itemActionPrimary: {
-    backgroundColor: "#F97316"
-  },
-  itemActionSecondary: {
-    backgroundColor: "#334155"
-  },
-  itemActionText: {
-    color: "white",
-    textAlign: "center",
-    fontWeight: "700"
+    fontWeight: "600",
   },
   orderCard: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     borderRadius: 12,
+    backgroundColor: "#FFFFFF",
     borderWidth: 1,
     borderColor: "#E2E8F0",
-    backgroundColor: "white",
-    padding: 12,
-    gap: 4
+    padding: 14,
+    shadowColor: "#000",
+    shadowOpacity: 0.02,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 1,
   },
   orderNumber: {
     color: "#0F172A",
     fontWeight: "800",
-    fontSize: 16
+    fontSize: 15,
   },
   orderMeta: {
-    color: "#475569",
-    fontWeight: "600"
+    color: "#64748B",
+    fontWeight: "600",
+    marginTop: 4,
+  },
+  orderPrice: {
+    color: "#0F172A",
+    fontWeight: "800",
+    fontSize: 15,
   }
 });

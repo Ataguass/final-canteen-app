@@ -17,6 +17,7 @@ type User = {
 type PendingRegistration = {
   tenantId: string;
   name: string;
+  email: string;
   phone: string;
   password: string;
   rollNumber?: string;
@@ -28,9 +29,11 @@ type AuthContextValue = {
   isHydrated: boolean;
   pendingRegistration: PendingRegistration | null;
   setPendingRegistration: (value: PendingRegistration | null) => void;
+  confirmationResult: any;
+  setConfirmationResult: (value: any) => void;
   setSessionUser: (nextUser: User) => Promise<void>;
-  login: (tenantId: string, phone: string, password: string) => Promise<void>;
-  registerAfterOtp: (code: string) => Promise<void>;
+  login: (phone: string, rollNumber: string | undefined, password: string, isAdminLogin?: boolean) => Promise<void>;
+  registerAfterOtp: (firebaseIdToken: string) => Promise<void>;
   logout: () => Promise<void>;
 };
 
@@ -41,6 +44,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [isHydrated, setIsHydrated] = useState(false);
   const [pendingRegistration, setPendingRegistration] = useState<PendingRegistration | null>(null);
+  const [confirmationResult, setConfirmationResult] = useState<any>(null);
 
   const sanitizeUser = useCallback((raw: Partial<User>): User => {
     if (!raw.id || !raw.name || !raw.role || !raw.tenantId) {
@@ -99,25 +103,30 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     await keyValueStorage.set("session:user", JSON.stringify(sanitized));
   }, [sanitizeUser]);
 
-  const login = useCallback(async (tenantId: string, phone: string, password: string) => {
-    const response = await authService.login({ tenantId, phone, password });
+  const login = useCallback(async (phone: string, rollNumber: string | undefined, password: string, isAdminLogin?: boolean) => {
+    const response = await authService.login({ phone, rollNumber, password, isAdminLogin });
     const nextUser = sanitizeUser(response.data.user);
     setUser(nextUser);
     setAccessToken(response.data.accessToken);
     await persistSession(nextUser, response.data.accessToken, response.data.refreshToken);
   }, [persistSession, sanitizeUser]);
 
-  const registerAfterOtp = useCallback(async (code: string) => {
+  const registerAfterOtp = useCallback(async (firebaseIdToken: string) => {
     if (!pendingRegistration) {
       throw new Error("Registration session missing");
     }
 
-    await authService.verifyOtp(pendingRegistration.tenantId, pendingRegistration.phone, code);
-    const response = await authService.registerStudent(pendingRegistration);
+    const payload = {
+      ...pendingRegistration,
+      firebaseIdToken
+    };
+
+    const response = await authService.registerStudent(payload);
     const nextUser = sanitizeUser(response.data.user);
     setUser(nextUser);
     setAccessToken(response.data.accessToken);
     setPendingRegistration(null);
+    setConfirmationResult(null);
     await persistSession(nextUser, response.data.accessToken, response.data.refreshToken);
   }, [pendingRegistration, persistSession, sanitizeUser]);
 
@@ -135,12 +144,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       isHydrated,
       pendingRegistration,
       setPendingRegistration,
+      confirmationResult,
+      setConfirmationResult,
       setSessionUser,
       login,
       registerAfterOtp,
       logout
     }),
-    [user, accessToken, isHydrated, pendingRegistration, setSessionUser, login, registerAfterOtp, logout]
+    [user, accessToken, isHydrated, pendingRegistration, confirmationResult, setSessionUser, login, registerAfterOtp, logout]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -238,71 +238,62 @@ export default function Screen() {
   return (
     <View style={styles.screen}>
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
-        <View style={styles.heroCard}>
-          <View style={styles.heroIconWrap}>
-            <Ionicons name="receipt" size={21} color="#0F172A" />
-          </View>
-          <View style={styles.heroTextWrap}>
-            <Text style={styles.heroTitle}>Invoice Settings</Text>
-            <Text style={styles.heroSubtitle}>Control branding and receipt fields shown to customers.</Text>
-          </View>
-        </View>
-
         <View style={styles.sectionCard}>
           <Text style={styles.sectionTitle}>Branding</Text>
-          <Text style={styles.sectionHint}>Use URL or upload from phone (max 1MB, max 1024x1024 px).</Text>
 
-          <Text style={styles.fieldLabel}>Logo URL</Text>
-          <TextInput
-            value={logoUrl}
-            onChangeText={setLogoUrl}
-            placeholder="https://your-domain.com/logo.png"
-            autoCapitalize="none"
-            autoCorrect={false}
-            style={styles.input}
-          />
+          <View style={{ alignItems: "center", paddingVertical: 8 }}>
+            {logoUrl ? (
+              <View style={{ position: "relative" }}>
+                <View style={{ width: 100, height: 100, borderRadius: 20, backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#E2E8F0", overflow: "hidden", alignItems: "center", justifyContent: "center" }}>
+                  <Image source={{ uri: logoUrl }} resizeMode="contain" style={{ width: 90, height: 90 }} />
+                </View>
+                <Pressable
+                  onPress={removeLogo}
+                  disabled={uploadingLogo}
+                  style={{ position: "absolute", bottom: -6, right: -6, backgroundColor: "#EF4444", borderRadius: 14, width: 28, height: 28, alignItems: "center", justifyContent: "center", borderWidth: 2, borderColor: "white" }}
+                >
+                  <Ionicons name="trash" size={14} color="white" />
+                </Pressable>
+              </View>
+            ) : (
+              <View style={{ width: 100, height: 100, borderRadius: 20, backgroundColor: "#F8FAFC", borderWidth: 1, borderColor: "#E2E8F0", borderStyle: "dashed", alignItems: "center", justifyContent: "center" }}>
+                <Ionicons name="image-outline" size={32} color="#94A3B8" />
+              </View>
+            )}
 
-          <View style={styles.buttonRow}>
-            <Pressable
-              onPress={() => pickAndUploadLogo("fit")}
-              disabled={uploadingLogo}
-              style={[styles.button, styles.buttonDark, uploadingLogo && styles.buttonDisabled]}
-            >
-              <Ionicons name="cloud-upload-outline" size={16} color="white" />
-              <Text style={styles.buttonText}>{uploadingLogo ? "Uploading..." : "Upload Fit"}</Text>
-            </Pressable>
-            <Pressable
-              onPress={() => pickAndUploadLogo("square")}
-              disabled={uploadingLogo}
-              style={[styles.button, styles.buttonIndigo, uploadingLogo && styles.buttonDisabled]}
-            >
-              <Ionicons name="scan-outline" size={16} color="white" />
-              <Text style={styles.buttonText}>{uploadingLogo ? "Uploading..." : "Upload Square"}</Text>
-            </Pressable>
+            <View style={{ flexDirection: "row", gap: 8, marginTop: 16 }}>
+              <Pressable
+                onPress={() => pickAndUploadLogo("fit")}
+                disabled={uploadingLogo}
+                style={{ backgroundColor: "#F1F5F9", paddingHorizontal: 16, paddingVertical: 8, borderRadius: 999, borderWidth: 1, borderColor: "#E2E8F0" }}
+              >
+                <Text style={{ color: "#0F172A", fontWeight: "700", fontSize: 13 }}>{uploadingLogo ? "..." : "Upload Fit"}</Text>
+              </Pressable>
+              <Pressable
+                onPress={() => pickAndUploadLogo("square")}
+                disabled={uploadingLogo}
+                style={{ backgroundColor: "#F1F5F9", paddingHorizontal: 16, paddingVertical: 8, borderRadius: 999, borderWidth: 1, borderColor: "#E2E8F0" }}
+              >
+                <Text style={{ color: "#0F172A", fontWeight: "700", fontSize: 13 }}>{uploadingLogo ? "..." : "Upload Square"}</Text>
+              </Pressable>
+            </View>
+            
+            <Text style={{ color: "#64748B", fontSize: 11, marginTop: 12, textAlign: "center", fontWeight: "500" }}>
+              Recommended: 500x500 px. Max size 1MB.
+            </Text>
           </View>
 
-          {logoUrl ? (
-            <>
-              <View style={styles.previewCard}>
-                <Text style={styles.previewTitle}>Current Logo Preview</Text>
-                <Image source={{ uri: logoUrl }} resizeMode="contain" style={styles.logoPreview} />
-              </View>
-
-              <Pressable
-                onPress={removeLogo}
-                disabled={uploadingLogo}
-                style={[styles.removeButton, uploadingLogo && styles.buttonDisabled]}
-              >
-                <Ionicons name="trash-outline" size={16} color="white" />
-                <Text style={styles.buttonText}>{uploadingLogo ? "Please wait..." : "Remove Logo"}</Text>
-              </Pressable>
-            </>
-          ) : (
-            <View style={styles.emptyLogoCard}>
-              <Ionicons name="image-outline" size={20} color="#64748B" />
-              <Text style={styles.emptyLogoText}>No logo selected yet.</Text>
-            </View>
-          )}
+          <View style={{ marginTop: 4 }}>
+            <Text style={{ color: "#64748B", fontSize: 11, fontWeight: "700", textTransform: "uppercase", marginBottom: 6, marginLeft: 2 }}>Or enter logo URL</Text>
+            <TextInput
+              value={logoUrl}
+              onChangeText={setLogoUrl}
+              placeholder="https://your-domain.com/logo.png"
+              autoCapitalize="none"
+              autoCorrect={false}
+              style={{ backgroundColor: "#F8FAFC", borderWidth: 1, borderColor: "#E2E8F0", borderRadius: 12, padding: 10, fontSize: 13, color: "#0F172A", fontWeight: "500" }}
+            />
+          </View>
         </View>
 
         <View style={styles.sectionCard}>
@@ -321,39 +312,28 @@ export default function Screen() {
           <Text style={styles.sectionTitle}>Receipt Fields</Text>
           <Text style={styles.sectionHint}>Enable or hide fields shown on invoice print.</Text>
 
-          {toggleRows.map((row) => {
-            const enabled = settings[row.key];
-            return (
-              <Pressable
-                key={row.key}
-                onPress={() => toggleField(row.key)}
-                style={[styles.toggleCard, enabled && styles.toggleCardEnabled]}
-              >
-                <View style={styles.toggleLeft}>
-                  <View style={[styles.toggleIconWrap, enabled && styles.toggleIconWrapEnabled]}>
-                    <Ionicons name={row.icon} size={16} color={enabled ? "#047857" : "#64748B"} />
+          <View style={styles.toggleListContainer}>
+            {toggleRows.map((row, index) => {
+              const enabled = settings[row.key];
+              return (
+                <View key={row.key} style={[styles.toggleRow, index === toggleRows.length - 1 && styles.toggleRowLast]}>
+                  <View style={styles.toggleIconWrap}>
+                    <Ionicons name={row.icon} size={18} color={enabled ? "#0F172A" : "#94A3B8"} />
                   </View>
                   <View style={styles.toggleTextWrap}>
-                    <Text style={[styles.toggleTitle, enabled && styles.toggleTitleEnabled]}>{row.label}</Text>
+                    <Text style={[styles.toggleTitle, !enabled && styles.toggleTitleDisabled]}>{row.label}</Text>
                     <Text style={styles.toggleHint}>{row.hint}</Text>
-                  </View>
-                </View>
-                <View style={styles.toggleRight}>
-                  <View style={[styles.toggleStatusBadge, enabled ? styles.toggleStatusOn : styles.toggleStatusOff]}>
-                    <Text style={[styles.toggleStatusText, enabled ? styles.toggleStatusTextOn : styles.toggleStatusTextOff]}>
-                      {enabled ? "ON" : "OFF"}
-                    </Text>
                   </View>
                   <Switch
                     value={enabled}
                     onValueChange={() => toggleField(row.key)}
-                    thumbColor={enabled ? "#FFFFFF" : "#FFFFFF"}
+                    thumbColor="white"
                     trackColor={{ false: "#CBD5E1", true: "#10B981" }}
                   />
                 </View>
-              </Pressable>
-            );
-          })}
+              );
+            })}
+          </View>
         </View>
 
         <Pressable onPress={saveSettings} disabled={saving} style={[styles.saveButton, saving && styles.buttonDisabled]}>
@@ -431,13 +411,13 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#E2E8F0",
     borderRadius: 16,
-    padding: 12,
-    gap: 10,
+    padding: 16,
+    gap: 12,
     shadowColor: "#0F172A",
     shadowOpacity: 0.04,
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 3 },
-    elevation: 1
+    elevation: 2
   },
   sectionTitle: {
     fontSize: 19,
@@ -463,34 +443,6 @@ const styles = StyleSheet.create({
     minHeight: 84,
     textAlignVertical: "top"
   },
-  buttonRow: {
-    flexDirection: "row",
-    gap: 8
-  },
-  button: {
-    flex: 1,
-    borderRadius: 12,
-    padding: 11,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6
-  },
-  buttonDark: {
-    backgroundColor: "#0F172A"
-  },
-  buttonIndigo: {
-    backgroundColor: "#4338CA"
-  },
-  removeButton: {
-    backgroundColor: "#B91C1C",
-    borderRadius: 12,
-    padding: 11,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6
-  },
   buttonText: {
     color: "white",
     textAlign: "center",
@@ -499,109 +451,54 @@ const styles = StyleSheet.create({
   buttonDisabled: {
     opacity: 0.6
   },
-  previewCard: {
+  toggleListContainer: {
+    marginTop: 4,
     borderWidth: 1,
     borderColor: "#E2E8F0",
-    borderRadius: 12,
-    padding: 10,
+    borderRadius: 16,
     backgroundColor: "#F8FAFC",
-    gap: 8
+    overflow: "hidden"
   },
-  previewTitle: {
-    color: "#0F172A",
-    fontWeight: "700"
-  },
-  logoPreview: {
-    width: "100%",
-    height: 98,
-    backgroundColor: "#FFFFFF",
-    borderRadius: 10
-  },
-  emptyLogoCard: {
-    borderWidth: 1,
-    borderColor: "#CBD5E1",
-    borderRadius: 12,
-    backgroundColor: "#F8FAFC",
-    padding: 14,
-    alignItems: "center",
-    gap: 6
-  },
-  emptyLogoText: {
-    color: "#64748B",
-    fontWeight: "600"
-  },
-  toggleCard: {
-    borderWidth: 1,
-    borderColor: "#D1D5DB",
-    borderRadius: 12,
-    padding: 10,
-    backgroundColor: "#FFFFFF",
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    gap: 10
-  },
-  toggleCardEnabled: {
-    borderColor: "#86EFAC",
-    backgroundColor: "#ECFDF5"
-  },
-  toggleLeft: {
-    flex: 1,
+  toggleRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 10
+    paddingVertical: 14,
+    paddingHorizontal: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E2E8F0",
+    gap: 12
+  },
+  toggleRowLast: {
+    borderBottomWidth: 0
   },
   toggleIconWrap: {
-    width: 34,
-    height: 34,
-    borderRadius: 10,
-    backgroundColor: "#F1F5F9",
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    backgroundColor: "white",
     alignItems: "center",
-    justifyContent: "center"
-  },
-  toggleIconWrapEnabled: {
-    backgroundColor: "#D1FAE5"
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#E2E8F0"
   },
   toggleTextWrap: {
     flex: 1,
+    justifyContent: "center",
     gap: 2
   },
   toggleTitle: {
-    color: "#111827",
-    fontWeight: "700"
+    color: "#0F172A",
+    fontWeight: "800",
+    fontSize: 15
   },
-  toggleTitleEnabled: {
-    color: "#065F46"
+  toggleTitleDisabled: {
+    color: "#64748B",
+    fontWeight: "700"
   },
   toggleHint: {
     color: "#64748B",
     fontSize: 12,
     fontWeight: "500"
-  },
-  toggleRight: {
-    alignItems: "flex-end",
-    gap: 4
-  },
-  toggleStatusBadge: {
-    borderRadius: 999,
-    paddingHorizontal: 10,
-    paddingVertical: 3
-  },
-  toggleStatusOn: {
-    backgroundColor: "#BBF7D0"
-  },
-  toggleStatusOff: {
-    backgroundColor: "#E2E8F0"
-  },
-  toggleStatusText: {
-    fontSize: 11,
-    fontWeight: "800"
-  },
-  toggleStatusTextOn: {
-    color: "#065F46"
-  },
-  toggleStatusTextOff: {
-    color: "#334155"
   },
   saveButton: {
     marginTop: 2,

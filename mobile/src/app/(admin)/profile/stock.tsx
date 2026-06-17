@@ -1,7 +1,20 @@
+import { Ionicons } from "@expo/vector-icons";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Alert, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { useAuth } from "../../../hooks/useAuth";
 import { menuService, type StockMovement } from "../../../services/menuService";
+
+const card = {
+  borderWidth: 1,
+  borderColor: "#E2E8F0",
+  borderRadius: 16,
+  backgroundColor: "white",
+  shadowColor: "#0F172A",
+  shadowOpacity: 0.05,
+  shadowRadius: 8,
+  shadowOffset: { width: 0, height: 4 },
+  elevation: 2
+} as const;
 
 type Category = { id: string; name: string };
 type StockItem = {
@@ -235,51 +248,57 @@ export default function Screen() {
   }
 
   return (
-    <ScrollView style={{ flex: 1 }} contentContainerStyle={{ padding: 16, gap: 10 }}>
-      <Text style={{ fontSize: 22, fontWeight: "700" }}>Stock Management</Text>
-      <Text style={{ color: "#6B7280" }}>Track inventory and stock movement history.</Text>
-
-      {summary.low > 0 ? (
-        <Pressable
-          onPress={() => {
-            setOnlyLowStock(true);
-            setSelectedCategory("ALL");
-            setQuery("");
-          }}
-          style={{ borderRadius: 10, backgroundColor: "#FEF3C7", borderWidth: 1, borderColor: "#F59E0B", padding: 10 }}
-        >
-          <Text style={{ color: "#92400E", fontWeight: "700" }}>
-            Alert: {summary.low} item(s) are below threshold. Tap to view.
-          </Text>
-        </Pressable>
-      ) : (
-        <View style={{ borderRadius: 10, backgroundColor: "#DCFCE7", borderWidth: 1, borderColor: "#16A34A", padding: 10 }}>
-          <Text style={{ color: "#065F46", fontWeight: "700" }}>All items are above threshold.</Text>
+    <ScrollView style={{ flex: 1, backgroundColor: "#EEF2F7" }} contentContainerStyle={{ padding: 16, gap: 16, paddingBottom: 24 }}>
+      <View style={{ ...card, padding: 16, gap: 12 }}>
+        <View>
+          <Text style={{ fontSize: 18, fontWeight: "800", color: "#0F172A" }}>Stock Overview</Text>
+          <Text style={{ color: "#64748B", fontSize: 12, marginTop: 2 }}>Monitor inventory and threshold alerts</Text>
         </View>
-      )}
 
-      <View style={{ flexDirection: "row", gap: 8 }}>
-        <Pressable
-          onPress={() => {
-            setOnlyLowStock(false);
-            setQuery("");
-          }}
-          style={{ flex: 1, borderRadius: 10, backgroundColor: "#F3F4F6", padding: 10 }}
-        >
-          <Text style={{ color: "#6B7280" }}>Total Items</Text>
-          <Text style={{ fontSize: 20, fontWeight: "700" }}>{summary.total}</Text>
-        </Pressable>
-        <Pressable
-          onPress={() => {
-            setOnlyLowStock(true);
-            setSelectedCategory("ALL");
-            setQuery("");
-          }}
-          style={{ flex: 1, borderRadius: 10, backgroundColor: "#FEF3C7", padding: 10 }}
-        >
-          <Text style={{ color: "#92400E" }}>Low Stock</Text>
-          <Text style={{ fontSize: 20, fontWeight: "700", color: "#92400E" }}>{summary.low}</Text>
-        </Pressable>
+        {summary.low > 0 ? (
+          <Pressable
+            onPress={() => {
+              setOnlyLowStock(true);
+              setSelectedCategory("ALL");
+              setQuery("");
+            }}
+            style={{ borderRadius: 12, backgroundColor: "#FEF2F2", borderWidth: 1, borderColor: "#FCA5A5", padding: 12, flexDirection: "row", alignItems: "center", gap: 8 }}
+          >
+            <Ionicons name="warning" size={20} color="#DC2626" />
+            <Text style={{ color: "#991B1B", fontWeight: "700", fontSize: 13, flex: 1 }}>
+              Alert: {summary.low} item(s) are running low! Tap to view.
+            </Text>
+          </Pressable>
+        ) : (
+          <View style={{ borderRadius: 12, backgroundColor: "#F0FDF4", borderWidth: 1, borderColor: "#86EFAC", padding: 12, flexDirection: "row", alignItems: "center", gap: 8 }}>
+            <Ionicons name="checkmark-circle" size={20} color="#16A34A" />
+            <Text style={{ color: "#166534", fontWeight: "700", fontSize: 13, flex: 1 }}>All items are sufficiently stocked.</Text>
+          </View>
+        )}
+
+        <View style={{ flexDirection: "row", gap: 12 }}>
+          <Pressable
+            onPress={() => {
+              setOnlyLowStock(false);
+              setQuery("");
+            }}
+            style={{ flex: 1, borderRadius: 12, backgroundColor: "#F8FAFC", borderWidth: 1, borderColor: "#E2E8F0", padding: 12, alignItems: "center" }}
+          >
+            <Text style={{ color: "#64748B", fontSize: 12, fontWeight: "600" }}>Total Items</Text>
+            <Text style={{ fontSize: 24, fontWeight: "800", color: "#0F172A", marginTop: 4 }}>{summary.total}</Text>
+          </Pressable>
+          <Pressable
+            onPress={() => {
+              setOnlyLowStock(true);
+              setSelectedCategory("ALL");
+              setQuery("");
+            }}
+            style={{ flex: 1, borderRadius: 12, backgroundColor: "#FFF7ED", borderWidth: 1, borderColor: "#FED7AA", padding: 12, alignItems: "center" }}
+          >
+            <Text style={{ color: "#C2410C", fontSize: 12, fontWeight: "600" }}>Low Stock</Text>
+            <Text style={{ fontSize: 24, fontWeight: "800", color: "#C2410C", marginTop: 4 }}>{summary.low}</Text>
+          </Pressable>
+        </View>
       </View>
 
       {onlyLowStock ? (
@@ -299,66 +318,60 @@ export default function Screen() {
         </View>
       ) : null}
 
-      <TextInput
-        placeholder="Search item or user"
-        value={query}
-        onChangeText={setQuery}
-        style={{ borderWidth: 1, borderColor: "#D1D5DB", borderRadius: 10, padding: 10 }}
-      />
+      <View style={{ ...card, padding: 16, gap: 12 }}>
+        <View style={{ flexDirection: "row", alignItems: "center", backgroundColor: "#F1F5F9", borderRadius: 10, paddingHorizontal: 12 }}>
+          <Ionicons name="search" size={18} color="#64748B" />
+          <TextInput
+            placeholder="Search items..."
+            value={query}
+            onChangeText={setQuery}
+            style={{ flex: 1, paddingVertical: 10, paddingHorizontal: 8, fontSize: 14, color: "#0F172A" }}
+            placeholderTextColor="#94A3B8"
+          />
+        </View>
 
-      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
-        <Pressable
-          onPress={() => setSelectedCategory("ALL")}
-          style={{
-            borderRadius: 999,
-            paddingVertical: 7,
-            paddingHorizontal: 10,
-            backgroundColor: selectedCategory === "ALL" ? "#111827" : "#F3F4F6"
-          }}
-        >
-          <Text style={{ color: selectedCategory === "ALL" ? "white" : "#111827", fontWeight: "600" }}>All</Text>
-        </Pressable>
-        {categories.map((category) => (
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingRight: 8 }}>
           <Pressable
-            key={category.id}
-            onPress={() => setSelectedCategory(category.id)}
-            style={{
-              borderRadius: 999,
-              paddingVertical: 7,
-              paddingHorizontal: 10,
-              backgroundColor: selectedCategory === category.id ? "#111827" : "#F3F4F6"
-            }}
+            onPress={() => setSelectedCategory("ALL")}
+            style={{ borderRadius: 999, paddingVertical: 8, paddingHorizontal: 16, backgroundColor: selectedCategory === "ALL" ? "#1D4ED8" : "#F1F5F9" }}
           >
-            <Text style={{ color: selectedCategory === category.id ? "white" : "#111827", fontWeight: "600" }}>
-              {category.name}
+            <Text style={{ color: selectedCategory === "ALL" ? "white" : "#475569", fontWeight: "700", fontSize: 13 }}>All</Text>
+          </Pressable>
+          {categories.map((category) => (
+            <Pressable
+              key={category.id}
+              onPress={() => setSelectedCategory(category.id)}
+              style={{ borderRadius: 999, paddingVertical: 8, paddingHorizontal: 16, backgroundColor: selectedCategory === category.id ? "#1D4ED8" : "#F1F5F9" }}
+            >
+              <Text style={{ color: selectedCategory === category.id ? "white" : "#475569", fontWeight: "700", fontSize: 13 }}>
+                {category.name}
+              </Text>
+            </Pressable>
+          ))}
+        </ScrollView>
+
+        <View style={{ flexDirection: "row", gap: 12 }}>
+          <Pressable
+            onPress={() => setOnlyLowStock((prev) => !prev)}
+            style={{ flex: 1, borderRadius: 10, borderWidth: 1, borderColor: onlyLowStock ? "#FCA5A5" : "#E2E8F0", backgroundColor: onlyLowStock ? "#FEF2F2" : "#F8FAFC", paddingVertical: 10, flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 6 }}
+          >
+            <Ionicons name="alert-circle-outline" size={16} color={onlyLowStock ? "#DC2626" : "#64748B"} />
+            <Text style={{ fontWeight: "700", fontSize: 13, color: onlyLowStock ? "#991B1B" : "#475569" }}>
+              Low Stock Only
             </Text>
           </Pressable>
-        ))}
+
+          <Pressable
+            onPress={() => loadData().catch(() => Alert.alert("Error", "Failed to refresh stock"))}
+            style={{ backgroundColor: "#0F172A", borderRadius: 10, paddingHorizontal: 16, justifyContent: "center", alignItems: "center", flexDirection: "row", gap: 6 }}
+          >
+            <Ionicons name="refresh" size={16} color="white" />
+            <Text style={{ color: "white", fontWeight: "700", fontSize: 13 }}>
+              {loading ? "..." : "Refresh"}
+            </Text>
+          </Pressable>
+        </View>
       </View>
-
-      <Pressable
-        onPress={() => setOnlyLowStock((prev) => !prev)}
-        style={{
-          borderRadius: 10,
-          borderWidth: 1,
-          borderColor: onlyLowStock ? "#92400E" : "#D1D5DB",
-          backgroundColor: onlyLowStock ? "#FEF3C7" : "white",
-          paddingVertical: 10
-        }}
-      >
-        <Text style={{ textAlign: "center", fontWeight: "700", color: onlyLowStock ? "#92400E" : "#111827" }}>
-          {onlyLowStock ? "Showing Low Stock Only" : "Show Low Stock Only"}
-        </Text>
-      </Pressable>
-
-      <Pressable
-        onPress={() => loadData().catch(() => Alert.alert("Error", "Failed to refresh stock"))}
-        style={{ backgroundColor: "#111827", borderRadius: 10, padding: 12 }}
-      >
-        <Text style={{ color: "white", textAlign: "center", fontWeight: "700" }}>
-          {loading ? "Refreshing..." : "Refresh"}
-        </Text>
-      </Pressable>
 
       <Text style={{ fontWeight: "700", marginTop: 6 }}>Items ({filteredItems.length})</Text>
       {filteredItems.length === 0 ? (
@@ -366,127 +379,82 @@ export default function Screen() {
       ) : null}
 
       {filteredItems.map((item) => (
-        <View
-          key={item.id}
-          style={{ borderWidth: 1, borderColor: "#E5E7EB", borderRadius: 12, padding: 12, gap: 8 }}
-        >
-          <Text style={{ fontWeight: "700", fontSize: 16 }}>{item.name}</Text>
-          <Text style={{ color: "#6B7280" }}>
-            {categoryMap[item.categoryId ?? ""] ?? "Uncategorized"} | INR {item.price}
-          </Text>
-          <Text style={{ color: isLowStockItem(item) ? "#B45309" : "#111827" }}>
-            Current Stock: {item.stockQty}
-          </Text>
-          <Text style={{ color: "#6B7280" }}>Threshold: {thresholdFor(item)}</Text>
-          <Text style={{ color: item.isAvailable ? "#065F46" : "#991B1B" }}>
-            {item.isAvailable ? "Visible to users" : "Hidden from users"}
-          </Text>
+        <View key={item.id} style={{ ...card, padding: 16, gap: 12 }}>
+          <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" }}>
+            <View style={{ flex: 1, gap: 2 }}>
+              <Text style={{ fontWeight: "800", fontSize: 16, color: "#0F172A" }}>{item.name}</Text>
+              <Text style={{ color: "#64748B", fontSize: 12 }}>{categoryMap[item.categoryId ?? ""] ?? "Uncategorized"} | ₹ {item.price}</Text>
+            </View>
+            <View style={{ alignItems: "flex-end", gap: 2 }}>
+              <Text style={{ color: isLowStockItem(item) ? "#DC2626" : "#0F172A", fontWeight: "800", fontSize: 16 }}>{item.stockQty} left</Text>
+              <Text style={{ color: "#94A3B8", fontSize: 11 }}>Threshold: {thresholdFor(item)}</Text>
+            </View>
+          </View>
+
+          <View style={{ flexDirection: "row", gap: 8, marginTop: 4 }}>
+            <Pressable onPress={() => adjustStock(item, -10)} disabled={savingItemId === item.id} style={{ flex: 1, borderRadius: 8, paddingVertical: 10, backgroundColor: "#F1F5F9", alignItems: "center" }}>
+              <Text style={{ fontWeight: "700", color: "#475569" }}>-10</Text>
+            </Pressable>
+            <Pressable onPress={() => adjustStock(item, -1)} disabled={savingItemId === item.id} style={{ flex: 1, borderRadius: 8, paddingVertical: 10, backgroundColor: "#F1F5F9", alignItems: "center" }}>
+              <Text style={{ fontWeight: "700", color: "#475569" }}>-1</Text>
+            </Pressable>
+            <Pressable onPress={() => adjustStock(item, 1)} disabled={savingItemId === item.id} style={{ flex: 1, borderRadius: 8, paddingVertical: 10, backgroundColor: "#DCFCE7", alignItems: "center" }}>
+              <Text style={{ fontWeight: "700", color: "#16A34A" }}>+1</Text>
+            </Pressable>
+            <Pressable onPress={() => adjustStock(item, 10)} disabled={savingItemId === item.id} style={{ flex: 1, borderRadius: 8, paddingVertical: 10, backgroundColor: "#DCFCE7", alignItems: "center" }}>
+              <Text style={{ fontWeight: "700", color: "#16A34A" }}>+10</Text>
+            </Pressable>
+          </View>
 
           <View style={{ flexDirection: "row", gap: 8 }}>
-            <Pressable
-              onPress={() => adjustStock(item, -10)}
-              disabled={savingItemId === item.id}
-              style={{ flex: 1, borderRadius: 8, paddingVertical: 9, backgroundColor: "#E5E7EB" }}
-            >
-              <Text style={{ textAlign: "center", fontWeight: "700" }}>-10</Text>
-            </Pressable>
-            <Pressable
-              onPress={() => adjustStock(item, -1)}
-              disabled={savingItemId === item.id}
-              style={{ flex: 1, borderRadius: 8, paddingVertical: 9, backgroundColor: "#E5E7EB" }}
-            >
-              <Text style={{ textAlign: "center", fontWeight: "700" }}>-1</Text>
-            </Pressable>
-            <Pressable
-              onPress={() => adjustStock(item, 1)}
-              disabled={savingItemId === item.id}
-              style={{ flex: 1, borderRadius: 8, paddingVertical: 9, backgroundColor: "#DCFCE7" }}
-            >
-              <Text style={{ textAlign: "center", fontWeight: "700", color: "#065F46" }}>+1</Text>
-            </Pressable>
-            <Pressable
-              onPress={() => adjustStock(item, 10)}
-              disabled={savingItemId === item.id}
-              style={{ flex: 1, borderRadius: 8, paddingVertical: 9, backgroundColor: "#DCFCE7" }}
-            >
-              <Text style={{ textAlign: "center", fontWeight: "700", color: "#065F46" }}>+10</Text>
-            </Pressable>
-          </View>
-
-          <View style={{ flexDirection: "row", gap: 8, alignItems: "center" }}>
-            <TextInput
-              value={stockDrafts[item.id] ?? ""}
-              onChangeText={(text) => setStockDrafts((prev) => ({ ...prev, [item.id]: text }))}
-              keyboardType="numeric"
-              placeholder="Manual stock qty"
-              style={{ flex: 1, borderWidth: 1, borderColor: "#D1D5DB", borderRadius: 8, padding: 9 }}
-            />
-            <Pressable
-              onPress={() => saveManualStock(item)}
-              disabled={savingItemId === item.id}
-              style={{ borderRadius: 8, paddingVertical: 10, paddingHorizontal: 14, backgroundColor: "#111827" }}
-            >
-              <Text style={{ color: "white", fontWeight: "700" }}>
-                {savingItemId === item.id ? "Saving..." : "Save Stock"}
-              </Text>
-            </Pressable>
-          </View>
-
-          <View style={{ flexDirection: "row", gap: 8, alignItems: "center" }}>
-            <TextInput
-              value={thresholdDrafts[item.id] ?? ""}
-              onChangeText={(text) => setThresholdDrafts((prev) => ({ ...prev, [item.id]: text }))}
-              keyboardType="numeric"
-              placeholder="Low-stock threshold"
-              style={{ flex: 1, borderWidth: 1, borderColor: "#D1D5DB", borderRadius: 8, padding: 9 }}
-            />
-            <Pressable
-              onPress={() => saveThreshold(item)}
-              disabled={savingItemId === item.id}
-              style={{ borderRadius: 8, paddingVertical: 10, paddingHorizontal: 14, backgroundColor: "#7C3AED" }}
-            >
-              <Text style={{ color: "white", fontWeight: "700" }}>
-                {savingItemId === item.id ? "Saving..." : "Save Threshold"}
-              </Text>
-            </Pressable>
+            <View style={{ flex: 1, flexDirection: "row", borderWidth: 1, borderColor: "#E2E8F0", borderRadius: 8, overflow: "hidden" }}>
+              <TextInput value={stockDrafts[item.id] ?? ""} onChangeText={(text) => setStockDrafts((prev) => ({ ...prev, [item.id]: text }))} keyboardType="numeric" placeholder="Set stock" style={{ flex: 1, paddingHorizontal: 12, fontSize: 13, backgroundColor: "#F8FAFC" }} />
+              <Pressable onPress={() => saveManualStock(item)} disabled={savingItemId === item.id} style={{ backgroundColor: "#0F172A", paddingHorizontal: 12, justifyContent: "center" }}>
+                <Ionicons name="save" size={14} color="white" />
+              </Pressable>
+            </View>
+            <View style={{ flex: 1, flexDirection: "row", borderWidth: 1, borderColor: "#E2E8F0", borderRadius: 8, overflow: "hidden" }}>
+              <TextInput value={thresholdDrafts[item.id] ?? ""} onChangeText={(text) => setThresholdDrafts((prev) => ({ ...prev, [item.id]: text }))} keyboardType="numeric" placeholder="Threshold" style={{ flex: 1, paddingHorizontal: 12, fontSize: 13, backgroundColor: "#F8FAFC" }} />
+              <Pressable onPress={() => saveThreshold(item)} disabled={savingItemId === item.id} style={{ backgroundColor: "#3B82F6", paddingHorizontal: 12, justifyContent: "center" }}>
+                <Ionicons name="save" size={14} color="white" />
+              </Pressable>
+            </View>
           </View>
 
           <Pressable
             onPress={() => toggleItemAvailability(item)}
             disabled={savingItemId === item.id}
-            style={{
-              borderRadius: 8,
-              paddingVertical: 10,
-              backgroundColor: item.isAvailable ? "#B91C1C" : "#065F46"
-            }}
+            style={{ borderRadius: 8, paddingVertical: 10, backgroundColor: item.isAvailable ? "#FEF2F2" : "#F0FDF4", borderWidth: 1, borderColor: item.isAvailable ? "#FEE2E2" : "#DCFCE7", flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 6, marginTop: 4 }}
           >
-            <Text style={{ color: "white", textAlign: "center", fontWeight: "700" }}>
-              {item.isAvailable ? "Hide Item" : "Show Item"}
+            <Ionicons name={item.isAvailable ? "eye-off" : "eye"} size={16} color={item.isAvailable ? "#DC2626" : "#16A34A"} />
+            <Text style={{ color: item.isAvailable ? "#DC2626" : "#16A34A", fontWeight: "700", fontSize: 13 }}>
+              {item.isAvailable ? "Hide Item from Menu" : "Show Item on Menu"}
             </Text>
           </Pressable>
         </View>
       ))}
 
-      <Text style={{ fontWeight: "700", marginTop: 8 }}>Stock Movement Log ({filteredLogs.length})</Text>
-      {filteredLogs.length === 0 ? (
-        <Text style={{ color: "#6B7280" }}>No stock movement logs found.</Text>
-      ) : null}
-      {filteredLogs.slice(0, 60).map((log) => (
-        <View
-          key={log.id}
-          style={{ borderWidth: 1, borderColor: "#E5E7EB", borderRadius: 10, padding: 10, gap: 2 }}
-        >
-          <Text style={{ fontWeight: "700" }}>
-            {log.menuItem?.name ?? "Unknown Item"} | {log.changeType}
-          </Text>
-          <Text>
-            Qty: {log.previousQty} {"->"} {log.newQty} ({log.delta > 0 ? `+${log.delta}` : log.delta})
-          </Text>
-          <Text>By: {log.actorUser?.name ?? "System"}</Text>
-          <Text>At: {new Date(log.createdAt).toLocaleString()}</Text>
-          {log.note ? <Text style={{ color: "#6B7280" }}>Note: {log.note}</Text> : null}
-        </View>
-      ))}
+      <View style={{ ...card, padding: 16, gap: 12 }}>
+        <Text style={{ fontWeight: "800", fontSize: 16, color: "#0F172A" }}>Stock Movement Log ({filteredLogs.length})</Text>
+        {filteredLogs.length === 0 ? (
+          <Text style={{ color: "#64748B", fontSize: 13 }}>No stock movement logs found.</Text>
+        ) : null}
+        {filteredLogs.slice(0, 60).map((log) => (
+          <View key={log.id} style={{ borderBottomWidth: 1, borderColor: "#F1F5F9", paddingBottom: 12, gap: 4 }}>
+            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" }}>
+              <Text style={{ fontWeight: "700", color: "#0F172A", fontSize: 13, flex: 1 }}>{log.menuItem?.name ?? "Unknown Item"}</Text>
+              <Text style={{ fontWeight: "800", color: log.delta > 0 ? "#16A34A" : log.delta < 0 ? "#DC2626" : "#64748B", fontSize: 13 }}>
+                {log.delta > 0 ? `+${log.delta}` : log.delta}
+              </Text>
+            </View>
+            <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+              <Text style={{ color: "#64748B", fontSize: 11 }}>{log.changeType} • {log.actorUser?.name ?? "System"}</Text>
+              <Text style={{ color: "#94A3B8", fontSize: 11 }}>Qty: {log.previousQty} → {log.newQty}</Text>
+            </View>
+            {log.note ? <Text style={{ color: "#94A3B8", fontSize: 11, fontStyle: "italic" }}>{log.note}</Text> : null}
+          </View>
+        ))}
+      </View>
     </ScrollView>
   );
 }

@@ -7,6 +7,7 @@ import {
   createCategory,
   createItem,
   deleteItem,
+  deleteCategory,
   listCategories,
   listItems,
   listStockMovements,
@@ -32,6 +33,13 @@ menuRouter.patch(
   tenantResolver,
   roleGuard("ADMIN", "SUPER_ADMIN"),
   asyncHandler(updateCategory)
+);
+menuRouter.delete(
+  "/categories/:id",
+  auth,
+  tenantResolver,
+  roleGuard("ADMIN", "SUPER_ADMIN"),
+  asyncHandler(deleteCategory)
 );
 menuRouter.get("/items", auth, tenantResolver, asyncHandler(listItems));
 menuRouter.get(
@@ -70,3 +78,26 @@ menuRouter.delete(
   roleGuard("ADMIN", "SUPER_ADMIN"),
   asyncHandler(deleteItem)
 );
+
+// ── Public menu for QR ordering (no auth) ────────────────────────────
+menuRouter.get("/public/categories", asyncHandler(async (req, res) => {
+  const tenantId = req.query.tenantId as string;
+  if (!tenantId) { res.status(400).json({ success: false, message: "tenantId is required" }); return; }
+  const categories = await (await import("../../config/database.js")).prisma.category.findMany({
+    where: { tenantId, isActive: true },
+    orderBy: { sortOrder: "asc" },
+    select: { id: true, name: true, imageUrl: true, description: true }
+  });
+  res.status(200).json({ success: true, data: categories });
+}));
+
+menuRouter.get("/public/items", asyncHandler(async (req, res) => {
+  const tenantId = req.query.tenantId as string;
+  if (!tenantId) { res.status(400).json({ success: false, message: "tenantId is required" }); return; }
+  const items = await (await import("../../config/database.js")).prisma.menuItem.findMany({
+    where: { tenantId, isAvailable: true },
+    orderBy: { createdAt: "desc" },
+    select: { id: true, categoryId: true, name: true, price: true, description: true, image: true, isVeg: true, isTodaySpecial: true, stockQty: true }
+  });
+  res.status(200).json({ success: true, data: items });
+}));

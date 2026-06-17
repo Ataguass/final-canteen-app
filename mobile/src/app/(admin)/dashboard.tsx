@@ -1,7 +1,8 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Alert, Pressable, ScrollView, Text, View } from "react-native";
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View, RefreshControl } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "../../hooks/useAuth";
 import { menuService } from "../../services/menuService";
 import { orderService, type Order } from "../../services/orderService";
@@ -28,6 +29,7 @@ type QuickAction = {
   icon: keyof typeof Ionicons.glyphMap;
   path: string;
   tint: string;
+  iconColor: string;
 };
 
 const formatCurrency = (value: number): string => `₹ ${value.toFixed(2)}`;
@@ -44,20 +46,8 @@ const dayKey = (value: Date): string =>
 const dayLabel = (value: Date): string =>
   value.toLocaleDateString("en-IN", { weekday: "short" });
 
-const cardShadow = {
-  borderWidth: 1,
-  borderColor: "#E5E7EB",
-  borderRadius: 18,
-  backgroundColor: "white",
-  shadowColor: "#0F172A",
-  shadowOpacity: 0.07,
-  shadowRadius: 10,
-  shadowOffset: { width: 0, height: 4 },
-  elevation: 2
-} as const;
-
 const statusColorMap: Record<string, string> = {
-  PENDING: "#F59E0B",
+  PENDING: "#D97706",
   ACCEPTED: "#2563EB",
   PREPARING: "#7C3AED",
   READY: "#0891B2",
@@ -67,72 +57,34 @@ const statusColorMap: Record<string, string> = {
 };
 
 const quickActions: QuickAction[] = [
-  { label: "Open POS", subtitle: "Create counter order", icon: "storefront-outline", path: "/(admin)/pos", tint: "#FFF1EC" },
-  {
-    label: "Manage Orders",
-    subtitle: "Track and update status",
-    icon: "receipt-outline",
-    path: "/(admin)/orders",
-    tint: "#EEF2FF"
-  },
-  {
-    label: "Reports",
-    subtitle: "Sales and performance",
-    icon: "bar-chart-outline",
-    path: "/(admin)/profile/reports",
-    tint: "#ECFEFF"
-  },
-  {
-    label: "Menu",
-    subtitle: "Categories and items",
-    icon: "restaurant-outline",
-    path: "/(admin)/profile/menu-manage",
-    tint: "#ECFDF5"
-  },
-  {
-    label: "Stock",
-    subtitle: "Inventory controls",
-    icon: "cube-outline",
-    path: "/(admin)/profile/stock",
-    tint: "#FEF3C7"
-  },
-  {
-    label: "Users",
-    subtitle: "Teacher and staff",
-    icon: "people-outline",
-    path: "/(admin)/profile/users",
-    tint: "#F5F3FF"
-  },
-  {
-    label: "Community",
-    subtitle: "Posts and updates",
-    icon: "megaphone-outline",
-    path: "/(admin)/community",
-    tint: "#F3E8FF"
-  },
-  {
-    label: "Banners",
-    subtitle: "Top promotions",
-    icon: "images-outline",
-    path: "/(admin)/profile/banners",
-    tint: "#DBEAFE"
-  }
+  { label: "Open POS", subtitle: "Counter order", icon: "storefront", path: "/(admin)/pos", tint: "#FFEDD5", iconColor: "#EA580C" },
+  { label: "Orders", subtitle: "Live tracking", icon: "receipt", path: "/(admin)/orders", tint: "#DBEAFE", iconColor: "#2563EB" },
+  { label: "Reports", subtitle: "Sales & KPIs", icon: "bar-chart", path: "/(admin)/profile/reports", tint: "#E0F2FE", iconColor: "#0284C7" },
+  { label: "Menu", subtitle: "Manage items", icon: "restaurant", path: "/(admin)/profile/menu-manage", tint: "#DCFCE7", iconColor: "#16A34A" },
+  { label: "Stock", subtitle: "Inventory", icon: "cube", path: "/(admin)/profile/stock", tint: "#FEF3C7", iconColor: "#D97706" },
+  { label: "Users", subtitle: "Team access", icon: "people", path: "/(admin)/profile/users", tint: "#F3E8FF", iconColor: "#9333EA" },
+  { label: "Community", subtitle: "Broadcasts", icon: "megaphone", path: "/(admin)/community", tint: "#FCE7F3", iconColor: "#DB2777" },
+  { label: "Banners", subtitle: "Promotions", icon: "images", path: "/(admin)/profile/banners", tint: "#E0E7FF", iconColor: "#4F46E5" }
 ];
 
 export default function Screen() {
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const { user, accessToken } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [items, setItems] = useState<MenuItem[]>([]);
   const [users, setUsers] = useState<ManagedUser[]>([]);
   const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [chartWidth, setChartWidth] = useState(0);
 
-  const loadDashboard = useCallback(async () => {
+  const loadDashboard = useCallback(async (isRefresh = false) => {
     if (!user?.tenantId || !accessToken) return;
     try {
-      setLoading(true);
+      if (isRefresh) setRefreshing(true);
+      else setLoading(true);
+      
       const [ordersResponse, itemsResponse, usersResponse] = await Promise.all([
         orderService.listOrders(accessToken, user.tenantId),
         menuService.listItems(accessToken, user.tenantId),
@@ -147,6 +99,7 @@ export default function Screen() {
       Alert.alert("Error", error instanceof Error ? error.message : "Could not load dashboard");
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   }, [accessToken, user?.tenantId]);
 
@@ -235,9 +188,9 @@ export default function Screen() {
     [dashboardData.orderStatusData]
   );
 
-  const chartHeight = 186;
-  const chartPaddingX = 14;
-  const chartPaddingY = 14;
+  const chartHeight = 180;
+  const chartPaddingX = 20;
+  const chartPaddingY = 16;
 
   const chartPoints = useMemo(() => {
     if (chartWidth <= 0 || dashboardData.sevenDays.length === 0) return [];
@@ -266,7 +219,7 @@ export default function Screen() {
         return {
           key: `${prev.key}-${point.key}`,
           left: prev.x,
-          top: prev.y - 2,
+          top: prev.y - 2, // Center of 4px line
           width: Math.max(1, length),
           angle
         };
@@ -279,339 +232,723 @@ export default function Screen() {
       title: "Today Sales",
       value: formatCurrency(dashboardData.todaySales),
       note: "Live collection",
-      icon: "trending-up-outline" as const,
-      color: "#1D4ED8",
+      icon: "trending-up" as const,
+      color: "#2563EB",
       tint: "#DBEAFE"
     },
     {
       title: "Month Sales",
       value: formatCurrency(dashboardData.monthSales),
       note: "This month",
-      icon: "calendar-outline" as const,
+      icon: "calendar" as const,
       color: "#7C3AED",
       tint: "#EDE9FE"
     },
     {
       title: "Active Orders",
       value: `${dashboardData.pendingOrderCount}`,
-      note: "Pending/Preparing/Ready",
-      icon: "timer-outline" as const,
-      color: "#B45309",
+      note: "Pending/Ready",
+      icon: "timer" as const,
+      color: "#D97706",
       tint: "#FEF3C7"
     },
     {
       title: "Low Stock",
       value: `${dashboardData.lowStockItems.length}`,
       note: "Needs refill",
-      icon: "warning-outline" as const,
-      color: "#B91C1C",
+      icon: "warning" as const,
+      color: "#DC2626",
       tint: "#FEE2E2"
     }
   ];
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: "#F8FAFC" }} contentContainerStyle={{ padding: 16, gap: 14, paddingBottom: 26 }}>
-      <View style={{ gap: 5 }}>
-        <Text style={{ fontSize: 30, fontWeight: "800", letterSpacing: 0.3, color: "#0F172A" }}>Admin Dashboard</Text>
-        <Text style={{ color: "#64748B", fontSize: 13 }}>
-          Last updated: {lastUpdated ? lastUpdated.toLocaleString() : "Not loaded yet"}
-        </Text>
-      </View>
-
-      <Pressable
-        onPress={() => loadDashboard().catch(() => undefined)}
-        style={{
-          borderRadius: 14,
-          paddingVertical: 13,
-          backgroundColor: "#0F172A",
-          alignItems: "center",
-          flexDirection: "row",
-          justifyContent: "center",
-          gap: 8
-        }}
+    <View style={styles.screen}>
+      <ScrollView 
+        contentContainerStyle={[styles.content, { paddingTop: 16 }]}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={() => loadDashboard(true)} colors={["#0F172A"]} />
+        }
       >
-        <Ionicons name="refresh-outline" size={17} color="white" />
-        <Text style={{ color: "white", textAlign: "center", fontWeight: "800", fontSize: 14 }}>
-          {loading ? "Refreshing..." : "Refresh Dashboard"}
-        </Text>
-      </Pressable>
-
-      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
-        {topKpis.map((kpi) => (
-          <View key={kpi.title} style={{ width: "48%", ...cardShadow, padding: 12, gap: 7 }}>
-            <View style={{ width: 34, height: 34, borderRadius: 10, backgroundColor: kpi.tint, alignItems: "center", justifyContent: "center" }}>
-              <Ionicons name={kpi.icon} size={18} color={kpi.color} />
-            </View>
-            <Text style={{ color: "#334155", fontWeight: "700", fontSize: 12 }}>{kpi.title}</Text>
-            <Text style={{ color: "#0F172A", fontWeight: "800", fontSize: 21 }}>{kpi.value}</Text>
-            <Text style={{ color: "#64748B", fontSize: 12 }}>{kpi.note}</Text>
-          </View>
-        ))}
-      </View>
-
-      <View style={{ ...cardShadow, padding: 14, overflow: "hidden", gap: 10 }}>
-        <View
-          style={{
-            position: "absolute",
-            right: -32,
-            top: -25,
-            width: 130,
-            height: 130,
-            borderRadius: 999,
-            backgroundColor: "rgba(59,130,246,0.12)"
-          }}
-        />
-        <View
-          style={{
-            position: "absolute",
-            right: 20,
-            top: 18,
-            width: 72,
-            height: 72,
-            borderRadius: 999,
-            backgroundColor: "rgba(16,185,129,0.12)"
-          }}
-        />
-
-        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-          <View>
-            <Text style={{ fontSize: 18, fontWeight: "800", color: "#0F172A" }}>Revenue Trend</Text>
-            <Text style={{ color: "#64748B", marginTop: 2 }}>Last 7 days sales and order activity</Text>
-          </View>
-          <View style={{ borderRadius: 12, backgroundColor: "#EFF6FF", paddingHorizontal: 10, paddingVertical: 6 }}>
-            <Text style={{ color: "#2563EB", fontWeight: "700", fontSize: 12 }}>{formatCurrency(dashboardData.totalSales)}</Text>
-          </View>
+        {/* Overview Header */}
+        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-end", marginBottom: 12, paddingHorizontal: 4 }}>
+          <Text style={{ fontSize: 18, fontWeight: "900", color: "#0F172A" }}>Overview</Text>
+          <Text style={{ fontSize: 13, fontWeight: "600", color: "#64748B", marginBottom: 2 }}>
+            {new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "short" })}
+          </Text>
         </View>
 
-        <View style={{ flexDirection: "row", gap: 8 }}>
-          <View style={{ flex: 1, borderRadius: 12, backgroundColor: "#F8FAFC", padding: 8 }}>
-            <Text style={{ color: "#64748B", fontSize: 11 }}>Today</Text>
-            <Text style={{ color: "#0F172A", fontWeight: "800", fontSize: 15 }}>{formatCurrency(dashboardData.todaySales)}</Text>
-          </View>
-          <View style={{ flex: 1, borderRadius: 12, backgroundColor: "#F8FAFC", padding: 8 }}>
-            <Text style={{ color: "#64748B", fontSize: 11 }}>Month</Text>
-            <Text style={{ color: "#0F172A", fontWeight: "800", fontSize: 15 }}>{formatCurrency(dashboardData.monthSales)}</Text>
-          </View>
-          <View style={{ flex: 1, borderRadius: 12, backgroundColor: "#F8FAFC", padding: 8 }}>
-            <Text style={{ color: "#64748B", fontSize: 11 }}>Avg Ticket</Text>
-            <Text style={{ color: "#0F172A", fontWeight: "800", fontSize: 15 }}>{formatCurrency(dashboardData.avgTicket)}</Text>
-          </View>
-        </View>
-
-        <View
-          onLayout={(event) => setChartWidth(event.nativeEvent.layout.width)}
-          style={{ height: chartHeight, borderRadius: 16, backgroundColor: "#F8FAFC", overflow: "hidden", borderWidth: 1, borderColor: "#E2E8F0" }}
-        >
-          {[0, 1, 2, 3].map((line) => (
-            <View
-              key={`grid-${line}`}
-              style={{
-                position: "absolute",
-                left: 0,
-                right: 0,
-                top: chartPaddingY + (line * (chartHeight - chartPaddingY * 2)) / 3,
-                borderTopWidth: 1,
-                borderColor: "#E2E8F0"
-              }}
-            />
-          ))}
-
-          {chartPoints.map((point) => (
-            <View
-              key={`fill-${point.key}`}
-              style={{
-                position: "absolute",
-                left: point.x - 9,
-                top: point.y,
-                width: 18,
-                height: chartHeight - point.y,
-                borderTopLeftRadius: 10,
-                borderTopRightRadius: 10,
-                backgroundColor: "rgba(37,99,235,0.14)"
-              }}
-            />
-          ))}
-
-          {chartSegments.map((segment) => (
-            <View
-              key={segment.key}
-              style={{
-                position: "absolute",
-                left: segment.left,
-                top: segment.top,
-                width: segment.width,
-                height: 4,
-                borderRadius: 999,
-                backgroundColor: "#1D4ED8",
-                transform: [{ rotate: `${segment.angle}deg` }],
-                transformOrigin: "left center"
-              }}
-            />
-          ))}
-
-          {chartPoints.map((point) => (
-            <View key={`point-${point.key}`} style={{ position: "absolute", left: point.x - 5, top: point.y - 5 }}>
-              <View style={{ width: 10, height: 10, borderRadius: 999, backgroundColor: "#1D4ED8" }} />
-              <View style={{ position: "absolute", top: 15, left: -9, minWidth: 28 }}>
-                <Text style={{ color: "#0F172A", fontWeight: "700", fontSize: 11, textAlign: "center" }}>{point.orders}</Text>
+        {/* Top KPIs */}
+        <View style={styles.kpiGrid}>
+          {topKpis.map((kpi) => (
+            <View key={kpi.title} style={styles.kpiCard}>
+              <View style={[styles.kpiIconWrap, { backgroundColor: kpi.tint }]}>
+                <Ionicons name={kpi.icon} size={20} color={kpi.color} />
               </View>
+              <Text style={styles.kpiTitle}>{kpi.title}</Text>
+              <Text style={styles.kpiValue} numberOfLines={1} adjustsFontSizeToFit>{kpi.value}</Text>
+              <Text style={styles.kpiNote}>{kpi.note}</Text>
             </View>
           ))}
+        </View>
 
-          <View style={{ position: "absolute", left: 0, right: 0, bottom: 8, flexDirection: "row", justifyContent: "space-around" }}>
-            {dashboardData.sevenDays.map((day) => (
-              <Text key={`label-${day.key}`} style={{ color: "#64748B", fontSize: 11 }}>
-                {day.label}
-              </Text>
+        {/* Quick Actions */}
+        <View style={styles.sectionWrap}>
+          <Text style={styles.sectionTitle}>Quick Actions</Text>
+          <View style={styles.quickGrid}>
+            {quickActions.map((action) => (
+              <Pressable
+                key={action.path}
+                onPress={() => router.push(action.path as never)}
+                style={styles.quickCard}
+                android_ripple={{ color: "#E2E8F0" }}
+              >
+                <View style={[styles.quickIconWrap, { backgroundColor: action.tint }]}>
+                  <Ionicons name={action.icon} size={22} color={action.iconColor} />
+                </View>
+                <Text style={styles.quickLabel}>{action.label}</Text>
+              </Pressable>
             ))}
           </View>
         </View>
-      </View>
 
-      <View style={{ ...cardShadow, padding: 14, gap: 10 }}>
-        <Text style={{ fontSize: 18, fontWeight: "800", color: "#0F172A" }}>Order Status Mix</Text>
-        {dashboardData.orderStatusData.length === 0 ? (
-          <Text style={{ color: "#64748B" }}>No orders yet.</Text>
-        ) : (
-          dashboardData.orderStatusData.map((entry) => {
-            const tint = statusColorMap[entry.status] ?? "#1D4ED8";
-            return (
-              <View key={entry.status} style={{ gap: 5 }}>
-                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-                  <Text style={{ color: "#334155", fontWeight: "700" }}>{entry.status}</Text>
-                  <Text style={{ color: "#0F172A", fontWeight: "800" }}>{entry.count}</Text>
-                </View>
-                <View style={{ height: 10, borderRadius: 999, backgroundColor: "#E2E8F0", overflow: "hidden" }}>
-                  <View
-                    style={{
-                      width: `${Math.max(8, Math.round((entry.count / maxStatusCount) * 100))}%`,
-                      height: 10,
-                      borderRadius: 999,
-                      backgroundColor: tint
-                    }}
-                  />
-                </View>
+        {/* Chart */}
+        <View style={styles.sectionWrap}>
+          <Text style={styles.sectionTitle}>Revenue Trend</Text>
+          <View style={[styles.card, { padding: 0, overflow: "hidden" }]}>
+            <View style={styles.chartHeader}>
+              <View>
+                <Text style={styles.chartTitle}>Last 7 Days</Text>
+                <Text style={styles.chartSubtitle}>Sales and order volume</Text>
               </View>
-            );
-          })
-        )}
-      </View>
+              <View style={styles.chartPill}>
+                <Text style={styles.chartPillText}>{formatCurrency(dashboardData.totalSales)}</Text>
+              </View>
+            </View>
 
-      <View style={{ ...cardShadow, padding: 14, gap: 9 }}>
-        <Text style={{ fontSize: 18, fontWeight: "800", color: "#0F172A" }}>Inventory Alerts</Text>
-        <View style={{ flexDirection: "row", gap: 8 }}>
-          <View style={{ flex: 1, borderRadius: 12, backgroundColor: "#FEF3C7", padding: 10 }}>
-            <Text style={{ color: "#92400E", fontSize: 12, fontWeight: "700" }}>Low Stock</Text>
-            <Text style={{ color: "#78350F", fontSize: 22, fontWeight: "800" }}>{dashboardData.lowStockItems.length}</Text>
-          </View>
-          <View style={{ flex: 1, borderRadius: 12, backgroundColor: "#FEE2E2", padding: 10 }}>
-            <Text style={{ color: "#B91C1C", fontSize: 12, fontWeight: "700" }}>Out of Stock</Text>
-            <Text style={{ color: "#991B1B", fontSize: 22, fontWeight: "800" }}>{dashboardData.outOfStockItems.length}</Text>
-          </View>
-          <View style={{ flex: 1, borderRadius: 12, backgroundColor: "#F1F5F9", padding: 10 }}>
-            <Text style={{ color: "#334155", fontSize: 12, fontWeight: "700" }}>Hidden</Text>
-            <Text style={{ color: "#0F172A", fontSize: 22, fontWeight: "800" }}>{dashboardData.hiddenItems.length}</Text>
-          </View>
-        </View>
-        {dashboardData.lowStockItems.slice(0, 3).map((item) => (
-          <Text key={item.id} style={{ color: "#B91C1C", fontWeight: "700" }}>
-            {item.name}: {item.stockQty} left
-          </Text>
-        ))}
-        <Pressable
-          onPress={() => router.push("/(admin)/profile/stock")}
-          style={{ marginTop: 2, backgroundColor: "#0F172A", borderRadius: 12, padding: 11, alignItems: "center" }}
-        >
-          <Text style={{ color: "white", fontWeight: "800" }}>Open Stock Management</Text>
-        </Pressable>
-      </View>
+            <View style={styles.chartSummaryRow}>
+              <View style={styles.chartSummaryBox}>
+                <Text style={styles.chartSummaryLabel}>Today</Text>
+                <Text style={styles.chartSummaryValue}>{formatCurrency(dashboardData.todaySales)}</Text>
+              </View>
+              <View style={styles.chartSummaryBox}>
+                <Text style={styles.chartSummaryLabel}>Month</Text>
+                <Text style={styles.chartSummaryValue}>{formatCurrency(dashboardData.monthSales)}</Text>
+              </View>
+              <View style={styles.chartSummaryBox}>
+                <Text style={styles.chartSummaryLabel}>Avg Ticket</Text>
+                <Text style={styles.chartSummaryValue}>{formatCurrency(dashboardData.avgTicket)}</Text>
+              </View>
+            </View>
 
-      <View style={{ ...cardShadow, padding: 14, gap: 8 }}>
-        <Text style={{ fontSize: 18, fontWeight: "800", color: "#0F172A" }}>Team Snapshot</Text>
-        <View style={{ flexDirection: "row", gap: 8 }}>
-          <View style={{ flex: 1, borderRadius: 10, backgroundColor: "#ECFDF5", padding: 10 }}>
-            <Text style={{ color: "#047857", fontSize: 12, fontWeight: "700" }}>Teachers</Text>
-            <Text style={{ fontSize: 20, fontWeight: "800", color: "#065F46" }}>{dashboardData.teamData.teachers}</Text>
-          </View>
-          <View style={{ flex: 1, borderRadius: 10, backgroundColor: "#E0F2FE", padding: 10 }}>
-            <Text style={{ color: "#0369A1", fontSize: 12, fontWeight: "700" }}>Staff</Text>
-            <Text style={{ fontSize: 20, fontWeight: "800", color: "#075985" }}>{dashboardData.teamData.staff}</Text>
-          </View>
-          <View style={{ flex: 1, borderRadius: 10, backgroundColor: "#FEF2F2", padding: 10 }}>
-            <Text style={{ color: "#B91C1C", fontSize: 12, fontWeight: "700" }}>Pending</Text>
-            <Text style={{ fontSize: 20, fontWeight: "800", color: "#991B1B" }}>{dashboardData.teamData.pendingApprovals}</Text>
-          </View>
-        </View>
-        <Pressable
-          onPress={() => router.push("/(admin)/profile/users")}
-          style={{ marginTop: 2, backgroundColor: "#4F46E5", borderRadius: 12, padding: 11, alignItems: "center" }}
-        >
-          <Text style={{ color: "white", fontWeight: "800" }}>Open User Management</Text>
-        </Pressable>
-      </View>
+            <View
+              onLayout={(event) => setChartWidth(event.nativeEvent.layout.width)}
+              style={styles.chartArea}
+            >
+              {[0, 1, 2, 3].map((line) => (
+                <View
+                  key={`grid-${line}`}
+                  style={[styles.chartGridLine, { top: chartPaddingY + (line * (chartHeight - chartPaddingY * 2)) / 3 }]}
+                />
+              ))}
 
-      <View style={{ gap: 9 }}>
-        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-          <Text style={{ fontSize: 21, fontWeight: "800", color: "#0F172A" }}>Recent Orders</Text>
-          <Pressable onPress={() => router.push("/(admin)/orders")} style={{ paddingVertical: 4, paddingHorizontal: 8 }}>
-            <Text style={{ color: "#1D4ED8", fontWeight: "800" }}>View All</Text>
-          </Pressable>
-        </View>
-        {dashboardData.recentOrders.length === 0 ? (
-          <View style={{ ...cardShadow, padding: 12 }}>
-            <Text style={{ color: "#64748B" }}>No orders yet.</Text>
-          </View>
-        ) : (
-          dashboardData.recentOrders.map((order) => {
-            const statusTint = statusColorMap[order.status] ?? "#334155";
-            return (
-              <Pressable
-                key={order.id}
-                onPress={() => router.push({ pathname: "/(admin)/orders/[id]", params: { id: order.id } })}
-                style={{ ...cardShadow, padding: 12, gap: 6 }}
-              >
-                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-                  <Text style={{ color: "#0F172A", fontWeight: "800", fontSize: 15 }}>{order.orderNumber}</Text>
-                  <View style={{ borderRadius: 999, backgroundColor: `${statusTint}1A`, paddingHorizontal: 8, paddingVertical: 4 }}>
-                    <Text style={{ color: statusTint, fontWeight: "800", fontSize: 12 }}>{order.status}</Text>
+              {chartSegments.map((segment) => (
+                <View
+                  key={segment.key}
+                  style={[
+                    styles.chartSegment,
+                    {
+                      left: segment.left,
+                      top: segment.top,
+                      width: segment.width,
+                      transform: [{ rotate: `${segment.angle}deg` }]
+                    }
+                  ]}
+                />
+              ))}
+
+              {chartPoints.map((point) => (
+                <View key={`point-${point.key}`} style={[styles.chartPointWrap, { left: point.x - 6, top: point.y - 6 }]}>
+                  <View style={styles.chartPoint} />
+                  <View style={styles.chartPointTooltip}>
+                    <Text style={styles.chartPointText}>{point.orders}</Text>
                   </View>
                 </View>
-                <Text style={{ color: "#64748B", fontSize: 12 }}>{new Date(order.createdAt).toLocaleString()}</Text>
-                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-                  <Text style={{ color: "#334155", fontWeight: "600" }}>Payment: {order.paymentMethod}</Text>
-                  <Text style={{ color: "#0F172A", fontWeight: "800" }}>{formatCurrency(order.totalAmount)}</Text>
-                </View>
-              </Pressable>
-            );
-          })
-        )}
-      </View>
+              ))}
 
-      <View style={{ gap: 10 }}>
-        <Text style={{ fontSize: 21, fontWeight: "800", color: "#0F172A" }}>Quick Actions</Text>
-        <View style={{ flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", gap: 10 }}>
-          {quickActions.map((action) => (
-            <Pressable
-              key={action.path}
-              onPress={() => router.push(action.path as never)}
-              style={{
-                width: "48%",
-                ...cardShadow,
-                borderColor: "#E2E8F0",
-                padding: 12,
-                gap: 8,
-                backgroundColor: action.tint
-              }}
-            >
-              <View style={{ width: 34, height: 34, borderRadius: 10, backgroundColor: "white", alignItems: "center", justifyContent: "center" }}>
-                <Ionicons name={action.icon} size={18} color="#0F172A" />
+              <View style={styles.chartXAxis}>
+                {dashboardData.sevenDays.map((day) => (
+                  <Text key={`label-${day.key}`} style={styles.chartXLabel}>
+                    {day.label}
+                  </Text>
+                ))}
               </View>
-              <Text style={{ color: "#0F172A", fontWeight: "800", fontSize: 14 }}>{action.label}</Text>
-              <Text style={{ color: "#475569", fontSize: 12 }}>{action.subtitle}</Text>
-            </Pressable>
-          ))}
+            </View>
+          </View>
         </View>
-      </View>
-    </ScrollView>
+
+        {/* Multi-Section Row */}
+        <View style={styles.multiCardRow}>
+          {/* Status Mix */}
+          <View style={[styles.card, styles.flexCard]}>
+            <Text style={styles.cardHeader}>Order Status</Text>
+            {dashboardData.orderStatusData.length === 0 ? (
+              <Text style={styles.emptyText}>No active orders.</Text>
+            ) : (
+              <View style={styles.statusList}>
+                {dashboardData.orderStatusData.map((entry) => {
+                  const tint = statusColorMap[entry.status] ?? "#3B82F6";
+                  return (
+                    <View key={entry.status} style={styles.statusRow}>
+                      <View style={styles.statusRowTop}>
+                        <Text style={styles.statusRowLabel}>{entry.status.charAt(0) + entry.status.slice(1).toLowerCase()}</Text>
+                        <Text style={styles.statusRowValue}>{entry.count}</Text>
+                      </View>
+                      <View style={styles.statusBarTrack}>
+                        <View
+                          style={[styles.statusBarFill, { backgroundColor: tint, width: `${Math.max(8, Math.round((entry.count / maxStatusCount) * 100))}%` }]}
+                        />
+                      </View>
+                    </View>
+                  );
+                })}
+              </View>
+            )}
+          </View>
+
+          {/* Team Snapshot */}
+          <View style={[styles.card, styles.flexCard]}>
+            <Text style={styles.cardHeader}>Team Alerts</Text>
+            <View style={styles.teamGrid}>
+              <View style={[styles.teamBox, { backgroundColor: "#ECFDF5" }]}>
+                <Text style={[styles.teamBoxLabel, { color: "#047857" }]}>Teachers</Text>
+                <Text style={[styles.teamBoxValue, { color: "#064E3B" }]}>{dashboardData.teamData.teachers}</Text>
+              </View>
+              <View style={[styles.teamBox, { backgroundColor: "#EFF6FF" }]}>
+                <Text style={[styles.teamBoxLabel, { color: "#1D4ED8" }]}>Staff</Text>
+                <Text style={[styles.teamBoxValue, { color: "#1E3A8A" }]}>{dashboardData.teamData.staff}</Text>
+              </View>
+              <View style={[styles.teamBox, { backgroundColor: "#FEF2F2" }]}>
+                <Text style={[styles.teamBoxLabel, { color: "#DC2626" }]}>Pending</Text>
+                <Text style={[styles.teamBoxValue, { color: "#7F1D1D" }]}>{dashboardData.teamData.pendingApprovals}</Text>
+              </View>
+            </View>
+            <Pressable
+              onPress={() => router.push("/(admin)/profile/users")}
+              style={styles.actionBtn}
+            >
+              <Text style={styles.actionBtnText}>Manage Users</Text>
+            </Pressable>
+          </View>
+        </View>
+
+        {/* Inventory Alerts */}
+        <View style={styles.sectionWrap}>
+          <Text style={styles.sectionTitle}>Inventory Alerts</Text>
+          <View style={styles.card}>
+            <View style={styles.inventoryGrid}>
+              <View style={[styles.inventoryBox, { backgroundColor: "#FEF2F2" }]}>
+                <Text style={[styles.inventoryLabel, { color: "#B91C1C" }]}>Out of Stock</Text>
+                <Text style={[styles.inventoryValue, { color: "#7F1D1D" }]}>{dashboardData.outOfStockItems.length}</Text>
+              </View>
+              <View style={[styles.inventoryBox, { backgroundColor: "#FFFBEB" }]}>
+                <Text style={[styles.inventoryLabel, { color: "#B45309" }]}>Low Stock</Text>
+                <Text style={[styles.inventoryValue, { color: "#78350F" }]}>{dashboardData.lowStockItems.length}</Text>
+              </View>
+              <View style={[styles.inventoryBox, { backgroundColor: "#F1F5F9" }]}>
+                <Text style={[styles.inventoryLabel, { color: "#475569" }]}>Hidden</Text>
+                <Text style={[styles.inventoryValue, { color: "#0F172A" }]}>{dashboardData.hiddenItems.length}</Text>
+              </View>
+            </View>
+            {dashboardData.lowStockItems.length > 0 && (
+              <View style={styles.inventoryList}>
+                {dashboardData.lowStockItems.slice(0, 3).map((item) => (
+                  <View key={item.id} style={styles.inventoryListItem}>
+                    <Ionicons name="warning" size={14} color="#D97706" />
+                    <Text style={styles.inventoryListText}>{item.name} ({item.stockQty} left)</Text>
+                  </View>
+                ))}
+              </View>
+            )}
+            <Pressable
+              onPress={() => router.push("/(admin)/profile/stock")}
+              style={[styles.actionBtn, { marginTop: 12 }]}
+            >
+              <Text style={styles.actionBtnText}>Open Stock Management</Text>
+            </Pressable>
+          </View>
+        </View>
+
+        {/* Recent Orders */}
+        <View style={styles.sectionWrap}>
+          <View style={styles.sectionHeaderRow}>
+            <Text style={styles.sectionTitle}>Recent Orders</Text>
+            <Pressable onPress={() => router.push("/(admin)/orders")} style={styles.viewAllBtn}>
+              <Text style={styles.viewAllText}>View All</Text>
+            </Pressable>
+          </View>
+
+          {dashboardData.recentOrders.length === 0 ? (
+            <View style={styles.card}>
+              <Text style={styles.emptyText}>No orders yet.</Text>
+            </View>
+          ) : (
+            <View style={styles.orderList}>
+              {dashboardData.recentOrders.map((order) => {
+                const statusTint = statusColorMap[order.status] ?? "#64748B";
+                return (
+                  <Pressable
+                    key={order.id}
+                    onPress={() => router.push({ pathname: "/(admin)/orders/[id]", params: { id: order.id } })}
+                    style={styles.orderCard}
+                    android_ripple={{ color: "#F1F5F9" }}
+                  >
+                    <View style={styles.orderTopRow}>
+                      <Text style={styles.orderNumber}>{order.orderNumber}</Text>
+                      <View style={[styles.orderStatusPill, { backgroundColor: `${statusTint}15` }]}>
+                        <View style={[styles.orderStatusDot, { backgroundColor: statusTint }]} />
+                        <Text style={[styles.orderStatusText, { color: statusTint }]}>{order.status}</Text>
+                      </View>
+                    </View>
+                    <Text style={styles.orderDate}>{new Date(order.createdAt).toLocaleString(undefined, { 
+                      month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' 
+                    })}</Text>
+                    <View style={styles.orderDivider} />
+                    <View style={styles.orderBottomRow}>
+                      <Text style={styles.orderMeta}>{order.items.length} items • {order.paymentMethod}</Text>
+                      <Text style={styles.orderTotal}>{formatCurrency(order.totalAmount)}</Text>
+                    </View>
+                  </Pressable>
+                );
+              })}
+            </View>
+          )}
+        </View>
+
+      </ScrollView>
+    </View>
   );
 }
+
+const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+    backgroundColor: "#EEF2F7"
+  },
+  content: {
+    padding: 16,
+    gap: 24,
+    paddingBottom: 40
+  },
+  kpiGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    gap: 12
+  },
+  kpiCard: {
+    width: "48%",
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    backgroundColor: "white",
+    padding: 14,
+    shadowColor: "#0F172A",
+    shadowOpacity: 0.03,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2
+  },
+  kpiIconWrap: {
+    width: 38,
+    height: 38,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 10
+  },
+  kpiTitle: {
+    color: "#64748B",
+    fontSize: 12,
+    fontWeight: "700"
+  },
+  kpiValue: {
+    color: "#0F172A",
+    fontSize: 22,
+    fontWeight: "900",
+    marginVertical: 2
+  },
+  kpiNote: {
+    color: "#94A3B8",
+    fontSize: 11,
+    fontWeight: "500"
+  },
+  sectionWrap: {
+    gap: 12
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "800",
+    color: "#0F172A"
+  },
+  sectionHeaderRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center"
+  },
+  viewAllBtn: {
+    paddingHorizontal: 8,
+    paddingVertical: 4
+  },
+  viewAllText: {
+    color: "#2563EB",
+    fontWeight: "700",
+    fontSize: 14
+  },
+  quickGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10
+  },
+  quickCard: {
+    width: "23%",
+    backgroundColor: "white",
+    borderRadius: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 6,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    shadowColor: "#0F172A",
+    shadowOpacity: 0.02,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 1,
+    gap: 8
+  },
+  quickIconWrap: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: "center",
+    justifyContent: "center"
+  },
+  quickLabel: {
+    color: "#334155",
+    fontSize: 11,
+    fontWeight: "700",
+    textAlign: "center"
+  },
+  card: {
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    backgroundColor: "white",
+    padding: 16,
+    shadowColor: "#0F172A",
+    shadowOpacity: 0.03,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2
+  },
+  cardHeader: {
+    fontSize: 16,
+    fontWeight: "800",
+    color: "#0F172A",
+    marginBottom: 12
+  },
+  chartHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 16,
+    paddingBottom: 8
+  },
+  chartTitle: {
+    fontSize: 16,
+    fontWeight: "800",
+    color: "#0F172A"
+  },
+  chartSubtitle: {
+    color: "#64748B",
+    fontSize: 13,
+    fontWeight: "500",
+    marginTop: 2
+  },
+  chartPill: {
+    backgroundColor: "#F1F5F9",
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 6
+  },
+  chartPillText: {
+    color: "#0F172A",
+    fontWeight: "800",
+    fontSize: 14
+  },
+  chartSummaryRow: {
+    flexDirection: "row",
+    gap: 8,
+    paddingHorizontal: 16,
+    paddingBottom: 16
+  },
+  chartSummaryBox: {
+    flex: 1,
+    backgroundColor: "#F8FAFC",
+    borderRadius: 12,
+    padding: 10,
+    borderWidth: 1,
+    borderColor: "#F1F5F9"
+  },
+  chartSummaryLabel: {
+    color: "#64748B",
+    fontSize: 11,
+    fontWeight: "600"
+  },
+  chartSummaryValue: {
+    color: "#0F172A",
+    fontSize: 15,
+    fontWeight: "800",
+    marginTop: 2
+  },
+  chartArea: {
+    height: 180,
+    backgroundColor: "#FAFAFA",
+    borderTopWidth: 1,
+    borderTopColor: "#E2E8F0"
+  },
+  chartGridLine: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    borderTopWidth: 1,
+    borderColor: "#E2E8F0",
+    borderStyle: "dashed"
+  },
+  chartSegment: {
+    position: "absolute",
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: "#3B82F6",
+    transformOrigin: "left center" as any // React native 0.73+ supports this
+  },
+  chartPointWrap: {
+    position: "absolute",
+    alignItems: "center"
+  },
+  chartPoint: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: "white",
+    borderWidth: 3,
+    borderColor: "#2563EB",
+    zIndex: 2
+  },
+  chartPointTooltip: {
+    position: "absolute",
+    top: -24,
+    backgroundColor: "#0F172A",
+    borderRadius: 6,
+    paddingHorizontal: 6,
+    paddingVertical: 2
+  },
+  chartPointText: {
+    color: "white",
+    fontSize: 10,
+    fontWeight: "800"
+  },
+  chartXAxis: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 8,
+    flexDirection: "row",
+    justifyContent: "space-around"
+  },
+  chartXLabel: {
+    color: "#94A3B8",
+    fontSize: 10,
+    fontWeight: "600"
+  },
+  multiCardRow: {
+    flexDirection: "row",
+    gap: 12
+  },
+  flexCard: {
+    flex: 1
+  },
+  statusList: {
+    gap: 12
+  },
+  statusRow: {
+    gap: 6
+  },
+  statusRowTop: {
+    flexDirection: "row",
+    justifyContent: "space-between"
+  },
+  statusRowLabel: {
+    color: "#475569",
+    fontWeight: "600",
+    fontSize: 12
+  },
+  statusRowValue: {
+    color: "#0F172A",
+    fontWeight: "800",
+    fontSize: 13
+  },
+  statusBarTrack: {
+    height: 6,
+    backgroundColor: "#F1F5F9",
+    borderRadius: 3,
+    overflow: "hidden"
+  },
+  statusBarFill: {
+    height: 6,
+    borderRadius: 3
+  },
+  teamGrid: {
+    gap: 8
+  },
+  teamBox: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 10
+  },
+  teamBoxLabel: {
+    fontWeight: "700",
+    fontSize: 13
+  },
+  teamBoxValue: {
+    fontWeight: "800",
+    fontSize: 16
+  },
+  actionBtn: {
+    backgroundColor: "#0F172A",
+    borderRadius: 10,
+    paddingVertical: 10,
+    alignItems: "center",
+    marginTop: 12
+  },
+  actionBtnText: {
+    color: "white",
+    fontWeight: "800",
+    fontSize: 13
+  },
+  inventoryGrid: {
+    flexDirection: "row",
+    gap: 8
+  },
+  inventoryBox: {
+    flex: 1,
+    borderRadius: 12,
+    padding: 12,
+    alignItems: "center"
+  },
+  inventoryLabel: {
+    fontSize: 11,
+    fontWeight: "700"
+  },
+  inventoryValue: {
+    fontSize: 24,
+    fontWeight: "900",
+    marginTop: 4
+  },
+  inventoryList: {
+    marginTop: 12,
+    backgroundColor: "#FFFBEB",
+    borderRadius: 10,
+    padding: 10,
+    gap: 6
+  },
+  inventoryListItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6
+  },
+  inventoryListText: {
+    color: "#92400E",
+    fontSize: 13,
+    fontWeight: "600"
+  },
+  orderList: {
+    gap: 12
+  },
+  orderCard: {
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    backgroundColor: "white",
+    padding: 16,
+    gap: 10,
+    shadowColor: "#0F172A",
+    shadowOpacity: 0.02,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 1
+  },
+  orderTopRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center"
+  },
+  orderNumber: {
+    color: "#0F172A",
+    fontSize: 16,
+    fontWeight: "800"
+  },
+  orderStatusPill: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderRadius: 999,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    gap: 4
+  },
+  orderStatusDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3
+  },
+  orderStatusText: {
+    fontWeight: "800",
+    fontSize: 11,
+    textTransform: "uppercase"
+  },
+  orderDate: {
+    color: "#64748B",
+    fontSize: 13,
+    fontWeight: "600"
+  },
+  orderDivider: {
+    height: 1,
+    backgroundColor: "#F1F5F9",
+    marginVertical: 2
+  },
+  orderBottomRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center"
+  },
+  orderMeta: {
+    color: "#64748B",
+    fontSize: 13,
+    fontWeight: "600"
+  },
+  orderTotal: {
+    color: "#0F172A",
+    fontSize: 16,
+    fontWeight: "800"
+  },
+  emptyText: {
+    color: "#64748B",
+    textAlign: "center",
+    padding: 16
+  }
+});

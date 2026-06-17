@@ -143,11 +143,6 @@ export const createTenant = async (req: Request, res: Response): Promise<void> =
 };
 
 export const listTenants = async (req: Request, res: Response): Promise<void> => {
-  const platformKey = req.header("x-platform-key");
-  if (platformKey !== env.superAdminBootstrapKey) {
-    throw new AppError("Invalid platform key", 401);
-  }
-
   const tenants = await prisma.tenant.findMany({
     orderBy: { createdAt: "desc" },
     select: {

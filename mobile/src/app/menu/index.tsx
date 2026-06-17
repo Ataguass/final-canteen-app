@@ -12,7 +12,9 @@ import {
   View,
   useWindowDimensions
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "../../hooks/useAuth";
+import { CanteenHeader } from "../../components/CanteenHeader";
 import { menuService } from "../../services/menuService";
 
 type Category = {
@@ -44,6 +46,7 @@ const isRenderableImageUri = (uri?: string | null): boolean => {
 
 export default function Screen() {
   const { width: screenWidth } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
   const { user, accessToken } = useAuth();
   const [loading, setLoading] = useState(false);
   const [query, setQuery] = useState("");
@@ -53,8 +56,15 @@ export default function Screen() {
   const [items, setItems] = useState<MenuItem[]>([]);
   const [failedImageMap, setFailedImageMap] = useState<Record<string, true>>({});
   const categoryColumns = screenWidth >= 1000 ? 4 : screenWidth >= 760 ? 3 : 2;
+  const gap = 12;
+  const availableWidth = screenWidth - 32; // 16px padding on left/right
+  // Fix precision issues by flooring the width, preventing accidental wrapping
   const categoryCardWidth =
-    categoryColumns === 4 ? "23.5%" : categoryColumns === 3 ? "32%" : "48.5%";
+    categoryColumns === 4
+      ? Math.floor((availableWidth - gap * 3) / 4)
+      : categoryColumns === 3
+      ? Math.floor((availableWidth - gap * 2) / 3)
+      : Math.floor((availableWidth - gap) / 2);
   const categoryImageHeight = categoryColumns >= 3 ? 96 : 118;
 
   const onCategoryImageError = useCallback((categoryId: string) => {
@@ -136,31 +146,12 @@ export default function Screen() {
     <>
       <ScrollView
         style={styles.screen}
-        contentContainerStyle={styles.content}
+        contentContainerStyle={[styles.content, { paddingTop: insets.top + 16 }]}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.headerCard}>
-        <View style={styles.headerTop}>
-          <View style={styles.headerIconWrap}>
-            <Ionicons name="restaurant-outline" size={20} color="#0F172A" />
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.title}>Menu Categories</Text>
-            <Text style={styles.subtitle}>Choose a category to browse items</Text>
-          </View>
-        </View>
-        <View style={styles.metricRow}>
-          <View style={styles.metricChip}>
-            <Text style={styles.metricLabel}>Categories</Text>
-            <Text style={styles.metricValue}>{categories.length}</Text>
-          </View>
-          <View style={styles.metricChip}>
-            <Text style={styles.metricLabel}>Available Items</Text>
-            <Text style={styles.metricValue}>{availableItems.length}</Text>
-          </View>
-        </View>
-        <View style={styles.searchWrap}>
-          <Ionicons name="search-outline" size={18} color="#64748B" />
+        <CanteenHeader showBackButton title="Menu" subtitle="Categories & Items" />
+        <View style={styles.searchBarCard}>
+          <Ionicons name="search-outline" size={20} color="#64748B" />
           <TextInput
             value={query}
             onChangeText={(text) => {
@@ -169,7 +160,7 @@ export default function Screen() {
                 setSelectedCategoryId("ALL");
               }
             }}
-            placeholder="Search category"
+            placeholder="Search categories..."
             placeholderTextColor="#94A3B8"
             style={styles.searchInput}
           />
@@ -179,65 +170,12 @@ export default function Screen() {
                 setQuery("");
                 setSelectedCategoryId("ALL");
               }}
+              style={styles.clearBtn}
             >
               <Ionicons name="close-circle" size={18} color="#94A3B8" />
             </Pressable>
           ) : null}
         </View>
-        <Text style={styles.filterLabel}>Browse Mode</Text>
-        <View style={styles.segmentRow}>
-          <Pressable
-            onPress={() => {
-              setCategoryMode("POPULAR");
-              setSelectedCategoryId("ALL");
-            }}
-            style={[
-              styles.segmentButton,
-              categoryMode === "POPULAR" && styles.segmentButtonActive
-            ]}
-            android_ripple={{ color: "#DBEAFE" }}
-          >
-            <Ionicons
-              name="trending-up-outline"
-              size={14}
-              color={categoryMode === "POPULAR" ? "#1E3A8A" : "#64748B"}
-            />
-            <Text
-              style={[
-                styles.segmentButtonText,
-                categoryMode === "POPULAR" && styles.segmentButtonTextActive
-              ]}
-            >
-              Popular
-            </Text>
-          </Pressable>
-          <Pressable
-            onPress={() => {
-              setCategoryMode("ALL");
-              setSelectedCategoryId("ALL");
-            }}
-            style={[
-              styles.segmentButton,
-              categoryMode === "ALL" && styles.segmentButtonActive
-            ]}
-            android_ripple={{ color: "#DBEAFE" }}
-          >
-            <Ionicons
-              name="apps-outline"
-              size={14}
-              color={categoryMode === "ALL" ? "#1E3A8A" : "#64748B"}
-            />
-            <Text
-              style={[
-                styles.segmentButtonText,
-                categoryMode === "ALL" && styles.segmentButtonTextActive
-              ]}
-            >
-              All
-            </Text>
-          </Pressable>
-        </View>
-        <Text style={styles.filterLabel}>Quick Category Jump</Text>
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
@@ -268,10 +206,6 @@ export default function Screen() {
             );
           })}
         </ScrollView>
-        <Text style={styles.showingText}>
-          Showing {visibleCategories.length} of {jumpCategories.length} categories
-        </Text>
-      </View>
 
       {loading ? (
         <View style={styles.emptyCard}>
@@ -287,36 +221,24 @@ export default function Screen() {
         </View>
       ) : null}
 
-      <View style={styles.categorySectionCard}>
-        <View style={styles.gridHeaderRow}>
-          <Text style={styles.gridHeaderTitle}>Categories</Text>
-          <Text style={styles.gridHeaderMeta}>{visibleCategories.length} shown</Text>
-        </View>
+      <View style={styles.categoryGrid}>
+        {visibleCategories.map((category) => {
+          const itemCount = itemCountByCategoryId.get(category.id) ?? 0;
+          const canShowImage = isRenderableImageUri(category.imageUrl) && !failedImageMap[category.id];
 
-        <View style={styles.categoryGrid}>
-          {visibleCategories.map((category) => {
-            const itemCount = itemCountByCategoryId.get(category.id) ?? 0;
-            const canShowImage =
-              isRenderableImageUri(category.imageUrl) && !failedImageMap[category.id];
-
-            return (
+          return (
+            <View
+              key={category.id}
+              style={[styles.categoryCard, { width: categoryCardWidth }]}
+            >
               <Link
-                key={category.id}
                 href={{
                   pathname: "/(student)/menu/[categoryId]",
                   params: { categoryId: category.id }
                 }}
                 asChild
               >
-                <Pressable
-                  style={[
-                    styles.categoryCard,
-                    {
-                      width: categoryCardWidth
-                    }
-                  ]}
-                  android_ripple={{ color: "#E2E8F0" }}
-                >
+                <Pressable android_ripple={{ color: "#E2E8F0" }}>
                   <View style={styles.categoryImageWrap}>
                     {canShowImage ? (
                       <Image
@@ -327,32 +249,30 @@ export default function Screen() {
                       />
                     ) : (
                       <View style={[styles.categoryImageFallback, { height: categoryImageHeight }]}>
-                        <Ionicons name="fast-food-outline" size={20} color="#94A3B8" />
+                        <Ionicons name="fast-food-outline" size={24} color="#94A3B8" />
                       </View>
                     )}
+                    <View style={styles.categoryItemBadge}>
+                      <Text style={styles.categoryItemBadgeText}>{itemCount} items</Text>
+                    </View>
                   </View>
                   <View style={styles.categoryBody}>
-                    <View style={styles.categoryNameRow}>
-                      <Text style={styles.categoryName} numberOfLines={1}>
-                        {category.name}
-                      </Text>
-                      <View style={styles.categoryMetaPill}>
-                        <Text style={styles.categoryMeta}>{itemCount} items</Text>
-                      </View>
-                    </View>
+                    <Text style={styles.categoryName} numberOfLines={1}>
+                      {category.name}
+                    </Text>
                     {category.description ? (
                       <Text style={styles.categoryDescription} numberOfLines={2}>
                         {category.description}
                       </Text>
                     ) : (
-                      <Text style={styles.categoryDescriptionMuted}>Tap to view category items</Text>
+                      <Text style={styles.categoryDescriptionMuted}>Tap to view items</Text>
                     )}
                   </View>
                 </Pressable>
               </Link>
-            );
-          })}
-        </View>
+            </View>
+          );
+        })}
       </View>
       </ScrollView>
     </>
@@ -369,6 +289,25 @@ const styles = StyleSheet.create({
     gap: 12,
     paddingBottom: 28
   },
+  searchBarCard: {
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    shadowColor: "#0F172A",
+    shadowOpacity: 0.04,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 3 },
+    elevation: 2
+  },
+  clearBtn: {
+    padding: 4
+  },
+
   headerCard: {
     borderWidth: 1,
     borderColor: "#E2E8F0",
@@ -533,7 +472,7 @@ const styles = StyleSheet.create({
   categoryGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    justifyContent: "space-between",
+    gap: 12,
     alignItems: "flex-start"
   },
   gridHeaderRow: {
@@ -569,28 +508,36 @@ const styles = StyleSheet.create({
     elevation: 2
   },
   categoryImageWrap: {
-    marginHorizontal: 10,
-    marginTop: 10,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-    backgroundColor: "#FFFFFF",
-    overflow: "hidden"
+    width: "100%",
+    position: "relative"
   },
   categoryImage: {
     width: "100%",
-    backgroundColor: "#E2E8F0"
+    backgroundColor: "#F1F5F9"
   },
   categoryImageFallback: {
     width: "100%",
-    backgroundColor: "#F1F5F9",
+    backgroundColor: "#F8FAFC",
     alignItems: "center",
     justifyContent: "center"
   },
+  categoryItemBadge: {
+    position: "absolute",
+    top: 8,
+    right: 8,
+    backgroundColor: "rgba(15, 23, 42, 0.8)",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8
+  },
+  categoryItemBadgeText: {
+    color: "white",
+    fontSize: 11,
+    fontWeight: "800"
+  },
   categoryBody: {
-    padding: 10,
-    gap: 8,
-    minHeight: 108
+    padding: 12,
+    gap: 4
   },
   categoryNameRow: {
     flexDirection: "row",
@@ -600,9 +547,8 @@ const styles = StyleSheet.create({
   },
   categoryName: {
     color: "#0F172A",
-    fontSize: 17,
-    fontWeight: "800",
-    flex: 1
+    fontSize: 16,
+    fontWeight: "800"
   },
   categoryMetaPill: {
     alignSelf: "flex-start",
@@ -618,15 +564,12 @@ const styles = StyleSheet.create({
   },
   categoryDescription: {
     color: "#64748B",
-    fontSize: 12,
-    lineHeight: 17,
-    minHeight: 34,
-    fontWeight: "500"
+    fontSize: 13,
+    lineHeight: 18
   },
   categoryDescriptionMuted: {
     color: "#94A3B8",
-    fontSize: 12,
-    fontWeight: "600",
-    minHeight: 34
+    fontSize: 13,
+    fontWeight: "500"
   }
 });

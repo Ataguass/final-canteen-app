@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Alert, Image, Linking, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { Alert, Image, Linking, Pressable, ScrollView, Text, TextInput, View, RefreshControl } from "react-native";
 import { useAuth } from "../../../hooks/useAuth";
 import { communityService, type CommunityPost } from "../../../services/communityService";
 
@@ -114,152 +114,89 @@ export default function Screen() {
   }, [posts, query, filter]);
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: "#F8FAFC" }} contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: 22 }}>
-      <View style={{ gap: 4 }}>
-        <Text style={{ fontSize: 28, fontWeight: "800", color: "#0F172A" }}>Community</Text>
-        <Text style={{ color: "#64748B", fontSize: 13 }}>
-          Last updated: {lastUpdated ? lastUpdated.toLocaleString() : "Not loaded yet"}
-        </Text>
-      </View>
-
-      <View style={{ flexDirection: "row", gap: 8 }}>
-        <Pressable
-          onPress={() =>
-            router.push({
-              pathname: "/(admin)/community/create",
-              params: { resetKey: Date.now().toString() }
-            })
-          }
-          style={{
-            flex: 1,
-            borderRadius: 12,
-            padding: 12,
-            backgroundColor: "#0F172A",
-            alignItems: "center",
-            justifyContent: "center",
-            flexDirection: "row",
-            gap: 8
-          }}
-        >
-          <Ionicons name="add-circle-outline" size={18} color="white" />
-          <Text style={{ color: "white", fontWeight: "800" }}>Create Post</Text>
-        </Pressable>
-        <Pressable
-          onPress={() => load().catch(() => undefined)}
-          style={{
-            flex: 1,
-            borderRadius: 12,
-            padding: 12,
-            backgroundColor: "#334155",
-            alignItems: "center",
-            justifyContent: "center",
-            flexDirection: "row",
-            gap: 8
-          }}
-        >
-          <Ionicons name="refresh-outline" size={18} color="white" />
-          <Text style={{ color: "white", fontWeight: "800" }}>{loading ? "Refreshing..." : "Refresh"}</Text>
-        </Pressable>
-      </View>
-
-      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 10 }}>
-        <View style={{ width: "48%", ...cardShadow, padding: 12 }}>
-          <Text style={{ color: "#475569", fontSize: 12, fontWeight: "700" }}>Total Posts</Text>
-          <Text style={{ color: "#0F172A", fontSize: 24, fontWeight: "800", marginTop: 4 }}>{stats.total}</Text>
-        </View>
-        <View style={{ width: "48%", ...cardShadow, padding: 12 }}>
-          <Text style={{ color: "#475569", fontSize: 12, fontWeight: "700" }}>Pinned</Text>
-          <Text style={{ color: "#4F46E5", fontSize: 24, fontWeight: "800", marginTop: 4 }}>{stats.pinned}</Text>
-        </View>
-        <View style={{ width: "48%", ...cardShadow, padding: 12 }}>
-          <Text style={{ color: "#475569", fontSize: 12, fontWeight: "700" }}>Visible</Text>
-          <Text style={{ color: "#059669", fontSize: 24, fontWeight: "800", marginTop: 4 }}>{stats.visible}</Text>
-        </View>
-        <View style={{ width: "48%", ...cardShadow, padding: 12 }}>
-          <Text style={{ color: "#475569", fontSize: 12, fontWeight: "700" }}>Hidden</Text>
-          <Text style={{ color: "#DC2626", fontSize: 24, fontWeight: "800", marginTop: 4 }}>{stats.hidden}</Text>
-        </View>
-      </View>
-
-      <View style={{ ...cardShadow, padding: 12, gap: 10 }}>
-        <Text style={{ fontSize: 16, fontWeight: "800", color: "#0F172A" }}>Search & Filter</Text>
-        <View
-          style={{
-            borderWidth: 1,
-            borderColor: "#E2E8F0",
-            borderRadius: 12,
-            backgroundColor: "#F8FAFC",
-            flexDirection: "row",
-            alignItems: "center",
-            paddingHorizontal: 10
-          }}
-        >
-          <Ionicons name="search-outline" size={16} color="#64748B" />
-          <TextInput
-            value={query}
-            onChangeText={setQuery}
-            placeholder="Search title, body or author"
-            placeholderTextColor="#94A3B8"
-            style={{ flex: 1, paddingVertical: 10, paddingHorizontal: 8, color: "#0F172A" }}
-          />
-          {query ? (
-            <Pressable onPress={() => setQuery("")}>
-              <Ionicons name="close-circle" size={18} color="#94A3B8" />
-            </Pressable>
-          ) : null}
-        </View>
-
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
-          {filters.map((value) => {
-            const active = filter === value;
-            return (
-              <Pressable
-                key={value}
-                onPress={() => setFilter(value)}
-                style={{
-                  borderRadius: 999,
-                  borderWidth: 1,
-                  borderColor: active ? "#0F172A" : "#E2E8F0",
-                  backgroundColor: active ? "#0F172A" : "white",
-                  paddingHorizontal: 14,
-                  paddingVertical: 8
-                }}
-              >
-                <Text style={{ color: active ? "white" : "#334155", fontWeight: "700" }}>{value}</Text>
+    <View style={{ flex: 1, backgroundColor: "#F8FAFC" }}>
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{ padding: 16, gap: 16, paddingBottom: 100 }}
+        refreshControl={<RefreshControl refreshing={loading} onRefresh={() => load().catch(() => undefined)} />}
+      >
+        <View style={{ gap: 12 }}>
+          <View style={{ flexDirection: "row", alignItems: "center", backgroundColor: "white", borderRadius: 12, paddingHorizontal: 12, borderWidth: 1, borderColor: "#E2E8F0" }}>
+            <Ionicons name="search" size={18} color="#64748B" />
+            <TextInput
+              placeholder="Search posts..."
+              value={query}
+              onChangeText={setQuery}
+              style={{ flex: 1, paddingVertical: 12, paddingHorizontal: 8, fontSize: 14, color: "#0F172A" }}
+              placeholderTextColor="#94A3B8"
+            />
+            {query ? (
+              <Pressable onPress={() => setQuery("")}>
+                <Ionicons name="close-circle" size={18} color="#94A3B8" />
               </Pressable>
-            );
-          })}
-        </ScrollView>
-      </View>
+            ) : null}
+          </View>
 
-      <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-        <Text style={{ fontSize: 18, fontWeight: "800", color: "#0F172A" }}>Posts</Text>
-        <Text style={{ color: "#64748B", fontWeight: "700" }}>{filteredPosts.length} found</Text>
-      </View>
-
-      {filteredPosts.length === 0 ? (
-        <View style={{ ...cardShadow, padding: 14 }}>
-          <Text style={{ color: "#64748B" }}>No community posts yet.</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
+            {filters.map((value) => {
+              const active = filter === value;
+              return (
+                <Pressable
+                  key={value}
+                  onPress={() => setFilter(value)}
+                  style={{
+                    borderRadius: 999,
+                    borderWidth: 1,
+                    borderColor: active ? "#0F172A" : "#E2E8F0",
+                    backgroundColor: active ? "#0F172A" : "white",
+                    paddingHorizontal: 16,
+                    paddingVertical: 8
+                  }}
+                >
+                  <Text style={{ color: active ? "white" : "#475569", fontWeight: "700", fontSize: 13 }}>{value}</Text>
+                </Pressable>
+              );
+            })}
+          </ScrollView>
         </View>
-      ) : (
+
+        {filteredPosts.length === 0 ? (
+          <View style={{ ...cardShadow, padding: 24, alignItems: "center", justifyContent: "center", marginTop: 20 }}>
+            <Ionicons name="document-text-outline" size={32} color="#94A3B8" style={{ marginBottom: 8 }} />
+            <Text style={{ color: "#0F172A", fontWeight: "700", fontSize: 16 }}>No posts found</Text>
+            <Text style={{ color: "#64748B", fontSize: 13, marginTop: 4 }}>Try adjusting your filters or create a new post.</Text>
+          </View>
+        ) : (
         filteredPosts.map((post) => (
-          <View key={post.id} style={{ ...cardShadow, padding: 12, gap: 8 }}>
-            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
-              <Text style={{ color: "#0F172A", fontSize: 17, fontWeight: "800", flex: 1 }}>{post.title}</Text>
-              {post.isPinned ? (
-                <View style={{ borderRadius: 999, backgroundColor: "#EEF2FF", paddingHorizontal: 8, paddingVertical: 4 }}>
-                  <Text style={{ color: "#4F46E5", fontWeight: "800", fontSize: 12 }}>Pinned</Text>
+          <View key={post.id} style={{ ...cardShadow, padding: 16, gap: 12 }}>
+            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", gap: 12 }}>
+              <View style={{ flex: 1, gap: 4 }}>
+                <Text style={{ color: "#0F172A", fontSize: 18, fontWeight: "800" }}>{post.title}</Text>
+                <Text style={{ color: "#64748B", fontSize: 12 }}>
+                  By {post.author?.name ?? "Admin"} • {new Date(post.createdAt).toLocaleDateString()}
+                </Text>
+              </View>
+              <View style={{ flexDirection: "row", gap: 6 }}>
+                {post.isPinned ? (
+                  <View style={{ borderRadius: 6, backgroundColor: "#EEF2FF", paddingHorizontal: 8, paddingVertical: 4, borderWidth: 1, borderColor: "#C7D2FE" }}>
+                    <Text style={{ color: "#4F46E5", fontWeight: "800", fontSize: 11 }}>Pinned</Text>
+                  </View>
+                ) : null}
+                <View style={{ borderRadius: 6, backgroundColor: post.isVisible ? "#ECFDF5" : "#FEF2F2", paddingHorizontal: 8, paddingVertical: 4, borderWidth: 1, borderColor: post.isVisible ? "#A7F3D0" : "#FECACA" }}>
+                  <Text style={{ color: post.isVisible ? "#059669" : "#DC2626", fontWeight: "800", fontSize: 11 }}>
+                    {post.isVisible ? "Visible" : "Hidden"}
+                  </Text>
                 </View>
-              ) : null}
+              </View>
             </View>
 
-            <Text style={{ color: "#334155", lineHeight: 20 }}>{post.body}</Text>
+            <Text style={{ color: "#334155", lineHeight: 22, fontSize: 14 }}>{post.body}</Text>
 
             {post.mediaUrl && post.mediaType === "IMAGE" ? (
               <Image
                 source={{ uri: post.mediaUrl }}
                 resizeMode="cover"
-                style={{ width: "100%", height: 180, borderRadius: 12, backgroundColor: "#F1F5F9" }}
+                style={{ width: "100%", height: 200, borderRadius: 12, backgroundColor: "#F1F5F9", borderWidth: 1, borderColor: "#E2E8F0" }}
               />
             ) : null}
             {post.mediaUrl && post.mediaType === "VIDEO" ? (
@@ -270,81 +207,72 @@ export default function Screen() {
                 }}
                 style={{
                   borderRadius: 12,
-                  paddingVertical: 10,
-                  backgroundColor: "#0F172A",
+                  paddingVertical: 12,
+                  backgroundColor: "#F8FAFC",
                   alignItems: "center",
                   justifyContent: "center",
                   flexDirection: "row",
-                  gap: 8
+                  gap: 8,
+                  borderWidth: 1,
+                  borderColor: "#E2E8F0"
                 }}
               >
-                <Ionicons name="play-circle-outline" size={18} color="white" />
-                <Text style={{ color: "white", fontWeight: "800" }}>Open Video</Text>
+                <Ionicons name="play-circle" size={20} color="#0F172A" />
+                <Text style={{ color: "#0F172A", fontWeight: "800" }}>Watch Attached Video</Text>
               </Pressable>
             ) : null}
 
-            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
-              <Text style={{ color: "#64748B", fontSize: 12, flex: 1 }}>
-                By {post.author?.name ?? "Admin"} on {new Date(post.createdAt).toLocaleString()}
-              </Text>
-              <View
-                style={{
-                  borderRadius: 999,
-                  backgroundColor: post.isVisible ? "#ECFDF5" : "#FEF2F2",
-                  paddingHorizontal: 8,
-                  paddingVertical: 4
-                }}
-              >
-                <Text style={{ color: post.isVisible ? "#059669" : "#DC2626", fontWeight: "800", fontSize: 11 }}>
-                  {post.isVisible ? "Visible" : "Hidden"}
-                </Text>
-              </View>
-            </View>
-
-            <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
+            <View style={{ flexDirection: "row", gap: 8, marginTop: 4, paddingTop: 16, borderTopWidth: 1, borderColor: "#F1F5F9" }}>
               <Pressable
                 onPress={() => onTogglePin(post.id)}
-                style={{
-                  flex: 1,
-                  minWidth: 100,
-                  borderRadius: 10,
-                  backgroundColor: "#4F46E5",
-                  paddingVertical: 9,
-                  alignItems: "center"
-                }}
+                style={{ flex: 1, borderRadius: 10, backgroundColor: "#F1F5F9", paddingVertical: 10, alignItems: "center" }}
               >
-                <Text style={{ color: "white", fontWeight: "800" }}>{post.isPinned ? "Unpin" : "Pin"}</Text>
+                <Text style={{ color: "#475569", fontWeight: "700", fontSize: 13 }}>{post.isPinned ? "Unpin" : "Pin"}</Text>
               </Pressable>
               <Pressable
                 onPress={() => onToggleVisibility(post.id)}
-                style={{
-                  flex: 1,
-                  minWidth: 100,
-                  borderRadius: 10,
-                  backgroundColor: "#D97706",
-                  paddingVertical: 9,
-                  alignItems: "center"
-                }}
+                style={{ flex: 1, borderRadius: 10, backgroundColor: "#F1F5F9", paddingVertical: 10, alignItems: "center" }}
               >
-                <Text style={{ color: "white", fontWeight: "800" }}>{post.isVisible ? "Hide" : "Show"}</Text>
+                <Text style={{ color: "#475569", fontWeight: "700", fontSize: 13 }}>{post.isVisible ? "Hide" : "Show"}</Text>
               </Pressable>
               <Pressable
                 onPress={() => onDelete(post.id)}
-                style={{
-                  flex: 1,
-                  minWidth: 100,
-                  borderRadius: 10,
-                  backgroundColor: "#B91C1C",
-                  paddingVertical: 9,
-                  alignItems: "center"
-                }}
+                style={{ flex: 1, borderRadius: 10, backgroundColor: "#FEF2F2", paddingVertical: 10, alignItems: "center" }}
               >
-                <Text style={{ color: "white", fontWeight: "800" }}>Delete</Text>
+                <Text style={{ color: "#DC2626", fontWeight: "700", fontSize: 13 }}>Delete</Text>
               </Pressable>
             </View>
           </View>
         ))
       )}
-    </ScrollView>
+      </ScrollView>
+
+      <Pressable
+        onPress={() =>
+          router.push({
+            pathname: "/(admin)/community/create",
+            params: { resetKey: Date.now().toString() }
+          })
+        }
+        style={{
+          position: "absolute",
+          bottom: 24,
+          right: 24,
+          backgroundColor: "#0F172A",
+          width: 60,
+          height: 60,
+          borderRadius: 30,
+          alignItems: "center",
+          justifyContent: "center",
+          shadowColor: "#0F172A",
+          shadowOpacity: 0.3,
+          shadowRadius: 12,
+          shadowOffset: { width: 0, height: 6 },
+          elevation: 6
+        }}
+      >
+        <Ionicons name="add" size={32} color="white" />
+      </Pressable>
+    </View>
   );
 }

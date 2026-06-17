@@ -4,6 +4,7 @@ import { Request, Response } from "express";
 import { Role } from "@prisma/client";
 import { prisma } from "../../config/database.js";
 import { env } from "../../config/env.js";
+import { firebaseAdmin } from "../../config/firebase.js";
 import { redis } from "../../config/redis.js";
 import { AppError } from "../../utils/appError.js";
 
@@ -23,71 +24,46 @@ const refreshTokenFor = (user: { id: string; role: Role; tenantId: string }): st
 const otpKey = (tenantId: string, phone: string): string => `otp:${tenantId}:${phone}`;
 const otpVerifiedKey = (tenantId: string, phone: string): string => `otp_verified:${tenantId}:${phone}`;
 
-export const requestOtp = async (req: Request, res: Response): Promise<void> => {
-  const { tenantId, phone } = req.body as { tenantId: string; phone: string };
 
-  if (!tenantId || !phone) {
-    throw new AppError("tenantId and phone are required", 400);
-  }
-
-  const tenant = await prisma.tenant.findUnique({ where: { id: tenantId } });
-  if (!tenant) {
-    throw new AppError("Tenant not found", 404);
-  }
-
-  const code = String(Math.floor(100000 + Math.random() * 900000));
-  await redis.set(otpKey(tenantId, phone), code, "EX", env.otpTtlSeconds);
-
-  res.status(200).json({
-    success: true,
-    message: "OTP sent",
-    data: {
-      expiresIn: env.otpTtlSeconds,
-      // Keep dev OTP visible for testing until SMS provider is integrated.
-      ...(env.nodeEnv === "development" ? { code } : {})
-    }
-  });
-};
-
-export const verifyOtp = async (req: Request, res: Response): Promise<void> => {
-  const { tenantId, phone, code } = req.body as { tenantId: string; phone: string; code: string };
-
-  if (!tenantId || !phone || !code) {
-    throw new AppError("tenantId, phone and code are required", 400);
-  }
-
-  const stored = await redis.get(otpKey(tenantId, phone));
-  if (!stored || stored !== code) {
-    throw new AppError("Invalid or expired OTP", 401);
-  }
-
-  await redis.del(otpKey(tenantId, phone));
-  await redis.set(otpVerifiedKey(tenantId, phone), "1", "EX", 600);
-
-  res.status(200).json({ success: true, message: "OTP verified" });
-};
 
 export const registerStudent = async (req: Request, res: Response): Promise<void> => {
-  const { name, phone, password, rollNumber, tenantId } = req.body as {
+  const { name, email, firebaseIdToken, password, rollNumber, tenantId } = req.body as {
     name: string;
-    phone: string;
+    email: string;
+    firebaseIdToken: string;
     password: string;
     rollNumber?: string;
     tenantId: string;
   };
 
-  if (!name || !phone || !password || !tenantId) {
-    throw new AppError("name, phone, password, tenantId are required", 400);
+  if (!name || !email || !firebaseIdToken || !password || !tenantId || !rollNumber) {
+    throw new AppError("name, email, firebaseIdToken, rollNumber, password, tenantId are required", 400);
   }
 
-  const otpVerified = await redis.get(otpVerifiedKey(tenantId, phone));
-  if (!otpVerified) {
-    throw new AppError("OTP verification required", 401);
+  let phone = "";
+  try {
+    const decodedToken = await firebaseAdmin.auth().verifyIdToken(firebaseIdToken);
+    if (!decodedToken.phone_number) {
+      throw new AppError("Firebase token does not contain a verified phone number", 400);
+    }
+    // phone_number usually comes with country code, e.g., +91...
+    // You might want to parse/normalize it here, but we will store it as is for now.
+    phone = decodedToken.phone_number;
+  } catch (error) {
+    throw new AppError("Invalid or expired Firebase ID token", 401);
   }
 
-  const existing = await prisma.user.findFirst({ where: { tenantId, phone } });
+  const existing = await prisma.user.findFirst({
+    where: { 
+      OR: [
+        { tenantId, phone },
+        { tenantId, email }
+      ]
+    }
+  });
+
   if (existing) {
-    throw new AppError("User already exists with this phone", 409);
+    throw new AppError("User already exists with this phone or email", 409);
   }
 
   const passwordHash = await bcrypt.hash(password, 10);
@@ -95,6 +71,7 @@ export const registerStudent = async (req: Request, res: Response): Promise<void
     data: {
       tenantId,
       name,
+      email,
       phone,
       passwordHash,
       rollNumber,
@@ -102,8 +79,6 @@ export const registerStudent = async (req: Request, res: Response): Promise<void
       isApproved: true
     }
   });
-
-  await redis.del(otpVerifiedKey(tenantId, phone));
 
   res.status(201).json({
     success: true,
@@ -116,23 +91,38 @@ export const registerStudent = async (req: Request, res: Response): Promise<void
 };
 
 export const login = async (req: Request, res: Response): Promise<void> => {
-  const { tenantId, phone, email, password } = req.body as {
-    tenantId: string;
-    phone?: string;
-    email?: string;
+  const { phone, rollNumber, password, isAdminLogin } = req.body as {
+    phone: string;
+    rollNumber?: string;
     password: string;
+    isAdminLogin?: boolean;
   };
 
-  if (!tenantId || !password || (!phone && !email)) {
-    throw new AppError("tenantId and password with phone/email are required", 400);
+  if (!phone || !password) {
+    throw new AppError("phone and password are required", 400);
   }
 
-  const user = await prisma.user.findFirst({
-    where: {
-      tenantId,
-      ...(phone ? { phone } : { email })
-    }
-  });
+  if (!isAdminLogin && !rollNumber) {
+    throw new AppError("rollNumber is required for student login", 400);
+  }
+
+  let user;
+  
+  if (isAdminLogin) {
+    user = await prisma.user.findFirst({
+      where: {
+        phone,
+        role: { in: [Role.SUPER_ADMIN, Role.ADMIN, Role.STAFF, Role.TEACHER] }
+      }
+    });
+  } else {
+    user = await prisma.user.findFirst({
+      where: {
+        phone,
+        rollNumber: rollNumber!
+      }
+    });
+  }
 
   if (!user) {
     throw new AppError("Invalid credentials", 401);

@@ -156,7 +156,7 @@ export default function Screen() {
         <Text style={{ color: "#64748B" }}>Publish announcements with optional image/video.</Text>
       </View>
 
-      <View style={{ ...cardShadow, padding: 12, gap: 10 }}>
+      <View style={{ ...cardShadow, padding: 16, gap: 12 }}>
         <Text style={{ fontSize: 16, fontWeight: "800", color: "#0F172A" }}>Content</Text>
         <TextInput
           value={title}
@@ -165,116 +165,150 @@ export default function Screen() {
           placeholderTextColor="#94A3B8"
           style={{
             borderWidth: 1,
-            borderColor: "#D1D5DB",
+            borderColor: "#E2E8F0",
             borderRadius: 12,
-            paddingHorizontal: 12,
-            paddingVertical: 10,
+            paddingHorizontal: 16,
+            paddingVertical: 14,
             backgroundColor: "#F8FAFC",
-            color: "#0F172A"
+            color: "#0F172A",
+            fontSize: 16,
+            fontWeight: "600"
           }}
         />
         <TextInput
           value={body}
           onChangeText={setBody}
-          placeholder="Write announcement..."
+          placeholder="Write your announcement..."
           placeholderTextColor="#94A3B8"
           multiline
           style={{
             borderWidth: 1,
-            borderColor: "#D1D5DB",
+            borderColor: "#E2E8F0",
             borderRadius: 12,
-            paddingHorizontal: 12,
-            paddingVertical: 10,
-            minHeight: 150,
+            paddingHorizontal: 16,
+            paddingVertical: 14,
+            minHeight: 180,
             textAlignVertical: "top",
             backgroundColor: "#F8FAFC",
-            color: "#0F172A"
+            color: "#0F172A",
+            fontSize: 15,
+            lineHeight: 22
           }}
         />
       </View>
 
-      <View style={{ ...cardShadow, padding: 12, gap: 10 }}>
+      <View style={{ ...cardShadow, padding: 16, gap: 12 }}>
         <Text style={{ fontSize: 16, fontWeight: "800", color: "#0F172A" }}>Attachment (optional)</Text>
         <Pressable
           onPress={uploadCommunityMedia}
           disabled={uploading}
           style={{
             borderRadius: 12,
-            paddingVertical: 11,
-            backgroundColor: "#1D4ED8",
+            paddingVertical: 14,
+            backgroundColor: "#F1F5F9",
             alignItems: "center",
             justifyContent: "center",
             flexDirection: "row",
-            gap: 8
+            gap: 8,
+            borderWidth: 1,
+            borderColor: "#E2E8F0",
+            borderStyle: "dashed"
           }}
         >
-          <Ionicons name="cloud-upload-outline" size={18} color="white" />
-          <Text style={{ color: "white", fontWeight: "800" }}>{uploading ? "Uploading..." : "Upload Image / Video"}</Text>
+          <Ionicons name="cloud-upload" size={24} color="#64748B" />
+          <Text style={{ color: "#475569", fontWeight: "800", fontSize: 15 }}>{uploading ? "Uploading..." : "Upload Image / Video"}</Text>
         </Pressable>
-        <Text style={{ color: "#64748B" }}>Image max ~2MB, Video max ~15MB.</Text>
+        <Text style={{ color: "#64748B", fontSize: 12 }}>
+          Recommended: 16:9 aspect ratio (Max 2MB). Video max 15MB.
+        </Text>
 
         {mediaUrl && mediaType === "IMAGE" ? (
-          <Image
-            source={{ uri: mediaUrl }}
-            resizeMode="cover"
-            style={{ width: "100%", height: 190, backgroundColor: "#F1F5F9", borderRadius: 12 }}
-          />
+          <View style={{ position: "relative" }}>
+            <Image
+              source={{ uri: mediaUrl }}
+              resizeMode="cover"
+              style={{ width: "100%", height: 220, backgroundColor: "#F1F5F9", borderRadius: 12, borderWidth: 1, borderColor: "#E2E8F0" }}
+            />
+            <Pressable
+              onPress={() => {
+                setMediaUrl(null);
+                setMediaType(null);
+              }}
+              style={{ position: "absolute", top: 12, right: 12, backgroundColor: "rgba(15, 23, 42, 0.7)", borderRadius: 20, padding: 8 }}
+            >
+              <Ionicons name="trash" size={18} color="white" />
+            </Pressable>
+          </View>
         ) : null}
 
         {mediaUrl && mediaType === "VIDEO" ? (
-          <View style={{ borderWidth: 1, borderColor: "#D1D5DB", borderRadius: 12, padding: 10, gap: 8, backgroundColor: "#F8FAFC" }}>
-            <Text style={{ fontWeight: "700", color: "#0F172A" }}>Video attached</Text>
+          <View style={{ borderWidth: 1, borderColor: "#E2E8F0", borderRadius: 12, padding: 16, gap: 12, backgroundColor: "#F8FAFC" }}>
+            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+                <Ionicons name="videocam" size={20} color="#0F172A" />
+                <Text style={{ fontWeight: "800", color: "#0F172A", fontSize: 15 }}>Video attached</Text>
+              </View>
+              <Pressable
+                onPress={() => {
+                  setMediaUrl(null);
+                  setMediaType(null);
+                }}
+              >
+                <Ionicons name="trash" size={20} color="#DC2626" />
+              </Pressable>
+            </View>
             <Pressable
               onPress={async () => {
                 const canOpen = await Linking.canOpenURL(mediaUrl);
                 if (canOpen) await Linking.openURL(mediaUrl);
               }}
-              style={{ backgroundColor: "#0F172A", borderRadius: 10, paddingVertical: 10, alignItems: "center" }}
+              style={{ backgroundColor: "#0F172A", borderRadius: 10, paddingVertical: 12, alignItems: "center", flexDirection: "row", justifyContent: "center", gap: 8 }}
             >
-              <Text style={{ color: "white", fontWeight: "800" }}>Open Uploaded Video</Text>
+              <Ionicons name="play" size={16} color="white" />
+              <Text style={{ color: "white", fontWeight: "800", fontSize: 14 }}>Watch Video</Text>
             </Pressable>
           </View>
         ) : null}
-
-        {mediaUrl ? (
-          <Pressable
-            onPress={() => {
-              setMediaUrl(null);
-              setMediaType(null);
-            }}
-            style={{ borderRadius: 12, paddingVertical: 10, backgroundColor: "#B91C1C", alignItems: "center" }}
-          >
-            <Text style={{ color: "white", fontWeight: "800" }}>Remove Attachment</Text>
-          </Pressable>
-        ) : null}
       </View>
 
-      <View style={{ ...cardShadow, padding: 12, gap: 10 }}>
-        <Text style={{ fontSize: 16, fontWeight: "800", color: "#0F172A" }}>Visibility</Text>
-        <View style={{ flexDirection: "row", gap: 8 }}>
+      <View style={{ ...cardShadow, padding: 16, gap: 12 }}>
+        <Text style={{ fontSize: 16, fontWeight: "800", color: "#0F172A" }}>Settings</Text>
+        <View style={{ flexDirection: "row", gap: 12 }}>
           <Pressable
             onPress={() => setIsPinned((value) => !value)}
             style={{
               flex: 1,
               borderRadius: 12,
-              paddingVertical: 10,
+              paddingVertical: 12,
               alignItems: "center",
-              backgroundColor: isPinned ? "#4F46E5" : "#E2E8F0"
+              backgroundColor: isPinned ? "#EEF2FF" : "#F8FAFC",
+              borderWidth: 1,
+              borderColor: isPinned ? "#818CF8" : "#E2E8F0",
+              flexDirection: "row",
+              justifyContent: "center",
+              gap: 8
             }}
           >
-            <Text style={{ color: isPinned ? "white" : "#0F172A", fontWeight: "800" }}>{isPinned ? "Pinned" : "Not Pinned"}</Text>
+            <Ionicons name={isPinned ? "pin" : "pin-outline"} size={16} color={isPinned ? "#4F46E5" : "#64748B"} />
+            <Text style={{ color: isPinned ? "#4F46E5" : "#64748B", fontWeight: "800" }}>Pinned</Text>
           </Pressable>
           <Pressable
             onPress={() => setIsVisible((value) => !value)}
             style={{
               flex: 1,
               borderRadius: 12,
-              paddingVertical: 10,
+              paddingVertical: 12,
               alignItems: "center",
-              backgroundColor: isVisible ? "#059669" : "#E2E8F0"
+              backgroundColor: isVisible ? "#ECFDF5" : "#FEF2F2",
+              borderWidth: 1,
+              borderColor: isVisible ? "#6EE7B7" : "#FCA5A5",
+              flexDirection: "row",
+              justifyContent: "center",
+              gap: 8
             }}
           >
-            <Text style={{ color: isVisible ? "white" : "#0F172A", fontWeight: "800" }}>{isVisible ? "Visible" : "Hidden"}</Text>
+            <Ionicons name={isVisible ? "eye" : "eye-off"} size={16} color={isVisible ? "#059669" : "#DC2626"} />
+            <Text style={{ color: isVisible ? "#059669" : "#DC2626", fontWeight: "800" }}>{isVisible ? "Visible" : "Hidden"}</Text>
           </Pressable>
         </View>
       </View>

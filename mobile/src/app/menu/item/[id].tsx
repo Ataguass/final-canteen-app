@@ -70,9 +70,17 @@ export default function Screen() {
   }
 
   return (
+    <View style={[styles.screen, { paddingTop: insets.top > 0 ? insets.top + 10 : 20 }]}>
+      <View style={styles.topNav}>
+        <Pressable onPress={() => router.back()} style={styles.backBtn}>
+          <Ionicons name="chevron-back" size={24} color="#0F172A" />
+        </Pressable>
+        <Text style={styles.topNavTitle}>Item Details</Text>
+        <View style={{ width: 40 }} />
+      </View>
     <ScrollView
-      style={styles.screen}
-      contentContainerStyle={[styles.content, { paddingTop: Math.max(insets.top + 8, 20) }]}
+      style={{ flex: 1 }}
+      contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}
     >
       <View style={styles.heroCard}>
@@ -103,23 +111,14 @@ export default function Screen() {
         </View>
       </View>
 
-      <View style={styles.infoCard}>
-        <Text style={styles.cardTitle}>About this item</Text>
-        <Text style={styles.itemDescription}>
-          {item.description || "Freshly prepared item from your canteen."}
-        </Text>
-
-        <View style={styles.stockRow}>
-          <Ionicons
-            name={isOutOfStock ? "alert-circle-outline" : "checkmark-circle-outline"}
-            size={16}
-            color={isOutOfStock ? "#B91C1C" : "#047857"}
-          />
-          <Text style={[styles.stockText, isOutOfStock ? styles.stockOut : styles.stockIn]}>
-            {isOutOfStock ? "Out of stock" : `In stock: ${item.stockQty}`}
+      {item.description ? (
+        <View style={styles.infoCard}>
+          <Text style={styles.cardTitle}>About this item</Text>
+          <Text style={styles.itemDescription}>
+            {item.description}
           </Text>
         </View>
-      </View>
+      ) : null}
 
       <View style={styles.configCard}>
         <Text style={styles.cardTitle}>Customize order</Text>
@@ -183,13 +182,36 @@ export default function Screen() {
         </Text>
       </Pressable>
     </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#EEF2F7"
+    backgroundColor: "#F8FAFC"
+  },
+  topNav: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 16,
+    paddingBottom: 10
+  },
+  backBtn: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#FFFFFF",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#E2E8F0"
+  },
+  topNavTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#0F172A"
   },
   content: {
     padding: 16,
@@ -396,7 +418,7 @@ const styles = StyleSheet.create({
     fontWeight: "900"
   },
   addBtn: {
-    backgroundColor: "#F97316",
+    backgroundColor: "#FF6B35",
     borderRadius: 12,
     paddingVertical: 13
   },

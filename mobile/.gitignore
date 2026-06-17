@@ -4,3 +4,9 @@
 
 expo-env.d.ts
 # @end expo-cli
+
+# Ignore build artifacts and temp files
+*.bundle
+*.hbc
+bundle*.js
+*.log

@@ -2,6 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { File, Paths } from "expo-file-system";
+import * as DocumentPicker from "expo-document-picker";
 import { useAuth } from "../../../hooks/useAuth";
 import { backupService, type BackupFile } from "../../../services/backupService";
 
@@ -34,6 +35,7 @@ export default function Screen() {
   const { user, accessToken } = useAuth();
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [activeBackupId, setActiveBackupId] = useState<string | null>(null);
   const [items, setItems] = useState<BackupFile[]>([]);
 
@@ -74,6 +76,36 @@ export default function Screen() {
       Alert.alert("Create failed", error instanceof Error ? error.message : "Could not create backup");
     } finally {
       setCreating(false);
+    }
+  };
+
+  const onUploadBackup = async () => {
+    if (!user?.tenantId || !accessToken) return;
+    try {
+      const result = await DocumentPicker.getDocumentAsync({
+        type: ["application/json", "text/plain", "*/*"],
+        copyToCacheDirectory: true
+      });
+
+      if (result.canceled || !result.assets || result.assets.length === 0) {
+        return;
+      }
+
+      const file = result.assets[0];
+      if (!file.name.endsWith(".json")) {
+        Alert.alert("Invalid file", "Please select a valid .json backup file.");
+        return;
+      }
+
+      setUploading(true);
+      await backupService.uploadBackup(accessToken, user.tenantId, file.uri, file.name);
+      
+      Alert.alert("Upload complete", "Backup uploaded successfully.");
+      await loadBackups();
+    } catch (error) {
+      Alert.alert("Upload failed", error instanceof Error ? error.message : "Could not upload backup");
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -170,17 +202,6 @@ export default function Screen() {
 
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
-      <View style={styles.heroCard}>
-        <View style={styles.heroIconWrap}>
-          <Ionicons name="shield-checkmark-outline" size={22} color="#0F172A" />
-        </View>
-        <View style={styles.heroTextWrap}>
-          <Text style={styles.heroTitle}>Data Backup</Text>
-          <Text style={styles.heroSubtitle}>
-            Create snapshots of your tenant data to recover from accidental deletion or attacks.
-          </Text>
-        </View>
-      </View>
 
       <View style={styles.infoCard}>
         <Ionicons name="information-circle-outline" size={16} color="#1E3A8A" />
@@ -189,14 +210,25 @@ export default function Screen() {
         </Text>
       </View>
 
-      <Pressable
-        onPress={onCreateBackup}
-        disabled={creating}
-        style={[styles.primaryButton, creating && styles.buttonDisabled]}
-      >
-        <Ionicons name="cloud-upload-outline" size={18} color="white" />
-        <Text style={styles.primaryButtonText}>{creating ? "Creating backup..." : "Create New Backup"}</Text>
-      </Pressable>
+      <View style={{ flexDirection: "row", gap: 12 }}>
+        <Pressable
+          onPress={onCreateBackup}
+          disabled={creating || uploading}
+          style={[styles.primaryButton, { flex: 1 }, (creating || uploading) && styles.buttonDisabled]}
+        >
+          <Ionicons name="add-circle-outline" size={18} color="white" />
+          <Text style={styles.primaryButtonText}>{creating ? "Creating..." : "Create Backup"}</Text>
+        </Pressable>
+
+        <Pressable
+          onPress={onUploadBackup}
+          disabled={creating || uploading}
+          style={[styles.primaryButton, { flex: 1, backgroundColor: "#4338CA" }, (creating || uploading) && styles.buttonDisabled]}
+        >
+          <Ionicons name="cloud-upload-outline" size={18} color="white" />
+          <Text style={styles.primaryButtonText}>{uploading ? "Uploading..." : "Upload JSON"}</Text>
+        </Pressable>
+      </View>
 
       <View style={styles.listHeader}>
         <Text style={styles.sectionTitle}>Backup History</Text>
@@ -207,8 +239,11 @@ export default function Screen() {
 
       {items.length === 0 ? (
         <View style={styles.emptyCard}>
-          <Ionicons name="archive-outline" size={20} color="#64748B" />
-          <Text style={styles.emptyText}>No backups yet. Create your first backup now.</Text>
+          <View style={styles.emptyIconCircle}>
+            <Ionicons name="cloud-offline-outline" size={36} color="#94A3B8" />
+          </View>
+          <Text style={styles.emptyTitle}>No Backups Found</Text>
+          <Text style={styles.emptyText}>Create a new backup to safeguard your tenant data.</Text>
         </View>
       ) : (
         items.map((item) => {
@@ -277,66 +312,41 @@ const styles = StyleSheet.create({
     color: "#334155",
     fontWeight: "700"
   },
-  heroCard: {
-    backgroundColor: "#F8FAFC",
+  infoCard: {
+    backgroundColor: "#FFFFFF",
     borderWidth: 1,
     borderColor: "#E2E8F0",
-    borderRadius: 18,
+    borderRadius: 14,
     padding: 14,
     flexDirection: "row",
-    gap: 12,
     alignItems: "center",
-    shadowColor: "#0F172A",
-    shadowOpacity: 0.06,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 2
-  },
-  heroIconWrap: {
-    width: 42,
-    height: 42,
-    borderRadius: 12,
-    backgroundColor: "#DBEAFE",
-    alignItems: "center",
-    justifyContent: "center"
-  },
-  heroTextWrap: {
-    flex: 1,
-    gap: 2
-  },
-  heroTitle: {
-    fontSize: 22,
-    fontWeight: "800",
-    color: "#0F172A"
-  },
-  heroSubtitle: {
-    color: "#64748B",
-    fontSize: 13,
-    fontWeight: "500"
-  },
-  infoCard: {
-    borderWidth: 1,
-    borderColor: "#BFDBFE",
-    backgroundColor: "#EFF6FF",
-    borderRadius: 12,
-    padding: 10,
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 8
+    gap: 10,
+    shadowColor: "#000",
+    shadowOpacity: 0.03,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 1
   },
   infoText: {
     flex: 1,
-    color: "#1E3A8A",
-    fontWeight: "600"
+    color: "#475569",
+    fontSize: 13,
+    fontWeight: "500",
+    lineHeight: 18
   },
   primaryButton: {
-    borderRadius: 12,
-    paddingVertical: 12,
+    borderRadius: 16,
+    paddingVertical: 14,
     backgroundColor: "#0F172A",
     alignItems: "center",
     justifyContent: "center",
     flexDirection: "row",
-    gap: 8
+    gap: 8,
+    shadowColor: "#000",
+    shadowOpacity: 0.08,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 3
   },
   primaryButtonText: {
     color: "white",
@@ -362,26 +372,52 @@ const styles = StyleSheet.create({
   },
   emptyCard: {
     borderWidth: 1,
-    borderColor: "#CBD5E1",
-    borderRadius: 12,
-    backgroundColor: "#F8FAFC",
-    padding: 14,
-    flexDirection: "row",
+    borderColor: "#E2E8F0",
+    borderRadius: 20,
+    backgroundColor: "#FFFFFF",
+    padding: 32,
     alignItems: "center",
-    gap: 8
+    justifyContent: "center",
+    gap: 10,
+    marginTop: 10,
+    shadowColor: "#000",
+    shadowOpacity: 0.02,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 1
+  },
+  emptyIconCircle: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    backgroundColor: "#F8FAFC",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 4
+  },
+  emptyTitle: {
+    color: "#0F172A",
+    fontSize: 18,
+    fontWeight: "800"
   },
   emptyText: {
-    color: "#475569",
-    fontWeight: "600",
-    flex: 1
+    color: "#64748B",
+    fontSize: 14,
+    fontWeight: "500",
+    textAlign: "center"
   },
   backupCard: {
     borderWidth: 1,
     borderColor: "#E2E8F0",
-    backgroundColor: "white",
-    borderRadius: 14,
-    padding: 12,
-    gap: 10
+    backgroundColor: "#FFFFFF",
+    borderRadius: 16,
+    padding: 16,
+    gap: 14,
+    shadowColor: "#000",
+    shadowOpacity: 0.04,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 2
   },
   backupId: {
     color: "#0F172A",

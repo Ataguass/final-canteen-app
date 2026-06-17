@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import * as ImageManipulator from "expo-image-manipulator";
 import * as ImagePicker from "expo-image-picker";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Alert, Image, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { useAuth } from "../../../hooks/useAuth";
 import { menuService, type Category, type MenuItem } from "../../../services/menuService";
@@ -25,6 +25,7 @@ const card = {
 } as const;
 
 export default function Screen() {
+  const scrollViewRef = useRef<ScrollView>(null);
   const { user, accessToken } = useAuth();
   const [categories, setCategories] = useState<Category[]>([]);
   const [items, setItems] = useState<MenuItem[]>([]);
@@ -97,7 +98,8 @@ export default function Screen() {
       const picked = await ImagePicker.launchImageLibraryAsync({
         allowsEditing: true,
         quality: 1,
-        mediaTypes: ["images"]
+        mediaTypes: ["images"],
+        aspect: target === "CATEGORY" ? [16, 9] : [1, 1]
       });
       if (picked.canceled || !picked.assets.length) return null;
 
@@ -316,283 +318,296 @@ export default function Screen() {
   }
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: "#EEF2F7" }} contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: 24 }}>
-      <View style={{ gap: 4 }}>
-        <Text style={{ fontSize: 28, fontWeight: "800", color: "#0F172A" }}>Menu Management</Text>
-        <Text style={{ color: "#64748B" }}>Create categories/items with image and description for better ordering.</Text>
-      </View>
+    <ScrollView ref={scrollViewRef} style={{ flex: 1, backgroundColor: "#EEF2F7" }} contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: 24 }}>
 
-      <View style={{ ...card, padding: 12, gap: 10 }}>
-        <Text style={{ fontSize: 17, fontWeight: "800", color: "#0F172A" }}>Today's Specials Feature</Text>
-        <Text style={{ color: "#475569" }}>
-          Toggle to show or hide the Today's Specials section for students, teachers, staff and guests.
-        </Text>
+
+      <View style={{ ...card, padding: 16, flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
+        <View style={{ flex: 1 }}>
+          <Text style={{ fontSize: 16, fontWeight: "800", color: "#0F172A" }}>Today's Specials Feature</Text>
+          <Text style={{ color: "#475569", fontSize: 12, marginTop: 2 }}>
+            Toggle specials section for all users.
+          </Text>
+        </View>
         <Pressable
           onPress={onToggleTodaySpecialsFeature}
           disabled={loading}
           style={{
-            borderRadius: 12,
-            paddingVertical: 11,
-            alignItems: "center",
+            borderRadius: 999,
+            paddingVertical: 8,
+            paddingHorizontal: 16,
             backgroundColor: todaySpecialsEnabled ? "#059669" : "#475569"
           }}
         >
-          <Text style={{ color: "white", fontWeight: "800" }}>
-            {todaySpecialsEnabled ? "Enabled (Tap to Disable)" : "Disabled (Tap to Enable)"}
+          <Text style={{ color: "white", fontWeight: "800", fontSize: 13 }}>
+            {todaySpecialsEnabled ? "Enabled" : "Disabled"}
           </Text>
         </Pressable>
       </View>
 
-      <View style={{ ...card, padding: 12, gap: 10 }}>
-        <Text style={{ fontSize: 17, fontWeight: "800", color: "#0F172A" }}>Create Category</Text>
-        {editingCategoryId ? (
-          <View style={{ borderWidth: 1, borderColor: "#93C5FD", borderRadius: 10, backgroundColor: "#EFF6FF", padding: 10, gap: 8 }}>
-            <Text style={{ color: "#1D4ED8", fontWeight: "700" }}>Editing existing category</Text>
+      <View style={{ ...card, padding: 16, gap: 12 }}>
+        <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+          <View>
+            <Text style={{ fontSize: 16, fontWeight: "800", color: "#0F172A" }}>Category Details</Text>
+            <Text style={{ color: "#64748B", fontSize: 12 }}>Create or edit a category</Text>
+          </View>
+          {editingCategoryId ? (
+            <Pressable onPress={resetCategoryForm} style={{ borderRadius: 999, backgroundColor: "#FEE2E2", paddingHorizontal: 10, paddingVertical: 4 }}>
+              <Text style={{ color: "#DC2626", fontWeight: "700", fontSize: 11 }}>Cancel Edit</Text>
+            </Pressable>
+          ) : null}
+        </View>
+
+        <View style={{ flexDirection: "row", gap: 12 }}>
+          <View style={{ flex: 1, gap: 8 }}>
+            <TextInput
+              placeholder="Category Name"
+              value={newCategoryName}
+              onChangeText={setNewCategoryName}
+              style={{ borderWidth: 1, borderColor: "#E2E8F0", borderRadius: 10, padding: 10, backgroundColor: "#F8FAFC", fontSize: 14 }}
+            />
+            <TextInput
+              placeholder="Description (optional)"
+              value={newCategoryDescription}
+              onChangeText={setNewCategoryDescription}
+              multiline
+              style={{ borderWidth: 1, borderColor: "#E2E8F0", borderRadius: 10, padding: 10, height: 60, textAlignVertical: "top", backgroundColor: "#F8FAFC", fontSize: 14 }}
+            />
+          </View>
+
+          <View style={{ width: 120 }}>
+            {newCategoryImageUrl ? (
+              <View style={{ borderRadius: 10, overflow: "hidden", borderWidth: 1, borderColor: "#E2E8F0", width: 120, height: 67 }}>
+                <Image source={{ uri: newCategoryImageUrl }} style={{ width: "100%", height: "100%", backgroundColor: "#F1F5F9" }} resizeMode="cover" />
+                <Pressable onPress={() => pickAndUploadImage("CATEGORY")} disabled={uploadingCategoryImage} style={{ position: "absolute", bottom: 4, right: 4, backgroundColor: "rgba(15, 23, 42, 0.7)", borderRadius: 999, padding: 4 }}>
+                  <Ionicons name="camera" size={14} color="white" />
+                </Pressable>
+              </View>
+            ) : (
+              <Pressable
+                onPress={() => pickAndUploadImage("CATEGORY")}
+                disabled={uploadingCategoryImage}
+                style={{ width: 120, height: 67, backgroundColor: "#EFF6FF", borderWidth: 1, borderColor: "#BFDBFE", borderStyle: "dashed", borderRadius: 10, alignItems: "center", justifyContent: "center", gap: 4 }}
+              >
+                <Ionicons name="cloud-upload" size={18} color="#1D4ED8" />
+                <Text style={{ color: "#1D4ED8", fontWeight: "700", fontSize: 11, textAlign: "center" }}>{uploadingCategoryImage ? "..." : "Banner\n(16:9)"}</Text>
+              </Pressable>
+            )}
+            
             <Pressable
-              onPress={resetCategoryForm}
-              style={{ alignSelf: "flex-start", borderRadius: 999, backgroundColor: "#DBEAFE", paddingHorizontal: 10, paddingVertical: 6 }}
+              onPress={onSaveCategory}
+              disabled={loading}
+              style={{ backgroundColor: "#0F172A", borderRadius: 10, paddingVertical: 10, alignItems: "center", marginTop: "auto" }}
             >
-              <Text style={{ color: "#1E3A8A", fontWeight: "700" }}>Cancel Edit</Text>
+              <Text style={{ color: "white", fontWeight: "800", fontSize: 13 }}>
+                {loading ? "..." : editingCategoryId ? "Update" : "Add"}
+              </Text>
             </Pressable>
           </View>
-        ) : null}
-        <TextInput
-          placeholder="Category name"
-          value={newCategoryName}
-          onChangeText={setNewCategoryName}
-          style={{ borderWidth: 1, borderColor: "#CBD5E1", borderRadius: 12, padding: 10, backgroundColor: "#F8FAFC" }}
-        />
-        <TextInput
-          placeholder="Description (optional)"
-          value={newCategoryDescription}
-          onChangeText={setNewCategoryDescription}
-          multiline
-          style={{ borderWidth: 1, borderColor: "#CBD5E1", borderRadius: 12, padding: 10, minHeight: 70, textAlignVertical: "top", backgroundColor: "#F8FAFC" }}
-        />
-        <TextInput
-          placeholder="Image URL (auto-filled after upload)"
-          value={newCategoryImageUrl}
-          onChangeText={setNewCategoryImageUrl}
-          autoCapitalize="none"
-          style={{ borderWidth: 1, borderColor: "#CBD5E1", borderRadius: 12, padding: 10, backgroundColor: "#F8FAFC" }}
-        />
-        <Pressable
-          onPress={() => pickAndUploadImage("CATEGORY")}
-          disabled={uploadingCategoryImage}
-          style={{ backgroundColor: "#1D4ED8", borderRadius: 12, paddingVertical: 11, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 7 }}
-        >
-          <Ionicons name="cloud-upload-outline" size={16} color="white" />
-          <Text style={{ color: "white", fontWeight: "800" }}>{uploadingCategoryImage ? "Uploading..." : "Upload Category Image"}</Text>
-        </Pressable>
-        {newCategoryImageUrl ? (
-          <Image source={{ uri: newCategoryImageUrl }} style={{ width: "100%", height: 130, borderRadius: 12, backgroundColor: "#F1F5F9" }} resizeMode="cover" />
-        ) : null}
-
-        <Pressable
-          onPress={onSaveCategory}
-          disabled={loading}
-          style={{ backgroundColor: "#0F172A", borderRadius: 12, padding: 12, alignItems: "center" }}
-        >
-          <Text style={{ color: "white", fontWeight: "800" }}>
-            {loading ? "Saving..." : editingCategoryId ? "Update Category" : "Add Category"}
-          </Text>
-        </Pressable>
+        </View>
       </View>
 
-      <View style={{ ...card, padding: 12, gap: 10 }}>
-        <Text style={{ fontSize: 17, fontWeight: "800", color: "#0F172A" }}>Create Item</Text>
-        <TextInput
-          placeholder="Item name"
-          value={itemName}
-          onChangeText={setItemName}
-          style={{ borderWidth: 1, borderColor: "#CBD5E1", borderRadius: 12, padding: 10, backgroundColor: "#F8FAFC" }}
-        />
-        <TextInput
-          placeholder="Description (optional)"
-          value={itemDescription}
-          onChangeText={setItemDescription}
-          multiline
-          style={{ borderWidth: 1, borderColor: "#CBD5E1", borderRadius: 12, padding: 10, minHeight: 70, textAlignVertical: "top", backgroundColor: "#F8FAFC" }}
-        />
-        <Pressable
-          onPress={() => setItemIsTodaySpecial((value) => !value)}
-          style={{
-            borderWidth: 1,
-            borderColor: itemIsTodaySpecial ? "#059669" : "#CBD5E1",
-            borderRadius: 12,
-            paddingVertical: 10,
-            paddingHorizontal: 12,
-            backgroundColor: itemIsTodaySpecial ? "#ECFDF5" : "#F8FAFC"
-          }}
-        >
-          <Text style={{ color: itemIsTodaySpecial ? "#065F46" : "#334155", fontWeight: "700" }}>
-            {itemIsTodaySpecial ? "Marked as Today's Special Item" : "Mark as Today's Special Item"}
-          </Text>
-        </Pressable>
-        <TextInput
-          placeholder="Image URL (auto-filled after upload)"
-          value={itemImageUrl}
-          onChangeText={setItemImageUrl}
-          autoCapitalize="none"
-          style={{ borderWidth: 1, borderColor: "#CBD5E1", borderRadius: 12, padding: 10, backgroundColor: "#F8FAFC" }}
-        />
-        <Pressable
-          onPress={() => pickAndUploadImage("ITEM")}
-          disabled={uploadingItemImage}
-          style={{ backgroundColor: "#4338CA", borderRadius: 12, paddingVertical: 11, flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 7 }}
-        >
-          <Ionicons name="image-outline" size={16} color="white" />
-          <Text style={{ color: "white", fontWeight: "800" }}>{uploadingItemImage ? "Uploading..." : "Upload Item Image"}</Text>
-        </Pressable>
-        {itemImageUrl ? (
-          <Image source={{ uri: itemImageUrl }} style={{ width: "100%", height: 130, borderRadius: 12, backgroundColor: "#F1F5F9" }} resizeMode="cover" />
-        ) : null}
+      <View style={{ ...card, padding: 16, gap: 12 }}>
+        <View>
+          <Text style={{ fontSize: 16, fontWeight: "800", color: "#0F172A" }}>Item Details</Text>
+          <Text style={{ color: "#64748B", fontSize: 12 }}>Add a new food or beverage item</Text>
+        </View>
 
-        <View style={{ flexDirection: "row", gap: 8 }}>
+        <View style={{ gap: 8 }}>
           <TextInput
-            placeholder="Price"
-            keyboardType="numeric"
-            value={itemPrice}
-            onChangeText={setItemPrice}
-            style={{ flex: 1, borderWidth: 1, borderColor: "#CBD5E1", borderRadius: 12, padding: 10, backgroundColor: "#F8FAFC" }}
+            placeholder="Item Name (e.g. Classic Cheeseburger)"
+            value={itemName}
+            onChangeText={setItemName}
+            style={{ borderWidth: 1, borderColor: "#E2E8F0", borderRadius: 10, padding: 10, backgroundColor: "#F8FAFC", fontSize: 14 }}
           />
           <TextInput
-            placeholder="Stock Qty"
-            keyboardType="numeric"
-            value={itemStock}
-            onChangeText={setItemStock}
-            style={{ flex: 1, borderWidth: 1, borderColor: "#CBD5E1", borderRadius: 12, padding: 10, backgroundColor: "#F8FAFC" }}
+            placeholder="Description (optional)"
+            value={itemDescription}
+            onChangeText={setItemDescription}
+            multiline
+            style={{ borderWidth: 1, borderColor: "#E2E8F0", borderRadius: 10, padding: 10, height: 60, textAlignVertical: "top", backgroundColor: "#F8FAFC", fontSize: 14 }}
           />
         </View>
 
-        <Text style={{ color: "#334155", fontWeight: "700" }}>Select Category</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingRight: 8 }}>
-          {categories.map((category) => {
-            const selected = categoryId === category.id;
-            return (
+        <View style={{ flexDirection: "row", gap: 12 }}>
+          <View style={{ flex: 1, gap: 8 }}>
+            <TextInput
+              placeholder="Price (INR)"
+              keyboardType="numeric"
+              value={itemPrice}
+              onChangeText={setItemPrice}
+              style={{ borderWidth: 1, borderColor: "#E2E8F0", borderRadius: 10, padding: 10, backgroundColor: "#F8FAFC", fontSize: 14 }}
+            />
+            <TextInput
+              placeholder="Stock Qty"
+              keyboardType="numeric"
+              value={itemStock}
+              onChangeText={setItemStock}
+              style={{ borderWidth: 1, borderColor: "#E2E8F0", borderRadius: 10, padding: 10, backgroundColor: "#F8FAFC", fontSize: 14 }}
+            />
+          </View>
+
+          <View style={{ width: 90 }}>
+            {itemImageUrl ? (
+              <View style={{ position: "relative", borderRadius: 10, overflow: "hidden", borderWidth: 1, borderColor: "#E2E8F0", width: 90, height: 90 }}>
+                <Image source={{ uri: itemImageUrl }} style={{ width: "100%", height: "100%", backgroundColor: "#F1F5F9" }} resizeMode="cover" />
+                <Pressable
+                  onPress={() => pickAndUploadImage("ITEM")}
+                  disabled={uploadingItemImage}
+                  style={{ position: "absolute", bottom: 4, right: 4, backgroundColor: "rgba(15, 23, 42, 0.7)", borderRadius: 999, padding: 6 }}
+                >
+                  <Ionicons name="camera" size={14} color="white" />
+                </Pressable>
+              </View>
+            ) : (
               <Pressable
-                key={category.id}
-                onPress={() => setCategoryId(category.id)}
-                style={{
-                  paddingVertical: 8,
-                  paddingHorizontal: 12,
-                  borderRadius: 999,
-                  backgroundColor: selected ? "#0F172A" : "#E2E8F0"
-                }}
+                onPress={() => pickAndUploadImage("ITEM")}
+                disabled={uploadingItemImage}
+                style={{ width: 90, height: 90, backgroundColor: "#F0FDF4", borderWidth: 1, borderColor: "#BBF7D0", borderStyle: "dashed", borderRadius: 10, alignItems: "center", justifyContent: "center", gap: 4 }}
               >
-                <Text style={{ color: selected ? "white" : "#0F172A", fontWeight: "700" }}>{category.name}</Text>
+                <Ionicons name="image-outline" size={20} color="#16A34A" />
+                <Text style={{ color: "#16A34A", fontWeight: "700", fontSize: 10, textAlign: "center" }}>{uploadingItemImage ? "..." : "Photo\n(1:1)"}</Text>
               </Pressable>
-            );
-          })}
-        </ScrollView>
+            )}
+          </View>
+        </View>
+
+        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+          <Text style={{ color: "#334155", fontWeight: "700", fontSize: 13 }}>Mark as Today's Special</Text>
+          <Pressable
+            onPress={() => setItemIsTodaySpecial((value) => !value)}
+            style={{
+              paddingVertical: 6,
+              paddingHorizontal: 12,
+              borderRadius: 999,
+              backgroundColor: itemIsTodaySpecial ? "#ECFDF5" : "#F1F5F9",
+              borderWidth: 1,
+              borderColor: itemIsTodaySpecial ? "#059669" : "#E2E8F0",
+              flexDirection: "row",
+              alignItems: "center",
+              gap: 6
+            }}
+          >
+            <Ionicons name={itemIsTodaySpecial ? "star" : "star-outline"} size={16} color={itemIsTodaySpecial ? "#059669" : "#64748B"} />
+            <Text style={{ color: itemIsTodaySpecial ? "#065F46" : "#475569", fontWeight: "700", fontSize: 13 }}>
+              {itemIsTodaySpecial ? "Yes" : "No"}
+            </Text>
+          </Pressable>
+        </View>
+
+        <View style={{ gap: 8 }}>
+          <Text style={{ color: "#334155", fontWeight: "700", fontSize: 13, marginLeft: 4 }}>Select Category</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingRight: 8 }}>
+            {categories.map((category) => {
+              const selected = categoryId === category.id;
+              return (
+                <Pressable
+                  key={category.id}
+                  onPress={() => setCategoryId(category.id)}
+                  style={{
+                    paddingVertical: 10,
+                    paddingHorizontal: 16,
+                    borderRadius: 999,
+                    backgroundColor: selected ? "#1D4ED8" : "#E2E8F0"
+                  }}
+                >
+                  <Text style={{ color: selected ? "white" : "#334155", fontWeight: "700" }}>{category.name}</Text>
+                </Pressable>
+              );
+            })}
+          </ScrollView>
+        </View>
 
         <Pressable
           onPress={onCreateItem}
           disabled={loading}
-          style={{ backgroundColor: "#059669", borderRadius: 12, padding: 12, alignItems: "center" }}
+          style={{ backgroundColor: "#059669", borderRadius: 10, paddingVertical: 12, alignItems: "center", marginTop: 4 }}
         >
-          <Text style={{ color: "white", fontWeight: "800" }}>{loading ? "Saving..." : "Add Item"}</Text>
+          <Text style={{ color: "white", fontWeight: "800", fontSize: 14 }}>{loading ? "Saving..." : "Add New Item"}</Text>
         </Pressable>
       </View>
 
-      <View style={{ ...card, padding: 12, gap: 10 }}>
-        <Text style={{ fontSize: 17, fontWeight: "800", color: "#0F172A" }}>Categories ({categories.length})</Text>
+      <View style={{ ...card, padding: 20, gap: 16 }}>
+        <Text style={{ fontSize: 18, fontWeight: "800", color: "#0F172A" }}>Categories ({categories.length})</Text>
         {categories.length === 0 ? <Text style={{ color: "#64748B" }}>No categories yet.</Text> : null}
         {categories.map((category) => (
-          <View key={category.id} style={{ borderWidth: 1, borderColor: "#E2E8F0", borderRadius: 12, padding: 10, gap: 6, backgroundColor: "#F8FAFC" }}>
-            <Text style={{ fontWeight: "800", color: "#0F172A" }}>{category.name}</Text>
-            {category.description ? <Text style={{ color: "#475569" }}>{category.description}</Text> : null}
+          <View key={category.id} style={{ borderRadius: 12, overflow: "hidden", backgroundColor: "white", borderWidth: 1, borderColor: "#E2E8F0", shadowColor: "#0F172A", shadowOpacity: 0.05, shadowRadius: 10, shadowOffset: { width: 0, height: 4 }, elevation: 2, flexDirection: "row", alignItems: "center" }}>
             {category.imageUrl ? (
-              <Image source={{ uri: category.imageUrl }} style={{ width: "100%", height: 110, borderRadius: 10, backgroundColor: "#F1F5F9" }} resizeMode="cover" />
-            ) : null}
+              <Image source={{ uri: category.imageUrl }} style={{ width: 120, height: 67, backgroundColor: "#F1F5F9" }} resizeMode="cover" />
+            ) : (
+              <View style={{ width: 120, height: 67, backgroundColor: "#F1F5F9", alignItems: "center", justifyContent: "center" }}>
+                <Ionicons name="image-outline" size={24} color="#CBD5E1" />
+              </View>
+            )}
+            <View style={{ flex: 1, paddingHorizontal: 12, paddingVertical: 8, gap: 4 }}>
+              <Text style={{ fontWeight: "800", color: "#0F172A", fontSize: 15 }} numberOfLines={1}>{category.name}</Text>
+              {category.description ? <Text style={{ color: "#64748B", fontSize: 12 }} numberOfLines={1}>{category.description}</Text> : null}
+            </View>
             <Pressable
               onPress={() => {
                 setEditingCategoryId(category.id);
                 setNewCategoryName(category.name);
                 setNewCategoryDescription(category.description ?? "");
                 setNewCategoryImageUrl(category.imageUrl ?? "");
+                scrollViewRef.current?.scrollTo({ y: 0, animated: true });
               }}
-              style={{ borderRadius: 10, backgroundColor: "#0F172A", paddingVertical: 10, alignItems: "center" }}
+              style={{ padding: 12, borderLeftWidth: 1, borderColor: "#E2E8F0", backgroundColor: "#F8FAFC", alignSelf: "stretch", justifyContent: "center" }}
             >
-              <Text style={{ color: "white", fontWeight: "700" }}>Edit Category</Text>
+              <Ionicons name="create-outline" size={20} color="#1D4ED8" />
             </Pressable>
           </View>
         ))}
       </View>
 
-      <View style={{ ...card, padding: 12, gap: 10 }}>
-        <Text style={{ fontSize: 17, fontWeight: "800", color: "#0F172A" }}>Items ({items.length})</Text>
+      <View style={{ ...card, padding: 20, gap: 16 }}>
+        <Text style={{ fontSize: 18, fontWeight: "800", color: "#0F172A" }}>Menu Items ({items.length})</Text>
         {items.length === 0 ? <Text style={{ color: "#64748B" }}>No items yet.</Text> : null}
         {items.map((item) => (
-          <View key={item.id} style={{ borderWidth: 1, borderColor: "#E2E8F0", borderRadius: 12, padding: 10, gap: 8, backgroundColor: "#F8FAFC" }}>
-            {item.image ? (
-              <Image source={{ uri: item.image }} style={{ width: "100%", height: 120, borderRadius: 10, backgroundColor: "#F1F5F9" }} resizeMode="cover" />
-            ) : null}
-            <View style={{ flexDirection: "row", justifyContent: "space-between", gap: 8, alignItems: "center" }}>
-              <Text style={{ fontWeight: "800", color: "#0F172A", flex: 1 }}>{item.name}</Text>
-              <Text style={{ fontWeight: "800", color: "#0F172A" }}>INR {item.price.toFixed(2)}</Text>
+          <View key={item.id} style={{ borderRadius: 16, overflow: "hidden", backgroundColor: "white", borderWidth: 1, borderColor: "#E2E8F0", shadowColor: "#0F172A", shadowOpacity: 0.05, shadowRadius: 10, shadowOffset: { width: 0, height: 4 }, elevation: 2 }}>
+            <View style={{ flexDirection: "row", padding: 12, gap: 12 }}>
+              {item.image ? (
+                <Image source={{ uri: item.image }} style={{ width: 100, height: 100, borderRadius: 12, backgroundColor: "#F1F5F9" }} resizeMode="cover" />
+              ) : (
+                <View style={{ width: 100, height: 100, borderRadius: 12, backgroundColor: "#F1F5F9", alignItems: "center", justifyContent: "center" }}>
+                  <Ionicons name="fast-food-outline" size={32} color="#CBD5E1" />
+                </View>
+              )}
+              
+              <View style={{ flex: 1, justifyContent: "center", gap: 4 }}>
+                <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start" }}>
+                  <Text style={{ fontWeight: "800", color: "#0F172A", fontSize: 16, flex: 1 }} numberOfLines={2}>{item.name}</Text>
+                  <Text style={{ fontWeight: "800", color: "#0F172A", fontSize: 16 }}>₹ {item.price.toFixed(2)}</Text>
+                </View>
+                <Text style={{ color: "#64748B", fontSize: 13 }}>{item.categoryId ? categoryNameById.get(item.categoryId) ?? "Unknown" : "Uncategorized"}</Text>
+                {item.description ? <Text style={{ color: "#475569", fontSize: 13 }} numberOfLines={1}>{item.description}</Text> : null}
+                
+                <View style={{ flexDirection: "row", gap: 6, marginTop: 4, flexWrap: "wrap" }}>
+                  <View style={{ backgroundColor: "#F1F5F9", paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6 }}>
+                    <Text style={{ color: "#475569", fontSize: 11, fontWeight: "700" }}>Stock: {item.stockQty}</Text>
+                  </View>
+                  <View style={{ backgroundColor: item.isAvailable ? "#DCFCE7" : "#FEE2E2", paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6 }}>
+                    <Text style={{ color: item.isAvailable ? "#16A34A" : "#DC2626", fontSize: 11, fontWeight: "700" }}>{item.isAvailable ? "Available" : "Hidden"}</Text>
+                  </View>
+                  {item.isTodaySpecial && (
+                    <View style={{ backgroundColor: "#FEF3C7", paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6 }}>
+                      <Text style={{ color: "#D97706", fontSize: 11, fontWeight: "700" }}>Today's Special</Text>
+                    </View>
+                  )}
+                </View>
+              </View>
             </View>
-            <Text style={{ color: "#64748B" }}>Category: {item.categoryId ? categoryNameById.get(item.categoryId) ?? "Unknown" : "Uncategorized"}</Text>
-            {item.description ? <Text style={{ color: "#475569" }}>{item.description}</Text> : null}
-            <Text style={{ color: "#334155" }}>Stock: {item.stockQty}</Text>
-            <View
-              style={{
-                alignSelf: "flex-start",
-                borderRadius: 999,
-                backgroundColor: item.isTodaySpecial ? "#FEF3C7" : "#E2E8F0",
-                paddingHorizontal: 10,
-                paddingVertical: 5
-              }}
-            >
-              <Text style={{ color: item.isTodaySpecial ? "#92400E" : "#475569", fontWeight: "800", fontSize: 12 }}>
-                {item.isTodaySpecial ? "Today's Special" : "Regular"}
-              </Text>
-            </View>
-            <Text style={{ color: item.isAvailable ? "#059669" : "#B91C1C", fontWeight: "700" }}>
-              {item.isAvailable ? "Available" : "Hidden"}
-            </Text>
-            <Pressable
-              onPress={() => onUpdateExistingItemImage(item.id, item.name)}
-              disabled={loading || uploadingItemImage}
-              style={{
-                borderRadius: 10,
-                backgroundColor: "#1D4ED8",
-                paddingVertical: 10,
-                alignItems: "center",
-                opacity: loading || uploadingItemImage ? 0.7 : 1
-              }}
-            >
-              <Text style={{ color: "white", fontWeight: "700" }}>
-                {uploadingItemImage ? "Uploading..." : "Update Image"}
-              </Text>
-            </Pressable>
-            <Pressable
-              onPress={() => onToggleItemTodaySpecial(item)}
-              disabled={loading}
-              style={{
-                borderRadius: 10,
-                backgroundColor: item.isTodaySpecial ? "#D97706" : "#059669",
-                paddingVertical: 10,
-                alignItems: "center",
-                opacity: loading ? 0.7 : 1
-              }}
-            >
-              <Text style={{ color: "white", fontWeight: "700" }}>
-                {item.isTodaySpecial ? "Remove Today Special" : "Mark Today Special"}
-              </Text>
-            </Pressable>
-            <View style={{ flexDirection: "row", gap: 8 }}>
-              <Pressable
-                onPress={() => onToggle(item.id)}
-                style={{ flex: 1, backgroundColor: "#0F172A", borderRadius: 10, paddingVertical: 10, alignItems: "center" }}
-              >
-                <Text style={{ color: "white", fontWeight: "700" }}>Toggle</Text>
+
+            <View style={{ flexDirection: "row", borderTopWidth: 1, borderColor: "#E2E8F0", backgroundColor: "#F8FAFC" }}>
+              <Pressable onPress={() => onUpdateExistingItemImage(item.id, item.name)} style={{ flex: 1, paddingVertical: 12, alignItems: "center", borderRightWidth: 1, borderColor: "#E2E8F0", opacity: loading || uploadingItemImage ? 0.5 : 1 }}>
+                <Ionicons name="camera-outline" size={20} color="#1D4ED8" />
               </Pressable>
-              <Pressable
-                onPress={() => onDelete(item.id)}
-                style={{ flex: 1, backgroundColor: "#B91C1C", borderRadius: 10, paddingVertical: 10, alignItems: "center" }}
-              >
-                <Text style={{ color: "white", fontWeight: "700" }}>Delete</Text>
+              <Pressable onPress={() => onToggleItemTodaySpecial(item)} style={{ flex: 1, paddingVertical: 12, alignItems: "center", borderRightWidth: 1, borderColor: "#E2E8F0", opacity: loading ? 0.5 : 1 }}>
+                <Ionicons name={item.isTodaySpecial ? "star" : "star-outline"} size={20} color={item.isTodaySpecial ? "#D97706" : "#64748B"} />
+              </Pressable>
+              <Pressable onPress={() => onToggle(item.id)} style={{ flex: 1, paddingVertical: 12, alignItems: "center", borderRightWidth: 1, borderColor: "#E2E8F0" }}>
+                <Ionicons name={item.isAvailable ? "eye-off-outline" : "eye-outline"} size={20} color="#334155" />
+              </Pressable>
+              <Pressable onPress={() => onDelete(item.id)} style={{ flex: 1, paddingVertical: 12, alignItems: "center" }}>
+                <Ionicons name="trash-outline" size={20} color="#DC2626" />
               </Pressable>
             </View>
           </View>

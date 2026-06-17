@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Canteen Management - Order in Seconds</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@100..900&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-error": "#ffffff",
+                    "on-primary": "#ffffff",
+                    "tertiary": "#2e4edc",
+                    "on-tertiary-fixed": "#001159",
+                    "primary-container": "#ff6b00",
+                    "on-primary-fixed-variant": "#7a3000",
+                    "surface-variant": "#e1e3e4",
+                    "inverse-primary": "#ffb693",
+                    "on-error-container": "#93000a",
+                    "inverse-surface": "#2e3132",
+                    "error": "#ba1a1a",
+                    "on-tertiary": "#ffffff",
+                    "tertiary-fixed-dim": "#bac3ff",
+                    "surface-container-low": "#f3f4f5",
+                    "surface-tint": "#a04100",
+                    "on-secondary-container": "#636467",
+                    "primary-fixed-dim": "#ffb693",
+                    "outline": "#8e7164",
+                    "surface-dim": "#d9dadb",
+                    "tertiary-fixed": "#dee1ff",
+                    "secondary": "#5d5e61",
+                    "on-secondary-fixed": "#1a1c1e",
+                    "surface-container-highest": "#e1e3e4",
+                    "inverse-on-surface": "#f0f1f2",
+                    "outline-variant": "#e2bfb0",
+                    "on-tertiary-container": "#00218e",
+                    "secondary-container": "#e2e2e5",
+                    "on-tertiary-fixed-variant": "#0031c4",
+                    "surface-container-high": "#e7e8e9",
+                    "primary-fixed": "#ffdbcc",
+                    "on-background": "#191c1d",
+                    "secondary-fixed-dim": "#c6c6c9",
+                    "on-surface": "#191c1d",
+                    "error-container": "#ffdad6",
+                    "surface-bright": "#f8f9fa",
+                    "tertiary-container": "#7c91ff",
+                    "on-primary-container": "#572000",
+                    "surface": "#f8f9fa",
+                    "on-secondary-fixed-variant": "#454749",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-container": "#edeeef",
+                    "on-primary-fixed": "#351000",
+                    "background": "#f8f9fa",
+                    "primary": "#a04100",
+                    "secondary-fixed": "#e2e2e5",
+                    "on-surface-variant": "#5a4136",
+                    "on-secondary": "#ffffff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "margin-mobile": "1rem",
+                    "stack-md": "1rem",
+                    "stack-lg": "1.5rem",
+                    "stack-sm": "0.5rem",
+                    "gutter": "1rem",
+                    "margin-desktop": "2.5rem"
+            },
+            "fontFamily": {
+                    "body-md": ["Plus Jakarta Sans"],
+                    "headline-xl": ["Plus Jakarta Sans"],
+                    "headline-md": ["Plus Jakarta Sans"],
+                    "label-lg": ["Plus Jakarta Sans"],
+                    "body-lg": ["Plus Jakarta Sans"],
+                    "headline-lg-mobile": ["Plus Jakarta Sans"],
+                    "label-md": ["Plus Jakarta Sans"],
+                    "headline-lg": ["Plus Jakarta Sans"]
+            },
+            "fontSize": {
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "headline-xl": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "label-lg": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-lg-mobile": ["22px", {"lineHeight": "28px", "fontWeight": "700"}],
+                    "label-md": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                    "headline-lg": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        @keyframes float {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(1deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+        .animate-float {
+            animation: float 4s ease-in-out infinite;
+        }
+        .bg-illustration {
+            background-image: url('https://lh3.googleusercontent.com/aida/AP1WRLu56QAxCREmJ76WVWYZwUhcL4Nlptv8VJawzJ0gZ_BWbS7wq-v7Zq0BwjLlxe9owWEQPJlQZR3B1KXDOAZa3Q2GnbWNN3kqKF5AEUgmSPKOuxRx0NvE5foIu-d8fgZkhGVdNClsabhLgh28SlHwKxZPkc_8aky1wc4u6B1c_rzgY0BUurvc1vXWyRv7zjnUKTHUFIz2w5X-Yyyc30rDY5oW3X8PFQQgIKZ_xENg2zO7kuMAd_rBemYRPN4');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.08;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+    </style>
+</head>
+<body class="bg-surface font-body-md text-on-surface h-full overflow-hidden">
+<!-- Background Illustration Layer -->
+<div class="fixed inset-0 bg-illustration z-0 pointer-events-none"></div>
+<!-- Main Onboarding Container -->
+<main class="relative z-10 flex flex-col h-full max-w-md mx-auto px-margin-mobile">
+<!-- Top Navigation Area (Implicit) -->
+<header class="flex justify-between items-center w-full h-14 pt-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">restaurant</span>
+<span class="font-headline-lg-mobile text-headline-lg-mobile font-bold text-primary">CampusCrave</span>
+</div>
+<button class="font-label-lg text-label-lg text-secondary hover:opacity-80 transition-opacity">Skip</button>
+</header>
+<!-- Central Content Area -->
+<section class="flex-grow flex flex-col items-center justify-center pt-8">
+<!-- Floating Smartphone Illustration -->
+<div class="relative w-full aspect-[4/5] flex items-center justify-center mb-stack-lg">
+<div class="animate-float relative z-20 w-56 h-[460px] bg-inverse-surface rounded-[40px] p-3 border-[6px] border-surface-container-highest shadow-2xl overflow-hidden">
+<!-- Phone Screen Content -->
+<div class="bg-white h-full w-full rounded-[28px] overflow-hidden flex flex-col">
+<div class="p-4 flex flex-col gap-3">
+<div class="w-full h-32 bg-primary-container rounded-xl flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-5xl" style="font-variation-settings: 'FILL' 1;">bolt</span>
+</div>
+<div class="space-y-2">
+<div class="h-4 w-3/4 bg-surface-container-high rounded-full"></div>
+<div class="h-4 w-1/2 bg-surface-container-high rounded-full"></div>
+</div>
+<!-- Mock Order Button -->
+<div class="mt-4 p-3 bg-primary-container rounded-full flex items-center justify-center shadow-lg">
+<div class="h-2 w-12 bg-white/40 rounded-full"></div>
+</div>
+</div>
+<div class="mt-auto p-4 border-t border-outline-variant flex justify-around">
+<span class="material-symbols-outlined text-primary">home</span>
+<span class="material-symbols-outlined text-secondary">search</span>
+<span class="material-symbols-outlined text-secondary">shopping_cart</span>
+</div>
+</div>
+</div>
+<!-- Background Decorative Elements -->
+<div class="absolute w-64 h-64 bg-primary-container/20 rounded-full blur-3xl -z-10"></div>
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 border-2 border-primary/10 rounded-full -z-10"></div>
+</div>
+<!-- Text Content -->
+<div class="text-center space-y-stack-md px-2">
+<h1 class="font-headline-xl text-headline-xl text-on-surface">Order in Seconds</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-xs mx-auto leading-relaxed">
+                    Save your favorites and reorder with a single tap for ultimate convenience.
+                </p>
+</div>
+</section>
+<!-- Footer Actions -->
+<footer class="pb-12 pt-8 flex flex-col items-center gap-8">
+<!-- Progress Dots -->
+<div class="flex gap-2">
+<div class="w-2 h-2 rounded-full bg-outline-variant"></div>
+<div class="w-6 h-2 rounded-full bg-primary-container"></div>
+<div class="w-2 h-2 rounded-full bg-outline-variant"></div>
+</div>
+<!-- Next Button -->
+<button class="group relative w-full h-14 bg-primary-container text-white font-headline-md text-headline-md rounded-2xl shadow-[0_4px_12px_rgba(255,107,0,0.3)] flex items-center justify-center gap-2 hover:opacity-90 active:scale-95 transition-all duration-200" onclick="window.location.reload()">
+<span>Next</span>
+<span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+</footer>
+</main>
+<!-- Micro-interaction Script -->
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const button = document.querySelector('button.group');
+            button.addEventListener('mousedown', () => {
+                button.classList.add('scale-95');
+            });
+            button.addEventListener('mouseup', () => {
+                button.classList.remove('scale-95');
+            });
+            button.addEventListener('mouseleave', () => {
+                button.classList.remove('scale-95');
+            });
+        });
+    </script>
+</body></html>

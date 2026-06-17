@@ -8,20 +8,26 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  View
+  View,
+  RefreshControl
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "../../hooks/useAuth";
+import { CanteenHeader } from "../../components/CanteenHeader";
 import { communityService, type CommunityPost } from "../../services/communityService";
 
 export default function Screen() {
+  const insets = useSafeAreaInsets();
   const { user, accessToken } = useAuth();
   const [posts, setPosts] = useState<CommunityPost[]>([]);
   const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
-  const load = useCallback(async () => {
+  const load = useCallback(async (isRefresh = false) => {
     if (!user?.tenantId || !accessToken) return;
     try {
-      setLoading(true);
+      if (isRefresh) setRefreshing(true);
+      else setLoading(true);
       const response = await communityService.listPosts(accessToken, user.tenantId);
       setPosts(response.data);
     } catch (error) {
@@ -31,6 +37,7 @@ export default function Screen() {
       );
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   }, [accessToken, user?.tenantId]);
 
@@ -50,80 +57,92 @@ export default function Screen() {
   return (
     <ScrollView
       style={styles.screen}
-      contentContainerStyle={styles.content}
+      contentContainerStyle={[styles.content, { paddingTop: insets.top + 16 }]}
       showsVerticalScrollIndicator={false}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={() => load(true)} colors={["#0F172A"]} />
+      }
     >
-      <View style={styles.headerCard}>
-        <View style={styles.headerRow}>
-          <View style={styles.headerIconWrap}>
-            <Ionicons name="megaphone-outline" size={20} color="#1D4ED8" />
-          </View>
-          <View style={{ flex: 1 }}>
-            <Text style={styles.headerTitle}>Community</Text>
-            <Text style={styles.headerSubtitle}>Announcements and updates</Text>
-          </View>
-          <Pressable onPress={load} style={styles.refreshBtn}>
-            <Text style={styles.refreshBtnText}>
-              {loading ? "Refreshing..." : "Refresh"}
-            </Text>
-          </Pressable>
-        </View>
-      </View>
+      <CanteenHeader showBackButton title="Community" subtitle="Announcements and updates" />
 
-      {orderedPosts.length === 0 && !loading ? (
+      {orderedPosts.length === 0 && !loading && !refreshing ? (
         <View style={styles.emptyCard}>
-          <Ionicons name="chatbubbles-outline" size={28} color="#94A3B8" />
+          <View style={styles.emptyIconWrap}>
+            <Ionicons name="megaphone-outline" size={32} color="#94A3B8" />
+          </View>
           <Text style={styles.emptyTitle}>No announcements yet</Text>
-          <Text style={styles.emptySub}>New updates from admin will appear here.</Text>
+          <Text style={styles.emptySub}>New updates from the canteen admin will appear here.</Text>
         </View>
       ) : null}
 
-      {orderedPosts.map((post) => (
-        <View key={post.id} style={styles.postCard}>
-          <View style={styles.postHeaderRow}>
-            <Text style={styles.postTitle}>
-              {post.isPinned ? "[PINNED] " : ""}
-              {post.title}
-            </Text>
-            {post.isPinned ? (
-              <View style={styles.pinnedPill}>
-                <Text style={styles.pinnedPillText}>Pinned</Text>
-              </View>
-            ) : null}
-          </View>
-
-          <Text style={styles.postBody}>{post.body}</Text>
-
-          {post.mediaUrl && post.mediaType === "IMAGE" ? (
-            <Image
-              source={{ uri: post.mediaUrl }}
-              resizeMode="cover"
-              style={styles.postImage}
-            />
-          ) : null}
-
-          {post.mediaUrl && post.mediaType === "VIDEO" ? (
-            <Pressable
-              onPress={async () => {
-                const canOpen = await Linking.canOpenURL(post.mediaUrl as string);
-                if (!canOpen) {
-                  Alert.alert("Invalid URL", "Could not open this video.");
-                  return;
-                }
-                await Linking.openURL(post.mediaUrl as string);
-              }}
-              style={styles.videoBtn}
-            >
-              <Text style={styles.videoBtnText}>Open Video</Text>
-            </Pressable>
-          ) : null}
-
-          <Text style={styles.postMeta}>
-            By {post.author?.name ?? "Admin"} •{" "}
-            {new Date(post.createdAt).toLocaleString()}
-          </Text>
+      {loading && !refreshing && orderedPosts.length === 0 ? (
+        <View style={styles.loadingWrap}>
+          <Ionicons name="sync-outline" size={24} color="#94A3B8" />
+          <Text style={styles.loadingText}>Loading updates...</Text>
         </View>
-      ))}
+      ) : null}
+
+      <View style={styles.feedContainer}>
+        {orderedPosts.map((post) => {
+          const isPinned = post.isPinned;
+          return (
+            <View key={post.id} style={[styles.postCard, isPinned && styles.postCardPinned]}>
+              <View style={styles.postHeaderRow}>
+                <View style={styles.authorWrap}>
+                  <View style={styles.authorAvatar}>
+                    <Ionicons name="person" size={16} color="#64748B" />
+                  </View>
+                  <View>
+                    <Text style={styles.authorName}>{post.author?.name ?? "Canteen Admin"}</Text>
+                    <Text style={styles.postDate}>{new Date(post.createdAt).toLocaleString(undefined, { 
+                      month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' 
+                    })}</Text>
+                  </View>
+                </View>
+                {isPinned ? (
+                  <View style={styles.pinnedPill}>
+                    <Ionicons name="pin" size={12} color="#4F46E5" />
+                    <Text style={styles.pinnedPillText}>Pinned</Text>
+                  </View>
+                ) : null}
+              </View>
+
+              <View style={styles.postContentWrap}>
+                {post.title ? (
+                  <Text style={styles.postTitle}>{post.title}</Text>
+                ) : null}
+                <Text style={styles.postBody}>{post.body}</Text>
+              </View>
+
+              {post.mediaUrl && post.mediaType === "IMAGE" ? (
+                <Image
+                  source={{ uri: post.mediaUrl }}
+                  resizeMode="cover"
+                  style={styles.postImage}
+                />
+              ) : null}
+
+              {post.mediaUrl && post.mediaType === "VIDEO" ? (
+                <Pressable
+                  onPress={async () => {
+                    const canOpen = await Linking.canOpenURL(post.mediaUrl as string);
+                    if (!canOpen) {
+                      Alert.alert("Invalid URL", "Could not open this video.");
+                      return;
+                    }
+                    await Linking.openURL(post.mediaUrl as string);
+                  }}
+                  style={styles.videoBtn}
+                  android_ripple={{ color: "#E2E8F0" }}
+                >
+                  <Ionicons name="play-circle" size={20} color="#0F172A" />
+                  <Text style={styles.videoBtnText}>Watch Video</Text>
+                </Pressable>
+              ) : null}
+            </View>
+          );
+        })}
+      </View>
     </ScrollView>
   );
 }
@@ -135,57 +154,39 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 16,
-    gap: 12,
-    paddingBottom: 24
+    gap: 16,
+    paddingBottom: 40
   },
-  headerCard: {
+  loadingWrap: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 32,
+    gap: 8
+  },
+  loadingText: {
+    color: "#64748B",
+    fontWeight: "600",
+    fontSize: 15
+  },
+  emptyCard: {
     borderRadius: 16,
     borderWidth: 1,
     borderColor: "#E2E8F0",
     backgroundColor: "white",
-    padding: 12
-  },
-  headerRow: {
-    flexDirection: "row",
+    padding: 32,
     alignItems: "center",
-    gap: 10
+    justifyContent: "center",
+    gap: 8,
+    marginTop: 16
   },
-  headerIconWrap: {
-    width: 38,
-    height: 38,
-    borderRadius: 10,
-    backgroundColor: "#DBEAFE",
+  emptyIconWrap: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: "#F1F5F9",
     alignItems: "center",
-    justifyContent: "center"
-  },
-  headerTitle: {
-    color: "#0F172A",
-    fontSize: 24,
-    fontWeight: "800"
-  },
-  headerSubtitle: {
-    color: "#64748B",
-    marginTop: 2,
-    fontWeight: "600"
-  },
-  refreshBtn: {
-    backgroundColor: "#0F172A",
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 9
-  },
-  refreshBtnText: {
-    color: "white",
-    fontWeight: "700"
-  },
-  emptyCard: {
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: "#CBD5E1",
-    backgroundColor: "#F8FAFC",
-    padding: 18,
-    alignItems: "center",
-    gap: 6
+    justifyContent: "center",
+    marginBottom: 8
   },
   emptyTitle: {
     color: "#0F172A",
@@ -194,62 +195,117 @@ const styles = StyleSheet.create({
   },
   emptySub: {
     color: "#64748B",
-    textAlign: "center"
+    textAlign: "center",
+    fontSize: 14,
+    lineHeight: 20
+  },
+  feedContainer: {
+    gap: 16
   },
   postCard: {
-    borderRadius: 14,
+    borderRadius: 16,
     borderWidth: 1,
     borderColor: "#E2E8F0",
     backgroundColor: "white",
-    padding: 12,
-    gap: 8
+    padding: 16,
+    gap: 14,
+    shadowColor: "#0F172A",
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 2
+  },
+  postCardPinned: {
+    borderColor: "#C7D2FE",
+    backgroundColor: "#FAFAFF"
   },
   postHeaderRow: {
     flexDirection: "row",
-    alignItems: "flex-start",
+    alignItems: "center",
     justifyContent: "space-between",
     gap: 8
+  },
+  authorWrap: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    flex: 1
+  },
+  authorAvatar: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "#F1F5F9",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "#E2E8F0"
+  },
+  authorName: {
+    color: "#0F172A",
+    fontWeight: "800",
+    fontSize: 15
+  },
+  postDate: {
+    color: "#64748B",
+    fontWeight: "600",
+    fontSize: 12,
+    marginTop: 1
+  },
+  pinnedPill: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#EEF2FF",
+    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    gap: 4,
+    borderWidth: 1,
+    borderColor: "#C7D2FE"
+  },
+  pinnedPillText: {
+    color: "#4F46E5",
+    fontWeight: "800",
+    fontSize: 11,
+    textTransform: "uppercase",
+    letterSpacing: 0.5
+  },
+  postContentWrap: {
+    gap: 6
   },
   postTitle: {
     color: "#0F172A",
     fontSize: 18,
     fontWeight: "800",
-    flex: 1
-  },
-  pinnedPill: {
-    backgroundColor: "#E0E7FF",
-    borderRadius: 999,
-    paddingHorizontal: 10,
-    paddingVertical: 4
-  },
-  pinnedPillText: {
-    color: "#3730A3",
-    fontWeight: "700",
-    fontSize: 12
+    lineHeight: 24
   },
   postBody: {
     color: "#334155",
-    lineHeight: 20
+    fontSize: 15,
+    lineHeight: 22
   },
   postImage: {
     width: "100%",
-    height: 180,
-    borderRadius: 10,
-    backgroundColor: "#F1F5F9"
+    height: 220,
+    borderRadius: 12,
+    backgroundColor: "#F1F5F9",
+    borderWidth: 1,
+    borderColor: "#E2E8F0"
   },
   videoBtn: {
-    backgroundColor: "#0F172A",
-    borderRadius: 10,
-    paddingVertical: 10
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#F8FAFC",
+    borderRadius: 12,
+    paddingVertical: 14,
+    gap: 8,
+    borderWidth: 1,
+    borderColor: "#E2E8F0"
   },
   videoBtnText: {
-    color: "white",
-    textAlign: "center",
-    fontWeight: "700"
-  },
-  postMeta: {
-    color: "#64748B",
-    fontSize: 12,
-    fontWeight: "600"
+    color: "#0F172A",
+    fontWeight: "700",
+    fontSize: 15
   }
 });

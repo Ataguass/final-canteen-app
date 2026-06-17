@@ -1,0 +1,68 @@
+diff --git a/node_modules/@react-native-firebase/auth/lib/providers/OAuthProvider.js b/node_modules/@react-native-firebase/auth/lib/providers/OAuthProvider.js
+index feab7e0..fb84596 100644
+--- a/node_modules/@react-native-firebase/auth/lib/providers/OAuthProvider.js
++++ b/node_modules/@react-native-firebase/auth/lib/providers/OAuthProvider.js
+@@ -17,14 +17,14 @@
+ 
+ export default class OAuthProvider {
+   /** @internal */
+-  #providerId = null;
++  _providerId = null;
+   /** @internal */
+-  #customParameters = {};
++  _customParameters = {};
+   /** @internal */
+-  #scopes = [];
++  _scopes = [];
+ 
+   constructor(providerId) {
+-    this.#providerId = providerId;
++    this._providerId = providerId;
+   }
+ 
+   static credential(idToken, accessToken) {
+@@ -36,35 +36,35 @@ export default class OAuthProvider {
+   }
+ 
+   get PROVIDER_ID() {
+-    return this.#providerId;
++    return this._providerId;
+   }
+ 
+   setCustomParameters(customOAuthParameters) {
+-    this.#customParameters = customOAuthParameters;
++    this._customParameters = customOAuthParameters;
+     return this;
+   }
+ 
+   getCustomParameters() {
+-    return this.#customParameters;
++    return this._customParameters;
+   }
+ 
+   addScope(scope) {
+-    if (!this.#scopes.includes(scope)) {
+-      this.#scopes.push(scope);
++    if (!this._scopes.includes(scope)) {
++      this._scopes.push(scope);
+     }
+     return this;
+   }
+ 
+   getScopes() {
+-    return [...this.#scopes];
++    return [...this._scopes];
+   }
+ 
+   /** @internal */
+   toObject() {
+     return {
+-      providerId: this.#providerId,
+-      scopes: this.#scopes,
+-      customParameters: this.#customParameters,
++      providerId: this._providerId,
++      scopes: this._scopes,
++      customParameters: this._customParameters,
+     };
+   }
+ }

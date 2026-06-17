@@ -40,6 +40,32 @@ export const backupService = {
       tenantId
     }),
 
+  uploadBackup: async (token: string, tenantId: string, fileUri: string, fileName: string) => {
+    const formData = new FormData();
+    // @ts-ignore
+    formData.append("file", {
+      uri: fileUri,
+      name: fileName,
+      type: "application/json"
+    });
+
+    const response = await fetch(`${config.apiBaseUrl}/backups/me/upload`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "x-tenant-id": tenantId
+      },
+      body: formData
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || "Failed to upload backup");
+    }
+
+    return response.json() as Promise<{ success: boolean; message: string; data: CreatedBackup }>;
+  },
+
   restoreBackup: (token: string, tenantId: string, backupId: string) =>
     apiRequest<{
       success: boolean;

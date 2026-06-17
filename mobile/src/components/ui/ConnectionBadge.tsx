@@ -8,16 +8,18 @@ export const ConnectionBadge = ({ isConnected }: Props) => {
   return (
     <View
       style={{
-        alignSelf: "flex-start",
-        backgroundColor: isConnected ? "#065F46" : "#991B1B",
-        borderRadius: 999,
-        paddingVertical: 4,
-        paddingHorizontal: 10
+        width: 12,
+        height: 12,
+        borderRadius: 6,
+        backgroundColor: isConnected ? "#10B981" : "#EF4444",
+        borderWidth: 2,
+        borderColor: "white",
+        shadowColor: isConnected ? "#10B981" : "#EF4444",
+        shadowOpacity: 0.4,
+        shadowRadius: 4,
+        shadowOffset: { width: 0, height: 2 },
+        elevation: 2
       }}
-    >
-      <Text style={{ color: "white", fontWeight: "700", fontSize: 12 }}>
-        {isConnected ? "Online" : "Offline"}
-      </Text>
-    </View>
+    />
   );
 };

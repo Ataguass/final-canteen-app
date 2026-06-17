@@ -565,29 +565,19 @@ export default function Screen() {
   return (
     <View style={styles.screen}>
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
-        <View style={styles.headerCard}>
-          <View style={styles.headerIconWrap}>
-            <Ionicons name="storefront" size={22} color="#0F172A" />
-          </View>
-          <View style={styles.headerTextWrap}>
-            <Text style={styles.headerTitle}>POS Counter</Text>
-            <Text style={styles.headerSubtitle}>Fast billing with online/offline sync</Text>
-          </View>
-        </View>
-
         <View style={styles.statusCard}>
-          <ConnectionBadge isConnected={isConnected} />
           <View style={styles.statsRow}>
             <View style={[styles.statPill, styles.statPillBlue]}>
-              <Text style={styles.statLabel}>Held</Text>
+              <Text style={styles.statLabel}>Held Drafts</Text>
               <Text style={styles.statValue}>{heldDrafts.length}</Text>
             </View>
             <View style={[styles.statPill, styles.statPillAmber]}>
-              <Text style={styles.statLabel}>Queued</Text>
+              <Text style={styles.statLabel}>Queued Offline</Text>
               <Text style={styles.statValue}>{queuedCount}</Text>
             </View>
           </View>
           <View style={styles.topActionsRow}>
+            <ConnectionBadge isConnected={isConnected} />
             <Pressable
               onPress={syncQueuedPosOrders}
               disabled={syncingQueued || !isConnected}
@@ -596,11 +586,11 @@ export default function Screen() {
                 syncingQueued || !isConnected ? styles.topActionButtonDisabled : styles.topActionButtonPrimary
               ]}
             >
-              <Ionicons name="cloud-upload-outline" size={16} color="white" />
+              <Ionicons name="cloud-upload" size={18} color="white" />
               <Text style={styles.topActionText}>{syncingQueued ? "Syncing..." : "Sync Queued"}</Text>
             </Pressable>
             <Pressable onPress={restoreLastHeld} style={[styles.topActionButton, styles.topActionButtonSecondary]}>
-              <Ionicons name="refresh-outline" size={16} color="#0F172A" />
+              <Ionicons name="refresh" size={18} color="#0F172A" />
               <Text style={styles.topActionTextDark}>Restore Hold</Text>
             </Pressable>
           </View>
@@ -623,7 +613,7 @@ export default function Screen() {
               style={[styles.categoryChip, selectedCategoryId === "ALL" && styles.categoryChipActive]}
             >
               <Text style={[styles.categoryChipText, selectedCategoryId === "ALL" && styles.categoryChipTextActive]}>
-                All
+                All Items
               </Text>
             </Pressable>
             {categories.map((category) => {
@@ -645,7 +635,7 @@ export default function Screen() {
 
         <View style={styles.sectionCard}>
           <View style={styles.sectionHeaderRow}>
-            <Text style={styles.sectionTitle}>Items</Text>
+            <Text style={styles.sectionTitle}>Menu Items</Text>
             <Text style={styles.helperText}>{filteredMenu.length} shown</Text>
           </View>
           <View style={styles.itemGrid}>
@@ -653,7 +643,15 @@ export default function Screen() {
               const qty = cart[item.id] ?? 0;
               const isLowStock = item.stockQty <= 10;
               return (
-                <View key={item.id} style={[styles.itemCard, { width: itemCardWidth }]}>
+                <Pressable 
+                  key={item.id} 
+                  onPress={() => addItemToCart(item.id)}
+                  style={({ pressed }) => [
+                    styles.itemCard, 
+                    { width: itemCardWidth },
+                    pressed && { opacity: 0.8, transform: [{ scale: 0.98 }] }
+                  ]}
+                >
                   {item.image ? (
                     <Image
                       source={{ uri: item.image }}
@@ -665,63 +663,73 @@ export default function Screen() {
                     <View style={styles.itemTextWrap}>
                       <Text style={styles.itemName}>{item.name}</Text>
                       {item.description ? (
-                        <Text numberOfLines={2} style={styles.itemDescription}>
+                        <Text numberOfLines={1} style={styles.itemDescription}>
                           {item.description}
                         </Text>
                       ) : null}
                       <Text style={styles.itemPrice}>₹ {item.price.toFixed(2)}</Text>
                     </View>
+                  </View>
+                  <View style={styles.itemFooterRow}>
                     <View style={[styles.stockPill, isLowStock ? styles.stockPillLow : styles.stockPillNormal]}>
                       <Text style={[styles.stockText, isLowStock ? styles.stockTextLow : styles.stockTextNormal]}>
-                        Stock {item.stockQty}
+                        {item.stockQty} left
                       </Text>
                     </View>
-                  </View>
-                  <View style={styles.qtyRow}>
-                    <Pressable
-                      onPress={() =>
-                        setCart((prev) => ({ ...prev, [item.id]: Math.max((prev[item.id] ?? 0) - 1, 0) }))
-                      }
-                      style={styles.qtyButton}
-                    >
-                      <Ionicons name="remove" size={16} color="#0F172A" />
-                    </Pressable>
-                    <View style={styles.qtyValueWrap}>
-                      <Text style={styles.qtyValue}>{qty}</Text>
+                    <View style={styles.stepperWrap}>
+                      <Pressable
+                        onPress={(e) => {
+                          e.stopPropagation();
+                          setCart((prev) => ({ ...prev, [item.id]: Math.max((prev[item.id] ?? 0) - 1, 0) }));
+                        }}
+                        style={styles.stepperButton}
+                      >
+                        <Ionicons name="remove" size={16} color="#0F172A" />
+                      </Pressable>
+                      <Text style={styles.stepperValue}>{qty}</Text>
+                      <Pressable
+                        onPress={(e) => {
+                          e.stopPropagation();
+                          addItemToCart(item.id);
+                        }}
+                        style={styles.stepperButton}
+                      >
+                        <Ionicons name="add" size={16} color="#0F172A" />
+                      </Pressable>
                     </View>
-                    <Pressable
-                      onPress={() => addItemToCart(item.id)}
-                      style={[styles.qtyButton, styles.qtyButtonPlus]}
-                    >
-                      <Ionicons name="add" size={16} color="#0F172A" />
-                    </Pressable>
                   </View>
-                </View>
+                </Pressable>
               );
             })}
           </View>
           {!loadingMenu && filteredMenu.length === 0 ? (
             <View style={styles.emptyState}>
-              <Ionicons name="restaurant-outline" size={20} color="#64748B" />
+              <Ionicons name="restaurant-outline" size={24} color="#94A3B8" />
               <Text style={styles.emptyStateText}>No items in selected category.</Text>
             </View>
           ) : null}
         </View>
       </ScrollView>
 
+      {/* Floating Checkout Bar */}
       <View style={styles.checkoutBar}>
         <Pressable onPress={() => setCartSummaryVisible(true)} style={styles.selectedProductsCard}>
-          <View>
-            <Text style={styles.selectedProductsTitle}>Selected Products ({totalQty})</Text>
-            <Text style={styles.selectedProductsHint}>Tap to view table, tax, discount and shipping</Text>
+          <View style={styles.selectedProductsRow}>
+            <View style={styles.cartIconBadge}>
+              <Ionicons name="cart" size={20} color="white" />
+              <View style={styles.cartCountCircle}>
+                <Text style={styles.cartCountText}>{totalQty}</Text>
+              </View>
+            </View>
+            <View>
+              <Text style={styles.selectedProductsTitle}>Cart Summary</Text>
+              <Text style={styles.selectedProductsHint}>Tap to edit details</Text>
+            </View>
           </View>
-          <Ionicons name="chevron-up" size={18} color="#475569" />
+          <View style={styles.checkoutTotals}>
+            <Text style={styles.totalText}>₹ {grandTotal.toFixed(2)}</Text>
+          </View>
         </Pressable>
-
-        <View style={styles.checkoutTotals}>
-          <Text style={styles.subtotalText}>Sub Total: ₹ {subtotal.toFixed(2)}</Text>
-          <Text style={styles.totalText}>₹ {grandTotal.toFixed(2)}</Text>
-        </View>
 
         <View style={styles.checkoutActions}>
           <Pressable
@@ -729,17 +737,19 @@ export default function Screen() {
             disabled={isCartEmpty}
             style={[styles.actionButton, styles.holdButton, isCartEmpty && styles.disabledButton]}
           >
-            <Text style={styles.actionButtonText}>Hold</Text>
+            <Ionicons name="pause" size={18} color="#475569" />
+            <Text style={styles.actionButtonTextDark}>Hold</Text>
           </Pressable>
           <Pressable onPress={resetCart} style={[styles.actionButton, styles.resetButton]}>
-            <Text style={styles.actionButtonText}>Reset</Text>
+            <Ionicons name="trash" size={18} color="#EF4444" />
           </Pressable>
           <Pressable
             onPress={openPayment}
             disabled={loading || isCartEmpty}
-            style={[styles.actionButton, styles.payButton, (loading || isCartEmpty) && styles.disabledButton]}
+            style={[styles.payButton, (loading || isCartEmpty) && styles.disabledButton]}
           >
-            <Text style={styles.actionButtonText}>{loading ? "Processing..." : "Pay Now"}</Text>
+            <Text style={styles.payButtonText}>{loading ? "Processing..." : "Pay Now"}</Text>
+            <Ionicons name="arrow-forward" size={20} color="white" />
           </Pressable>
         </View>
       </View>
@@ -755,11 +765,11 @@ export default function Screen() {
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>Order Summary</Text>
               <Pressable onPress={() => setCartSummaryVisible(false)} style={styles.modalCloseButton}>
-                <Ionicons name="close" size={18} color="#0F172A" />
+                <Ionicons name="close" size={20} color="#0F172A" />
               </Pressable>
             </View>
 
-            <ScrollView contentContainerStyle={styles.modalScrollContent}>
+            <ScrollView contentContainerStyle={styles.modalScrollContent} showsVerticalScrollIndicator={false}>
               <View style={styles.orderSummaryHero}>
                 <View style={styles.orderSummaryMetric}>
                   <Text style={styles.orderSummaryMetricLabel}>Items</Text>
@@ -771,7 +781,7 @@ export default function Screen() {
                 </View>
                 <View style={styles.orderSummaryMetric}>
                   <Text style={styles.orderSummaryMetricLabel}>Grand Total</Text>
-                  <Text style={styles.orderSummaryMetricValue}>₹ {grandTotal.toFixed(2)}</Text>
+                  <Text style={[styles.orderSummaryMetricValue, { color: "#FF6B35" }]}>₹ {grandTotal.toFixed(2)}</Text>
                 </View>
               </View>
 
@@ -787,10 +797,10 @@ export default function Screen() {
                 ) : (
                   cartLines.map((line) => (
                     <View key={line.id} style={styles.tableBodyRow}>
-                      <Text style={{ flex: 2 }}>{line.name}</Text>
-                      <Text style={{ flex: 1, textAlign: "center" }}>{line.quantity}</Text>
-                      <Text style={{ flex: 1, textAlign: "right" }}>{line.price.toFixed(2)}</Text>
-                      <Text style={{ flex: 1.3, textAlign: "right" }}>{line.lineTotal.toFixed(2)}</Text>
+                      <Text style={{ flex: 2, fontWeight: "600", color: "#0F172A" }}>{line.name}</Text>
+                      <Text style={{ flex: 1, textAlign: "center", color: "#475569" }}>{line.quantity}</Text>
+                      <Text style={{ flex: 1, textAlign: "right", color: "#475569" }}>{line.price.toFixed(2)}</Text>
+                      <Text style={{ flex: 1.3, textAlign: "right", fontWeight: "700", color: "#0F172A" }}>{line.lineTotal.toFixed(2)}</Text>
                     </View>
                   ))
                 )}
@@ -804,10 +814,11 @@ export default function Screen() {
                   keyboardType="numeric"
                   placeholder="Tax %"
                   style={styles.input}
+                  placeholderTextColor="#94A3B8"
                 />
 
                 <View style={styles.discountRow}>
-                  <Text style={styles.inputLabel}>Discount</Text>
+                  <Text style={styles.inputLabel}>Discount Type</Text>
                   {(["FIXED", "PERCENTAGE"] as DiscountType[]).map((type) => {
                     const active = discountType === type;
                     return (
@@ -817,7 +828,7 @@ export default function Screen() {
                         style={[styles.segmentButton, active && styles.segmentButtonActive]}
                       >
                         <Text style={[styles.segmentButtonText, active && styles.segmentButtonTextActive]}>
-                          {type === "FIXED" ? "Fixed" : "Percentage"}
+                          {type === "FIXED" ? "Fixed Amount" : "Percentage"}
                         </Text>
                       </Pressable>
                     );
@@ -830,6 +841,7 @@ export default function Screen() {
                   keyboardType="numeric"
                   placeholder={discountType === "FIXED" ? "Discount ₹" : "Discount %"}
                   style={styles.input}
+                  placeholderTextColor="#94A3B8"
                 />
 
                 <TextInput
@@ -838,19 +850,15 @@ export default function Screen() {
                   keyboardType="numeric"
                   placeholder="Shipping ₹"
                   style={styles.input}
+                  placeholderTextColor="#94A3B8"
                 />
               </View>
-
-              <View style={styles.summaryTotalsWrap}>
-                <Text style={styles.summaryMetaText}>Total QTY: {totalQty}</Text>
-                <Text style={styles.summarySubTotal}>Sub Total: ₹ {subtotal.toFixed(2)}</Text>
-                <Text style={styles.summaryGrandTotal}>Total: ₹ {grandTotal.toFixed(2)}</Text>
-              </View>
             </ScrollView>
-
-            <Pressable onPress={() => setCartSummaryVisible(false)} style={styles.doneButton}>
-              <Text style={styles.doneButtonText}>Done</Text>
-            </Pressable>
+            <View style={styles.modalFooter}>
+              <Pressable onPress={() => setCartSummaryVisible(false)} style={styles.doneButton}>
+                <Text style={styles.doneButtonText}>Done</Text>
+              </Pressable>
+            </View>
           </View>
         </View>
       </Modal>
@@ -864,41 +872,42 @@ export default function Screen() {
         <View style={styles.modalBackdrop}>
           <View style={styles.paymentModalCard}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Make Payment</Text>
+              <Text style={styles.modalTitle}>Complete Payment</Text>
               <Pressable onPress={() => setPaymentModalVisible(false)} style={styles.modalCloseButton}>
-                <Ionicons name="close" size={18} color="#0F172A" />
+                <Ionicons name="close" size={20} color="#0F172A" />
               </Pressable>
             </View>
 
-            <ScrollView contentContainerStyle={styles.modalScrollContent}>
+            <ScrollView contentContainerStyle={styles.modalScrollContent} showsVerticalScrollIndicator={false}>
               <View style={styles.paymentAmountBanner}>
-                <Text style={styles.paymentAmountLabel}>Payable Amount</Text>
+                <Text style={styles.paymentAmountLabel}>Total Payable Amount</Text>
                 <Text style={styles.paymentAmountValue}>₹ {grandTotal.toFixed(2)}</Text>
               </View>
 
-              <Text style={styles.inputLabel}>Amount</Text>
+              <Text style={styles.inputLabel}>Received Amount</Text>
               <TextInput
                 value={paymentAmount}
                 onChangeText={setPaymentAmount}
                 keyboardType="numeric"
                 placeholder="Amount"
                 style={styles.input}
+                placeholderTextColor="#94A3B8"
               />
 
-              <Text style={styles.inputLabel}>Payment Type</Text>
-              <View style={styles.chipRow}>
+              <Text style={styles.inputLabel}>Payment Method</Text>
+              <View style={styles.chipGrid}>
                 {(["CASH", "UPI", "WALLET", "CARD", "OTHER"] as PaymentMethod[]).map((method) => {
                   const active = paymentMethod === method;
                   return (
                     <Pressable
                       key={method}
                       onPress={() => setPaymentMethod(method)}
-                      style={[styles.segmentButton, active && styles.segmentButtonActive]}
+                      style={[styles.gridSegmentButton, active && styles.segmentButtonActive]}
                     >
                       <Ionicons
                         name={paymentMethodIcons[method]}
-                        size={14}
-                        color={active ? "white" : "#334155"}
+                        size={20}
+                        color={active ? "white" : "#475569"}
                       />
                       <Text style={[styles.segmentButtonText, active && styles.segmentButtonTextActive]}>
                         {method}
@@ -910,25 +919,27 @@ export default function Screen() {
 
               {paymentMethod === "WALLET" ? (
                 <>
-                  <Text style={styles.inputLabel}>Teacher/Staff Phone (Wallet)</Text>
+                  <Text style={styles.inputLabel}>Teacher/Staff Phone</Text>
                   <TextInput
                     value={walletCustomerPhone}
                     onChangeText={setWalletCustomerPhone}
                     keyboardType="phone-pad"
-                    placeholder="10-digit customer phone"
+                    placeholder="Enter 10-digit customer phone"
                     maxLength={10}
                     style={styles.input}
+                    placeholderTextColor="#94A3B8"
                   />
                 </>
               ) : null}
 
-              <Text style={styles.inputLabel}>Note</Text>
+              <Text style={styles.inputLabel}>Note (Optional)</Text>
               <TextInput
                 value={paymentNote}
                 onChangeText={setPaymentNote}
-                placeholder="Note"
+                placeholder="Add an internal note..."
                 multiline
                 style={[styles.input, styles.noteInput]}
+                placeholderTextColor="#94A3B8"
               />
 
               <Text style={styles.inputLabel}>Payment Status</Text>
@@ -943,8 +954,8 @@ export default function Screen() {
                     >
                       <Ionicons
                         name={paymentStatusIcons[status]}
-                        size={14}
-                        color={active ? "white" : "#334155"}
+                        size={16}
+                        color={active ? "white" : "#475569"}
                       />
                       <Text style={[styles.segmentButtonText, active && styles.segmentButtonTextActive]}>
                         {status}
@@ -955,10 +966,10 @@ export default function Screen() {
               </View>
 
               <View style={styles.paymentSummaryCard}>
-                <Text style={styles.paymentSummaryTitle}>Payment Summary</Text>
+                <Text style={styles.paymentSummaryTitle}>Order Details</Text>
                 {[
-                  ["Total Products", totalQty.toString()],
-                  ["Total Amount", `₹ ${subtotal.toFixed(2)}`],
+                  ["Total Items", totalQty.toString()],
+                  ["Subtotal", `₹ ${subtotal.toFixed(2)}`],
                   ["Order Tax", `₹ ${taxAmount.toFixed(2)} (${taxPercent || 0}%)`],
                   ["Discount", `₹ ${discountAmount.toFixed(2)}`],
                   ["Shipping", `₹ ${shippingAmount.toFixed(2)}`],
@@ -981,19 +992,16 @@ export default function Screen() {
                 disabled={loading}
                 style={[styles.paymentActionButton, styles.submitButton, loading && styles.disabledButton]}
               >
-                <Text style={styles.actionButtonText}>{loading ? "Processing..." : "Submit"}</Text>
+                <Text style={styles.paymentActionTextSecondary}>{loading ? "Processing..." : "Submit Only"}</Text>
               </Pressable>
               <Pressable
                 onPress={() => submitOrder("print")}
                 disabled={loading}
                 style={[styles.paymentActionButton, styles.printButton, loading && styles.disabledButton]}
               >
-                <Text style={styles.actionButtonText}>Submit & Print</Text>
+                <Text style={styles.paymentActionText}>Submit & Print</Text>
               </Pressable>
             </View>
-            <Pressable onPress={() => setPaymentModalVisible(false)} style={styles.cancelButton}>
-              <Text style={styles.actionButtonText}>Cancel</Text>
-            </Pressable>
           </View>
         </View>
       </Modal>
@@ -1004,136 +1012,95 @@ export default function Screen() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#EEF2F7"
+    backgroundColor: "#F8FAFC"
   },
   scroll: {
     flex: 1
   },
   content: {
     padding: 16,
-    gap: 12,
-    paddingBottom: 212
-  },
-  headerCard: {
-    backgroundColor: "#F8FAFC",
-    borderRadius: 18,
-    padding: 14,
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    shadowColor: "#0F172A",
-    shadowOpacity: 0.07,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 3
-  },
-  headerIconWrap: {
-    width: 42,
-    height: 42,
-    borderRadius: 12,
-    backgroundColor: "#DBEAFE",
-    alignItems: "center",
-    justifyContent: "center"
-  },
-  headerTextWrap: {
-    flex: 1,
-    gap: 2
-  },
-  headerTitle: {
-    fontSize: 22,
-    fontWeight: "800",
-    color: "#0F172A"
-  },
-  headerSubtitle: {
-    color: "#64748B",
-    fontSize: 13,
-    fontWeight: "500"
+    gap: 16,
+    paddingBottom: 200
   },
   statusCard: {
     backgroundColor: "white",
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-    padding: 12,
-    gap: 10,
-    shadowColor: "#0F172A",
-    shadowOpacity: 0.06,
+    borderRadius: 20,
+    padding: 16,
+    gap: 16,
+    shadowColor: "#000",
+    shadowOpacity: 0.04,
     shadowRadius: 10,
     shadowOffset: { width: 0, height: 4 },
     elevation: 2
   },
   statsRow: {
     flexDirection: "row",
-    gap: 8
+    gap: 10
   },
   statPill: {
     flex: 1,
-    borderRadius: 12,
-    paddingVertical: 8,
-    paddingHorizontal: 10
+    borderRadius: 16,
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between"
   },
   statPillBlue: {
-    backgroundColor: "#EEF2FF"
+    backgroundColor: "#F1F5F9"
   },
   statPillAmber: {
-    backgroundColor: "#FEF3C7"
+    backgroundColor: "#FFFBEB"
   },
   statLabel: {
     color: "#475569",
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: "700"
   },
   statValue: {
     color: "#0F172A",
-    fontSize: 20,
-    fontWeight: "800",
-    marginTop: 2
+    fontSize: 22,
+    fontWeight: "900"
   },
   topActionsRow: {
     flexDirection: "row",
-    gap: 8
+    gap: 12,
+    alignItems: "center"
   },
   topActionButton: {
-    borderRadius: 12,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
+    borderRadius: 14,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 6,
+    gap: 8,
     flex: 1
   },
   topActionButtonPrimary: {
-    backgroundColor: "#0F172A"
+    backgroundColor: "#FF6B35"
   },
   topActionButtonSecondary: {
-    backgroundColor: "#E2E8F0"
+    backgroundColor: "#F8FAFC",
+    borderWidth: 1,
+    borderColor: "#F1F5F9"
   },
   topActionButtonDisabled: {
     backgroundColor: "#94A3B8"
   },
   topActionText: {
     color: "white",
-    fontWeight: "700"
+    fontWeight: "700",
+    fontSize: 15
   },
   topActionTextDark: {
     color: "#0F172A",
-    fontWeight: "700"
+    fontWeight: "700",
+    fontSize: 15
   },
   sectionCard: {
-    backgroundColor: "white",
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-    padding: 12,
-    gap: 10,
-    shadowColor: "#0F172A",
-    shadowOpacity: 0.04,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 3 },
-    elevation: 1
+    backgroundColor: "transparent",
+    gap: 12
   },
   sectionHeaderRow: {
     flexDirection: "row",
@@ -1143,19 +1110,21 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: "800",
-    color: "#0F172A"
+    color: "#0F172A",
+    marginLeft: 4
   },
   helperText: {
     color: "#64748B",
-    fontWeight: "600"
+    fontWeight: "600",
+    marginRight: 4
   },
   errorCard: {
     borderWidth: 1,
     borderColor: "#FCA5A5",
     backgroundColor: "#FEF2F2",
-    borderRadius: 12,
-    padding: 10,
-    gap: 8
+    borderRadius: 16,
+    padding: 14,
+    gap: 10
   },
   errorText: {
     color: "#991B1B",
@@ -1163,31 +1132,35 @@ const styles = StyleSheet.create({
   },
   retryButton: {
     alignSelf: "flex-start",
-    backgroundColor: "#0F172A",
+    backgroundColor: "#991B1B",
     borderRadius: 10,
-    paddingHorizontal: 12,
+    paddingHorizontal: 14,
     paddingVertical: 8
   },
   retryButtonText: {
     color: "white",
-    fontWeight: "700"
+    fontWeight: "800"
   },
   categoryRow: {
     gap: 8,
-    paddingRight: 8
+    paddingRight: 16
   },
   categoryChip: {
-    paddingVertical: 8,
-    paddingHorizontal: 14,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
     borderRadius: 999,
-    backgroundColor: "#E2E8F0"
+    backgroundColor: "white",
+    borderWidth: 1,
+    borderColor: "#E2E8F0"
   },
   categoryChipActive: {
-    backgroundColor: "#0F172A"
+    backgroundColor: "#FF6B35",
+    borderColor: "#FF6B35"
   },
   categoryChipText: {
-    color: "#0F172A",
-    fontWeight: "700"
+    color: "#475569",
+    fontWeight: "700",
+    fontSize: 15
   },
   categoryChipTextActive: {
     color: "white"
@@ -1199,47 +1172,57 @@ const styles = StyleSheet.create({
     alignItems: "flex-start"
   },
   itemCard: {
-    borderWidth: 1,
-    borderColor: "#E2E8F0",
-    borderRadius: 14,
+    backgroundColor: "white",
+    borderRadius: 20,
     padding: 12,
     gap: 10,
-    backgroundColor: "#F8FAFC",
-    marginBottom: 10
+    marginBottom: 12,
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 2
   },
   itemImage: {
     width: "100%",
     height: 110,
-    borderRadius: 10,
-    backgroundColor: "#E2E8F0"
+    borderRadius: 14,
+    backgroundColor: "#F1F5F9"
   },
   itemHeaderRow: {
     flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    gap: 8
+    alignItems: "flex-start",
+    justifyContent: "space-between"
   },
   itemTextWrap: {
     flex: 1,
-    gap: 2
+    gap: 4
   },
   itemName: {
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: "800",
     color: "#0F172A"
   },
   itemDescription: {
     color: "#64748B",
-    fontWeight: "500"
+    fontWeight: "500",
+    fontSize: 13
   },
   itemPrice: {
-    color: "#334155",
-    fontWeight: "700"
+    color: "#FF6B35",
+    fontWeight: "800",
+    fontSize: 16
+  },
+  itemFooterRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginTop: 4
   },
   stockPill: {
     borderRadius: 999,
-    paddingVertical: 5,
-    paddingHorizontal: 10
+    paddingVertical: 4,
+    paddingHorizontal: 8
   },
   stockPillNormal: {
     backgroundColor: "#ECFDF5"
@@ -1248,154 +1231,205 @@ const styles = StyleSheet.create({
     backgroundColor: "#FEF2F2"
   },
   stockText: {
-    fontSize: 12,
-    fontWeight: "700"
+    fontSize: 11,
+    fontWeight: "800"
   },
   stockTextNormal: {
-    color: "#047857"
+    color: "#059669"
   },
   stockTextLow: {
-    color: "#B91C1C"
+    color: "#DC2626"
   },
-  qtyRow: {
+  stepperWrap: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 10
+    backgroundColor: "#F1F5F9",
+    borderRadius: 999,
+    padding: 4,
+    gap: 8
   },
-  qtyButton: {
-    width: 38,
-    height: 38,
-    borderRadius: 12,
-    backgroundColor: "#E2E8F0",
-    alignItems: "center",
-    justifyContent: "center"
-  },
-  qtyButtonPlus: {
-    backgroundColor: "#BFDBFE"
-  },
-  qtyValueWrap: {
-    minWidth: 52,
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-    borderRadius: 10,
+  stepperButton: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     backgroundColor: "white",
-    borderWidth: 1,
-    borderColor: "#CBD5E1",
-    alignItems: "center"
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    shadowOffset: { width: 0, height: 1 },
+    elevation: 1
   },
-  qtyValue: {
+  stepperValue: {
     fontWeight: "800",
     color: "#0F172A",
-    fontSize: 15
+    fontSize: 14,
+    minWidth: 16,
+    textAlign: "center"
   },
   emptyState: {
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "#CBD5E1",
-    backgroundColor: "#F8FAFC",
-    padding: 16,
+    borderRadius: 20,
+    backgroundColor: "white",
+    padding: 32,
     alignItems: "center",
-    gap: 6
+    gap: 12,
+    shadowColor: "#000",
+    shadowOpacity: 0.03,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 1
   },
   emptyStateText: {
-    color: "#475569",
-    fontWeight: "600"
+    color: "#64748B",
+    fontWeight: "600",
+    fontSize: 16
   },
   checkoutBar: {
-    borderTopWidth: 1,
-    borderTopColor: "#D1D5DB",
-    backgroundColor: "#FFFFFF",
-    paddingHorizontal: 12,
-    paddingTop: 10,
-    paddingBottom: 14,
-    gap: 9,
-    shadowColor: "#020617",
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: -2 },
-    elevation: 4
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: "white",
+    borderTopLeftRadius: 32,
+    borderTopRightRadius: 32,
+    paddingTop: 20,
+    paddingBottom: 28,
+    paddingHorizontal: 20,
+    gap: 16,
+    shadowColor: "#0F172A",
+    shadowOpacity: 0.15,
+    shadowRadius: 20,
+    shadowOffset: { width: 0, height: -10 },
+    elevation: 20
   },
   selectedProductsCard: {
-    borderWidth: 1,
-    borderColor: "#D1D5DB",
-    borderRadius: 12,
-    padding: 11,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center"
+  },
+  selectedProductsRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12
+  },
+  cartIconBadge: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "#FF6B35",
+    alignItems: "center",
+    justifyContent: "center"
+  },
+  cartCountCircle: {
+    position: "absolute",
+    top: -4,
+    right: -4,
+    backgroundColor: "#EF4444",
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 2,
+    borderColor: "white"
+  },
+  cartCountText: {
+    color: "white",
+    fontSize: 10,
+    fontWeight: "900"
   },
   selectedProductsTitle: {
     fontWeight: "800",
     color: "#0F172A",
-    fontSize: 18
+    fontSize: 17
   },
   selectedProductsHint: {
     color: "#64748B",
     marginTop: 2,
-    fontWeight: "500"
+    fontWeight: "600",
+    fontSize: 12
   },
   checkoutTotals: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center"
-  },
-  subtotalText: {
-    color: "#4F46E5",
-    fontWeight: "700",
-    fontSize: 17
+    alignItems: "flex-end"
   },
   totalText: {
-    color: "#059669",
-    fontSize: 35,
+    color: "#0F172A",
+    fontSize: 26,
     fontWeight: "900"
   },
   checkoutActions: {
     flexDirection: "row",
-    gap: 8
+    gap: 12
   },
   actionButton: {
-    borderRadius: 12,
-    padding: 12,
-    flex: 1,
+    borderRadius: 16,
+    padding: 14,
     alignItems: "center",
-    justifyContent: "center"
+    justifyContent: "center",
+    flexDirection: "row",
+    gap: 8,
+    backgroundColor: "#F1F5F9"
   },
   holdButton: {
-    backgroundColor: "#DB2777"
+    flex: 1
   },
   resetButton: {
-    backgroundColor: "#E11D48"
+    width: 56,
+    backgroundColor: "#FEF2F2"
   },
   payButton: {
-    backgroundColor: "#10B981"
+    flex: 2,
+    backgroundColor: "#10B981",
+    borderRadius: 16,
+    padding: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    flexDirection: "row",
+    gap: 10
   },
-  actionButtonText: {
+  payButtonText: {
     color: "white",
-    textAlign: "center",
-    fontWeight: "800"
+    fontSize: 18,
+    fontWeight: "900"
+  },
+  actionButtonTextDark: {
+    color: "#0F172A",
+    fontWeight: "800",
+    fontSize: 15
   },
   disabledButton: {
     opacity: 0.5
   },
   modalBackdrop: {
     flex: 1,
-    backgroundColor: "rgba(15,23,42,0.5)",
+    backgroundColor: "rgba(15,23,42,0.6)",
     justifyContent: "center",
-    padding: 12
+    padding: 16
   },
   modalCard: {
     backgroundColor: "white",
-    borderRadius: 16,
-    padding: 14,
-    gap: 10,
-    maxHeight: "88%"
+    borderRadius: 24,
+    padding: 20,
+    gap: 16,
+    maxHeight: "85%",
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 24,
+    shadowOffset: { width: 0, height: 10 },
+    elevation: 10
   },
   paymentModalCard: {
     backgroundColor: "white",
-    borderRadius: 16,
-    padding: 14,
-    gap: 10,
-    maxHeight: "92%"
+    borderRadius: 24,
+    padding: 20,
+    gap: 16,
+    maxHeight: "92%",
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 24,
+    shadowOffset: { width: 0, height: 10 },
+    elevation: 10
   },
   modalHeader: {
     flexDirection: "row",
@@ -1403,235 +1437,258 @@ const styles = StyleSheet.create({
     justifyContent: "space-between"
   },
   modalTitle: {
-    fontSize: 21,
-    fontWeight: "800",
+    fontSize: 22,
+    fontWeight: "900",
     color: "#0F172A"
   },
   modalCloseButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "#E2E8F0",
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "#F1F5F9",
     alignItems: "center",
     justifyContent: "center"
   },
   modalScrollContent: {
-    gap: 10
+    gap: 16,
+    paddingBottom: 20
+  },
+  modalFooter: {
+    paddingTop: 10
   },
   orderSummaryHero: {
-    borderWidth: 1,
-    borderColor: "#DBEAFE",
-    backgroundColor: "#EFF6FF",
-    borderRadius: 12,
-    padding: 10,
+    backgroundColor: "#F1F5F9",
+    borderRadius: 16,
+    padding: 12,
     flexDirection: "row",
-    gap: 8
+    gap: 10
   },
   orderSummaryMetric: {
     flex: 1,
     backgroundColor: "white",
-    borderRadius: 10,
-    paddingVertical: 8,
-    paddingHorizontal: 8
+    borderRadius: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    shadowColor: "#000",
+    shadowOpacity: 0.02,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 1
   },
   orderSummaryMetricLabel: {
-    fontSize: 11,
+    fontSize: 12,
     color: "#64748B",
     fontWeight: "700"
   },
   orderSummaryMetricValue: {
-    marginTop: 2,
+    marginTop: 4,
     color: "#0F172A",
-    fontWeight: "800",
-    fontSize: 14
+    fontWeight: "900",
+    fontSize: 16
   },
   tableWrap: {
     borderWidth: 1,
-    borderColor: "#CBD5E1",
-    borderRadius: 12,
+    borderColor: "#E2E8F0",
+    borderRadius: 16,
     overflow: "hidden"
   },
   tableHeaderRow: {
     flexDirection: "row",
-    backgroundColor: "#E2E8F0",
-    padding: 10
+    backgroundColor: "#F8FAFC",
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E2E8F0"
   },
   tableHeaderText: {
     fontWeight: "800",
-    color: "#0F172A"
+    color: "#475569",
+    fontSize: 12
   },
   tableBodyRow: {
     flexDirection: "row",
-    padding: 10,
-    borderTopWidth: 1,
-    borderTopColor: "#E2E8F0"
+    paddingVertical: 14,
+    paddingHorizontal: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: "#F1F5F9"
   },
   emptyTableText: {
-    padding: 16,
+    padding: 20,
     textAlign: "center",
-    color: "#64748B",
-    fontWeight: "600"
+    color: "#94A3B8",
+    fontWeight: "700"
   },
   inputLabel: {
-    fontWeight: "700",
-    color: "#334155"
+    fontWeight: "800",
+    color: "#0F172A",
+    fontSize: 14,
+    marginBottom: -4
   },
   input: {
     borderWidth: 1,
-    borderColor: "#CBD5E1",
-    borderRadius: 12,
-    padding: 11,
-    backgroundColor: "#FFFFFF"
+    borderColor: "#E2E8F0",
+    borderRadius: 14,
+    padding: 14,
+    backgroundColor: "#F8FAFC",
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#0F172A"
   },
   adjustmentsCard: {
+    backgroundColor: "white",
+    borderRadius: 16,
     borderWidth: 1,
     borderColor: "#E2E8F0",
-    borderRadius: 12,
-    backgroundColor: "#F8FAFC",
-    padding: 10,
-    gap: 10
+    padding: 16,
+    gap: 16
   },
   adjustmentsTitle: {
-    color: "#334155",
-    fontWeight: "700"
+    color: "#0F172A",
+    fontWeight: "800",
+    fontSize: 16
   },
   noteInput: {
-    minHeight: 76,
+    minHeight: 80,
     textAlignVertical: "top"
   },
   paymentAmountBanner: {
-    borderWidth: 1,
-    borderColor: "#BBF7D0",
     backgroundColor: "#ECFDF5",
-    borderRadius: 12,
-    paddingVertical: 10,
-    paddingHorizontal: 12,
+    borderRadius: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 16,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center"
   },
   paymentAmountLabel: {
     color: "#065F46",
-    fontWeight: "700"
+    fontWeight: "800",
+    fontSize: 15
   },
   paymentAmountValue: {
-    color: "#047857",
+    color: "#059669",
     fontWeight: "900",
-    fontSize: 22
+    fontSize: 26
   },
   discountRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-    alignItems: "center"
+    gap: 10
   },
   chipRow: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 8
+    gap: 10
+  },
+  chipGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10
   },
   segmentButton: {
     borderWidth: 1,
-    borderColor: "#CBD5E1",
-    backgroundColor: "#F8FAFC",
+    borderColor: "#E2E8F0",
+    backgroundColor: "white",
     borderRadius: 999,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
     flexDirection: "row",
     alignItems: "center",
-    gap: 6
+    gap: 8
+  },
+  gridSegmentButton: {
+    borderWidth: 1,
+    borderColor: "#E2E8F0",
+    backgroundColor: "white",
+    borderRadius: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    flexBasis: "48%"
   },
   segmentButtonActive: {
-    backgroundColor: "#1D4ED8",
-    borderColor: "#1D4ED8"
+    backgroundColor: "#FF6B35",
+    borderColor: "#FF6B35"
   },
   segmentButtonText: {
-    color: "#334155",
-    fontWeight: "700"
+    color: "#475569",
+    fontWeight: "700",
+    fontSize: 14
   },
   segmentButtonTextActive: {
     color: "white"
   },
-  summaryTotalsWrap: {
-    alignItems: "flex-end",
-    gap: 4,
-    paddingTop: 2
-  },
-  summaryMetaText: {
-    color: "#334155",
-    fontWeight: "600"
-  },
-  summarySubTotal: {
-    color: "#4F46E5",
-    fontWeight: "700"
-  },
-  summaryGrandTotal: {
-    color: "#059669",
-    fontSize: 23,
-    fontWeight: "900"
-  },
   doneButton: {
-    backgroundColor: "#0F172A",
+    flexDirection: "row",
+    backgroundColor: "#FF6B35",
     borderRadius: 12,
-    padding: 12
+    padding: 16,
+    alignItems: "center"
   },
   doneButtonText: {
     color: "white",
-    textAlign: "center",
-    fontWeight: "800"
+    fontSize: 16,
+    fontWeight: "900"
   },
   paymentSummaryCard: {
-    borderWidth: 1,
-    borderColor: "#CBD5E1",
-    borderRadius: 12,
-    overflow: "hidden"
+    backgroundColor: "#F8FAFC",
+    borderRadius: 16,
+    padding: 16,
+    gap: 12
   },
   paymentSummaryTitle: {
     color: "#0F172A",
-    fontWeight: "800",
-    paddingHorizontal: 12,
-    paddingTop: 10,
-    paddingBottom: 2
+    fontWeight: "900",
+    fontSize: 16,
+    marginBottom: 4
   },
   paymentSummaryRow: {
     flexDirection: "row",
-    paddingVertical: 10,
-    paddingHorizontal: 12,
     justifyContent: "space-between",
     alignItems: "center"
   },
   paymentSummaryRowBorder: {
+    paddingTop: 12,
     borderTopWidth: 1,
     borderTopColor: "#E2E8F0"
   },
   paymentSummaryLabel: {
-    color: "#475569",
-    fontWeight: "600"
+    color: "#64748B",
+    fontWeight: "700",
+    fontSize: 14
   },
   paymentSummaryValue: {
     color: "#0F172A",
-    fontWeight: "700"
+    fontWeight: "800",
+    fontSize: 14
   },
   paymentActionsPrimaryRow: {
     flexDirection: "row",
-    gap: 8
+    gap: 12,
+    paddingTop: 8
   },
   paymentActionButton: {
     flex: 1,
-    borderRadius: 12,
-    padding: 12,
-    alignItems: "center"
+    borderRadius: 16,
+    paddingVertical: 16,
+    alignItems: "center",
+    justifyContent: "center"
   },
   submitButton: {
-    backgroundColor: "#4F46E5"
+    backgroundColor: "#F1F5F9"
   },
   printButton: {
-    backgroundColor: "#6366F1"
+    backgroundColor: "#FF6B35"
   },
-  cancelButton: {
-    backgroundColor: "#6B7280",
-    borderRadius: 12,
-    padding: 12,
-    alignItems: "center"
+  paymentActionText: {
+    color: "white",
+    fontWeight: "900",
+    fontSize: 15
+  },
+  paymentActionTextSecondary: {
+    color: "#0F172A",
+    fontWeight: "900",
+    fontSize: 15
   }
 });

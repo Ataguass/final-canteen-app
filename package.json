@@ -11,6 +11,13 @@
     "dev:backend": "npm run dev -w backend",
     "dev:web": "npm run dev -w web",
     "dev:mobile": "npm run start -w mobile",
-    "build": "npm run build -w backend && npm run build -w web"
+    "build": "npm run build -w backend && npm run build -w web",
+    "android": "expo run:android",
+    "ios": "expo run:ios"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "babel-preset-expo": "^56.0.15",
+    "typescript": "~5.9.2"
   }
 }

@@ -20,28 +20,23 @@ type AuthPayload = {
 };
 
 export const authService = {
+  listTenants: () =>
+    apiRequest<{
+      success: boolean;
+      data: Array<{ id: string; name: string; slug: string; logo?: string | null }>;
+    }>("/tenants"),
+
   resolveTenant: (code: string) =>
     apiRequest<{
       success: boolean;
       data: { id: string; name: string; slug: string; schoolCode?: string | null };
     }>(`/tenants/resolve?code=${encodeURIComponent(code)}`),
 
-  requestOtp: (tenantId: string, phone: string) =>
-    apiRequest<{ success: boolean; data?: { code?: string; expiresIn: number } }>("/auth/request-otp", {
-      method: "POST",
-      body: { tenantId, phone }
-    }),
-
-  verifyOtp: (tenantId: string, phone: string, code: string) =>
-    apiRequest<{ success: boolean }>("/auth/verify-otp", {
-      method: "POST",
-      body: { tenantId, phone, code }
-    }),
-
   registerStudent: (payload: {
     tenantId: string;
     name: string;
-    phone: string;
+    email: string;
+    firebaseIdToken: string;
     password: string;
     rollNumber?: string;
   }) =>
@@ -50,7 +45,7 @@ export const authService = {
       body: payload
     }),
 
-  login: (payload: { tenantId: string; phone: string; password: string }) =>
+  login: (payload: { phone: string; rollNumber?: string; password: string; isAdminLogin?: boolean }) =>
     apiRequest<AuthPayload>("/auth/login", {
       method: "POST",
       body: payload

@@ -7,6 +7,7 @@ import {
   Animated,
   Dimensions,
   Easing,
+  Image,
   Modal,
   Pressable,
   ScrollView,
@@ -75,39 +76,46 @@ const isPathActive = (pathname: string, targetPath: string): boolean => {
 
 const getHeaderMeta = (pathname: string, firstName: string) => {
   const dateLabel = new Date().toLocaleDateString("en-IN", { weekday: "short", day: "2-digit", month: "short" });
+  const normalizedPath = pathname.replace("/(admin)", "");
 
-  if (pathname.startsWith("/(admin)/dashboard")) {
-    return { title: "Dashboard", subtitle: `Welcome back, ${firstName} · ${dateLabel}` };
+  if (normalizedPath === "/dashboard" || normalizedPath === "/") {
+    return { title: "Dashboard", subtitle: `Welcome back, ${firstName}` };
   }
-  if (pathname.startsWith("/(admin)/pos")) {
+  if (normalizedPath.startsWith("/pos")) {
     return { title: "POS", subtitle: "Counter billing and checkout" };
   }
-  if (pathname.startsWith("/(admin)/orders")) {
+  if (normalizedPath === "/orders/all") {
+    return { title: "All Orders", subtitle: "Full order history" };
+  }
+  if (normalizedPath.startsWith("/orders")) {
     return { title: "Orders", subtitle: "Track and manage live orders" };
   }
-  if (pathname.startsWith("/(admin)/community")) {
+  if (normalizedPath.startsWith("/community")) {
     return { title: "Community", subtitle: "Announcements and updates" };
   }
-  if (pathname.startsWith("/(admin)/profile/menu-manage")) {
+  if (normalizedPath.startsWith("/profile/menu-manage")) {
     return { title: "Menu Management", subtitle: "Categories and food items" };
   }
-  if (pathname.startsWith("/(admin)/profile/stock")) {
+  if (normalizedPath.startsWith("/profile/stock")) {
     return { title: "Stock", subtitle: "Inventory and low stock control" };
   }
-  if (pathname.startsWith("/(admin)/profile/users")) {
+  if (normalizedPath.startsWith("/profile/users")) {
     return { title: "Users", subtitle: "Teacher and staff management" };
   }
-  if (pathname.startsWith("/(admin)/profile/reports")) {
+  if (normalizedPath.startsWith("/profile/reports")) {
     return { title: "Reports", subtitle: "Sales analytics and summaries" };
   }
-  if (pathname.startsWith("/(admin)/profile/invoice-settings")) {
+  if (normalizedPath.startsWith("/profile/invoice-settings")) {
     return { title: "Invoice Settings", subtitle: "Receipt customization controls" };
   }
-  if (pathname.startsWith("/(admin)/profile/backups")) {
+  if (normalizedPath.startsWith("/profile/backups")) {
     return { title: "Data Backup", subtitle: "Backup and restore tenant data" };
   }
-  if (pathname.startsWith("/(admin)/profile/banners")) {
+  if (normalizedPath.startsWith("/profile/banners")) {
     return { title: "Banners", subtitle: "Home banner media and visibility" };
+  }
+  if (normalizedPath === "/profile" || normalizedPath === "/profile/index") {
+    return { title: "Profile", subtitle: "Manage your account and settings" };
   }
   return { title: "Dashboard", subtitle: `Welcome back, ${firstName}` };
 };
@@ -115,7 +123,7 @@ const getHeaderMeta = (pathname: string, firstName: string) => {
 export default function AdminLayout() {
   const router = useRouter();
   const pathname = usePathname();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [newOrderCount, setNewOrderCount] = useState(0);
@@ -137,6 +145,15 @@ export default function AdminLayout() {
 
   const avatarText = useMemo(() => (user?.name?.charAt(0) ?? "A").toUpperCase(), [user?.name]);
   const headerMeta = useMemo(() => getHeaderMeta(pathname, firstName), [pathname, firstName]);
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      setDrawerVisible(false);
+    } catch (error) {
+      Alert.alert("Logout failed", error instanceof Error ? error.message : "Please try again");
+    }
+  };
 
   useEffect(() => {
     popupVisibleRef.current = orderPopupVisible;
@@ -307,69 +324,111 @@ export default function AdminLayout() {
   return (
     <View style={{ flex: 1 }}>
       <Tabs
+        backBehavior="history"
         screenOptions={{
           headerShown: true,
-          tabBarActiveTintColor: "#1D4ED8",
+          tabBarActiveTintColor: "#FF6B35",
           tabBarInactiveTintColor: "#64748B",
           headerStyle: {
-            backgroundColor: "#F8FAFC"
+            backgroundColor: "#EEF2F7",
+            elevation: 0,
+            shadowOpacity: 0,
+            borderBottomWidth: 0,
           },
-          headerShadowVisible: true,
+          headerShadowVisible: false,
+          headerTitleAlign: "left",
           headerTitle: () => (
-            <View style={{ alignItems: "flex-start" }}>
-              <Text style={{ color: "#0F172A", fontSize: 20, fontWeight: "800" }}>{headerMeta.title}</Text>
-              <Text style={{ color: "#64748B", fontSize: 12, marginTop: 1 }}>{headerMeta.subtitle}</Text>
+            <View style={{ alignItems: "flex-start", marginLeft: 4 }}>
+              <Text style={{ color: "#0F172A", fontSize: 18, fontWeight: "800" }}>{headerMeta.title}</Text>
+              <Text 
+                numberOfLines={1}
+                ellipsizeMode="tail"
+                style={{ color: "#64748B", fontSize: 13, fontWeight: "500", marginTop: 2, maxWidth: 220 }}
+              >
+                {headerMeta.subtitle}
+              </Text>
             </View>
           ),
-          headerLeft: () => (
-            <Pressable
-              onPress={openDrawer}
-              android_ripple={{ color: "#E2E8F0", borderless: true }}
-              style={{
-                marginLeft: 10,
-                width: 40,
-                height: 40,
-                borderRadius: 10,
-                borderWidth: 1,
-                borderColor: "#E2E8F0",
-                backgroundColor: "white",
-                alignItems: "center",
-                justifyContent: "center"
-              }}
-            >
-              <Ionicons name="menu-outline" size={22} color="#0F172A" />
-            </Pressable>
-          ),
+          headerLeft: () => {
+            const normalizedPath = pathname.replace("/(admin)", "");
+            const isRootTab = ["/dashboard", "/", "/pos", "/orders", "/community", "/profile"].includes(normalizedPath);
+
+            return (
+              <View style={{ flexDirection: "row", alignItems: "center", marginLeft: 16 }}>
+                {!isRootTab ? (
+                  <Pressable
+                    onPress={() => router.back()}
+                    style={({ pressed }) => [
+                      {
+                        padding: 4,
+                        opacity: pressed ? 0.7 : 1,
+                        backgroundColor: "white",
+                        borderRadius: 12,
+                        shadowColor: "#000",
+                        shadowOpacity: 0.05,
+                        shadowRadius: 4,
+                        shadowOffset: { width: 0, height: 2 },
+                        elevation: 1
+                      }
+                    ]}
+                  >
+                    <Ionicons name="arrow-back" size={24} color="#0F172A" />
+                  </Pressable>
+                ) : (
+                  <Pressable
+                    onPress={openDrawer}
+                    style={({ pressed }) => [
+                      {
+                        padding: 4,
+                        opacity: pressed ? 0.7 : 1,
+                        backgroundColor: normalizedPath === "/dashboard" ? "transparent" : "white",
+                        borderRadius: 12,
+                        shadowColor: "#000",
+                        shadowOpacity: normalizedPath === "/dashboard" ? 0 : 0.05,
+                        shadowRadius: 4,
+                        shadowOffset: { width: 0, height: 2 },
+                        elevation: normalizedPath === "/dashboard" ? 0 : 1
+                      }
+                    ]}
+                  >
+                    <Ionicons name="menu" size={26} color="#0F172A" />
+                  </Pressable>
+                )}
+              </View>
+            );
+          },
           headerRight: () => (
-            <View style={{ marginRight: 10, flexDirection: "row", alignItems: "center", gap: 8 }}>
+            <View style={{ marginRight: 16, flexDirection: "row", alignItems: "center", gap: 12 }}>
+              <Pressable
+                onPress={() => Alert.alert("Dark Mode", "Dark mode is coming soon!")}
+                style={({ pressed }) => [
+                  { padding: 4, opacity: pressed ? 0.7 : 1 }
+                ]}
+              >
+                <Ionicons name="moon-outline" size={24} color="#0F172A" />
+              </Pressable>
+
               <Pressable
                 onPress={openOrderNotifications}
-                android_ripple={{ color: "#E2E8F0", borderless: true }}
-                style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 10,
-                  borderWidth: 1,
-                  borderColor: "#E2E8F0",
-                  backgroundColor: "white",
-                  alignItems: "center",
-                  justifyContent: "center"
-                }}
+                style={({ pressed }) => [
+                  { padding: 4, opacity: pressed ? 0.7 : 1 }
+                ]}
               >
-                <Ionicons name="notifications-outline" size={20} color="#0F172A" />
+                <Ionicons name="notifications-outline" size={24} color="#0F172A" />
                 {newOrderCount > 0 ? (
                   <View
                     style={{
                       position: "absolute",
-                      top: -4,
-                      right: -4,
-                      minWidth: 18,
+                      top: 0,
+                      right: 0,
+                      width: 18,
                       height: 18,
-                      borderRadius: 999,
-                      backgroundColor: "#DC2626",
-                      paddingHorizontal: 4,
+                      borderRadius: 9,
+                      backgroundColor: "#EF4444",
                       alignItems: "center",
-                      justifyContent: "center"
+                      justifyContent: "center",
+                      borderWidth: 2,
+                      borderColor: "#EEF2F7"
                     }}
                   >
                     <Text style={{ color: "white", fontSize: 10, fontWeight: "800" }}>
@@ -381,17 +440,13 @@ export default function AdminLayout() {
 
               <Pressable
                 onPress={() => router.push("/(admin)/profile")}
-                android_ripple={{ color: "#E2E8F0", borderless: true }}
-                style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 12,
-                  backgroundColor: "#0F172A",
-                  alignItems: "center",
-                  justifyContent: "center"
-                }}
+                style={({ pressed }) => [
+                  { padding: 2, opacity: pressed ? 0.7 : 1 }
+                ]}
               >
-                <Text style={{ color: "white", fontWeight: "800", fontSize: 13 }}>{avatarText}</Text>
+                <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: "#E2E8F0", alignItems: "center", justifyContent: "center" }}>
+                  <Text style={{ color: "#0F172A", fontWeight: "700", fontSize: 16 }}>{avatarText}</Text>
+                </View>
               </Pressable>
             </View>
           )
@@ -437,6 +492,7 @@ export default function AdminLayout() {
         <Tabs.Screen name="community/index" options={{ href: null }} />
         <Tabs.Screen name="community/create" options={{ href: null }} />
         <Tabs.Screen name="orders/[id]" options={{ href: null }} />
+        <Tabs.Screen name="orders/all" options={{ href: null }} />
         <Tabs.Screen name="profile/menu-manage" options={{ href: null }} />
         <Tabs.Screen name="profile/users" options={{ href: null }} />
         <Tabs.Screen name="profile/stock" options={{ href: null }} />
@@ -474,31 +530,18 @@ export default function AdminLayout() {
               elevation: 12
             }}
           >
-            <View style={{ paddingHorizontal: 16, paddingTop: 54, paddingBottom: 14, backgroundColor: "#0F172A" }}>
-              <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
-                <View
-                  style={{
-                    width: 48,
-                    height: 48,
-                    borderRadius: 14,
-                    backgroundColor: "#1E293B",
-                    alignItems: "center",
-                    justifyContent: "center"
-                  }}
-                >
-                  <Text style={{ color: "white", fontWeight: "800", fontSize: 16 }}>{avatarText}</Text>
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Text style={{ color: "white", fontWeight: "800", fontSize: 18 }}>{user?.name ?? "Admin"}</Text>
-                  <Text style={{ color: "#CBD5E1", marginTop: 1 }}>{user?.email ?? user?.phone ?? "admin@canteen"}</Text>
-                </View>
+            <View style={{ paddingHorizontal: 24, paddingTop: 64, paddingBottom: 24, backgroundColor: "#F8FAFC", borderBottomWidth: 1, borderColor: "#E2E8F0", flexDirection: "row", alignItems: "center", gap: 14 }}>
+              <Image source={require("../../assets/images/canteen_logo_final.png")} style={{ width: 44, height: 44, borderRadius: 10 }} resizeMode="contain" />
+              <View style={{ flex: 1 }}>
+                <Text style={{ color: "#0F172A", fontWeight: "900", fontSize: 20, letterSpacing: -0.5 }}>Canteen Admin</Text>
+                <Text style={{ color: "#64748B", fontSize: 13, fontWeight: "600" }}>Management Portal</Text>
               </View>
             </View>
 
-            <ScrollView contentContainerStyle={{ paddingHorizontal: 12, paddingTop: 10, paddingBottom: 24, gap: 12 }}>
-              {drawerSections.map((section) => (
-                <View key={section.title} style={{ gap: 7 }}>
-                  <Text style={{ color: "#64748B", fontWeight: "800", fontSize: 11, letterSpacing: 1 }}>
+            <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 20, paddingBottom: 32, gap: 20 }}>
+              {drawerSections.map((section, index) => (
+                <View key={section.title} style={{ gap: 6 }}>
+                  <Text style={{ color: "#94A3B8", fontWeight: "800", fontSize: 11, letterSpacing: 1.2, paddingHorizontal: 12, marginBottom: 4 }}>
                     {section.title}
                   </Text>
 
@@ -508,29 +551,19 @@ export default function AdminLayout() {
                       <Pressable
                         key={item.path}
                         onPress={() => navigateFromDrawer(item.path)}
-                        android_ripple={{ color: "#E2E8F0" }}
+                        android_ripple={{ color: "rgba(0,0,0,0.05)" }}
                         style={{
-                          borderRadius: 12,
-                          backgroundColor: active ? "#E0E7FF" : "white",
-                          borderWidth: 1,
-                          borderColor: active ? "#C7D2FE" : "#E2E8F0",
-                          paddingVertical: 11,
-                          paddingHorizontal: 12,
+                          borderRadius: 14,
+                          backgroundColor: active ? "#FF6B35" : "transparent",
+                          paddingVertical: 14,
+                          paddingHorizontal: 14,
                           flexDirection: "row",
                           alignItems: "center",
-                          gap: 10
+                          gap: 14
                         }}
                       >
-                        <View
-                          style={{
-                            width: 3,
-                            height: 24,
-                            borderRadius: 999,
-                            backgroundColor: active ? "#1D4ED8" : "transparent"
-                          }}
-                        />
-                        <Ionicons name={item.icon} size={18} color={active ? "#1D4ED8" : "#334155"} />
-                        <Text style={{ color: active ? "#1E3A8A" : "#0F172A", fontWeight: active ? "800" : "700", fontSize: 14 }}>
+                        <Ionicons name={item.icon} size={22} color={active ? "white" : "#64748B"} />
+                        <Text style={{ color: active ? "white" : "#334155", fontWeight: active ? "800" : "600", fontSize: 15, flex: 1 }}>
                           {item.label}
                         </Text>
                       </Pressable>
@@ -539,6 +572,37 @@ export default function AdminLayout() {
                 </View>
               ))}
             </ScrollView>
+
+            <View style={{ padding: 16, borderTopWidth: 1, borderColor: "#E2E8F0", backgroundColor: "#F8FAFC" }}>
+              <View style={{ flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 12, paddingHorizontal: 8 }}>
+                <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: "#E2E8F0", alignItems: "center", justifyContent: "center" }}>
+                  <Text style={{ color: "#0F172A", fontWeight: "800", fontSize: 16 }}>{avatarText}</Text>
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={{ color: "#0F172A", fontWeight: "800", fontSize: 15 }}>{user?.name ?? "Admin"}</Text>
+                  <Text style={{ color: "#64748B", fontSize: 12, fontWeight: "500" }}>{user?.email ?? user?.phone ?? "admin@canteen"}</Text>
+                </View>
+              </View>
+
+              <Pressable
+                onPress={handleLogout}
+                android_ripple={{ color: "rgba(0,0,0,0.05)" }}
+                style={{
+                  borderRadius: 12,
+                  backgroundColor: "#FEF2F2",
+                  paddingVertical: 12,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  flexDirection: "row",
+                  gap: 8,
+                  borderWidth: 1,
+                  borderColor: "#FECACA"
+                }}
+              >
+                <Ionicons name="log-out-outline" size={18} color="#DC2626" />
+                <Text style={{ color: "#DC2626", fontWeight: "800", fontSize: 14 }}>Sign Out</Text>
+              </Pressable>
+            </View>
           </Animated.View>
         </View>
       </Modal>
@@ -575,10 +639,10 @@ export default function AdminLayout() {
                   borderRadius: 12,
                   alignItems: "center",
                   justifyContent: "center",
-                  backgroundColor: "#DBEAFE"
+                  backgroundColor: "#E2E8F0"
                 }}
               >
-                <Ionicons name="notifications" size={20} color="#1D4ED8" />
+                <Ionicons name="notifications" size={20} color="#0F172A" />
               </View>
               <View style={{ flex: 1 }}>
                 <Text style={{ fontSize: 19, fontWeight: "800", color: "#0F172A" }}>
@@ -622,7 +686,7 @@ export default function AdminLayout() {
                 </Text>
               ) : null}
               {popupBatchCount > 1 ? (
-                <Text style={{ color: "#1D4ED8", fontWeight: "700" }}>
+                <Text style={{ color: "#0F172A", fontWeight: "700" }}>
                   New orders in this alert: {popupBatchCount}
                 </Text>
               ) : null}
@@ -648,7 +712,7 @@ export default function AdminLayout() {
                 style={{
                   flex: 1,
                   borderRadius: 12,
-                  backgroundColor: "#0F172A",
+                  backgroundColor: "#FF6B35",
                   paddingVertical: 11,
                   alignItems: "center"
                 }}
