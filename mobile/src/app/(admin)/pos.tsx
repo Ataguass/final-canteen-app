@@ -546,11 +546,37 @@ export default function Screen() {
             source: "POS"
           });
           setPaymentModalVisible(false);
-          resetCart();
           await loadQueuedCount();
+
+          // Print offline receipt if user requested printing
+          if (mode === "print") {
+            const offlineOrder: Order = {
+              id: `offline-${Date.now()}`,
+              tenantId: user.tenantId,
+              userId: user.id,
+              orderNumber: `OFF-${Date.now().toString(36).toUpperCase()}`,
+              status: "PENDING",
+              paymentMethod,
+              paymentStatus: paymentStatus ?? "UNPAID",
+              subtotal,
+              taxAmount,
+              totalAmount: grandTotal,
+              items: cartLines.map((line) => ({
+                id: line.id,
+                name: line.name,
+                price: line.price,
+                quantity: line.quantity
+              })),
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+            };
+            await printInvoice(offlineOrder);
+          }
+
+          resetCart();
           Alert.alert(
             "Saved offline",
-            "No internet/server connection. POS order queued and will sync when network is back."
+            `No internet/server connection. POS order queued and will sync when network is back.${mode === "print" ? " Receipt printed." : ""}`
           );
         } catch {
           Alert.alert("Error", "Could not save POS order offline.");
