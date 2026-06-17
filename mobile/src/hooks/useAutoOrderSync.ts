@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef } from "react";
+import { AppState } from "react-native";
 import { useAuth } from "./useAuth";
 import { useNetworkStatus } from "./useNetworkStatus";
 import { offlineOrderQueue } from "../services/offlineOrderQueue";
@@ -48,5 +49,18 @@ export const useAutoOrderSync = () => {
     if (isConnected) {
       sync().catch(() => undefined);
     }
+  }, [isConnected, sync]);
+
+  // Also sync when app comes to foreground
+  useEffect(() => {
+    const subscription = AppState.addEventListener("change", (nextAppState) => {
+      if (nextAppState === "active" && isConnected) {
+        sync().catch(() => undefined);
+      }
+    });
+
+    return () => {
+      subscription.remove();
+    };
   }, [isConnected, sync]);
 };

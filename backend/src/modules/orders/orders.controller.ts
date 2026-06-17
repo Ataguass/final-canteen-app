@@ -1,5 +1,6 @@
 import { OrderStatus, PaymentMethod, PaymentStatus, StockMovementType, WalletTransactionType } from "@prisma/client";
 import { Request, Response } from "express";
+import { Expo, ExpoPushMessage } from "expo-server-sdk";
 import { prisma } from "../../config/database.js";
 import { getIo } from "../../config/socket.js";
 import { AppError } from "../../utils/appError.js";
@@ -409,7 +410,12 @@ export const updateOrderStatus = async (req: Request, res: Response): Promise<vo
   const order = await prisma.order.update({
     where: { id },
     data: { status },
-    include: { items: true }
+    include: { 
+      items: true,
+      user: {
+        select: { pushToken: true }
+      }
+    }
   });
 
   const io = getIo();
@@ -417,6 +423,27 @@ export const updateOrderStatus = async (req: Request, res: Response): Promise<vo
   io.to(`tenant:${order.tenantId}`).emit("order:status_changed", order);
   if (order.userId) {
     io.to(`user:${order.userId}`).emit("order:status_changed", order);
+    
+    // Send Push Notification if READY
+    if (status === "READY" && order.user?.pushToken) {
+      const expo = new Expo();
+      const messages: ExpoPushMessage[] = [{
+        to: order.user.pushToken,
+        sound: 'default',
+        title: 'Order Ready!',
+        body: `Your order #${order.orderNumber} is ready for pickup!`,
+        data: { orderId: order.id },
+      }];
+      
+      try {
+        const chunks = expo.chunkPushNotifications(messages);
+        for (const chunk of chunks) {
+          await expo.sendPushNotificationsAsync(chunk);
+        }
+      } catch (error) {
+        console.error("Failed to send push notification:", error);
+      }
+    }
   }
   res.status(200).json({ success: true, data: order });
 };

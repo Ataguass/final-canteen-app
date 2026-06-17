@@ -254,6 +254,24 @@ export const updateMyPassword = async (req: Request, res: Response): Promise<voi
   res.status(200).json({ success: true, message: "Password updated successfully" });
 };
 
+export const updatePushToken = async (req: Request, res: Response): Promise<void> => {
+  const tenantId = req.tenantId as string;
+  const userId = req.user?.sub;
+  if (!userId) {
+    throw new AppError("Unauthorized", 401);
+  }
+
+  const { pushToken } = req.body as { pushToken?: string };
+  
+  // pushToken can be null if user revokes permission
+  await prisma.user.update({
+    where: { id: userId, tenantId },
+    data: { pushToken: pushToken || null }
+  });
+
+  res.status(200).json({ success: true, message: "Push token updated successfully" });
+};
+
 export const listUsers = async (req: Request, res: Response): Promise<void> => {
   const tenantId = req.tenantId as string;
 

@@ -8,6 +8,8 @@ import { ThemeProvider } from "../hooks/useTheme";
 import { useEffect, useState, createContext, useContext } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+import { usePushNotifications } from "../hooks/usePushNotifications";
+
 export const OnboardingContext = createContext<{
   hasSeenOnboarding: boolean | null;
   completeOnboarding: () => Promise<void>;
@@ -20,6 +22,7 @@ const GuardedStack = () => {
   const { user, isHydrated } = useAuth();
   const { hasSeenOnboarding } = useContext(OnboardingContext);
   useAutoOrderSync();
+  usePushNotifications();
   const segments = useSegments();
   const inAuth = segments[0] === "(auth)";
   const inAdmin = segments[0] === "(admin)";

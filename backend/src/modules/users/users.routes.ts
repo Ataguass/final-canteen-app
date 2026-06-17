@@ -14,7 +14,8 @@ import {
   updateMyProfile,
   updateUserActive,
   updateUserApproval,
-  updateUserPassword
+  updateUserPassword,
+  updatePushToken
 } from "./users.controller.js";
 
 export const usersRouter = Router();
@@ -22,6 +23,7 @@ export const usersRouter = Router();
 usersRouter.get("/me", auth, tenantResolver, asyncHandler(getMyProfile));
 usersRouter.patch("/me", auth, tenantResolver, asyncHandler(updateMyProfile));
 usersRouter.patch("/me/password", auth, tenantResolver, asyncHandler(updateMyPassword));
+usersRouter.put("/me/push-token", auth, tenantResolver, asyncHandler(updatePushToken));
 
 usersRouter.get("/", auth, tenantResolver, roleGuard("ADMIN", "SUPER_ADMIN"), asyncHandler(listUsers));
 usersRouter.post("/", auth, tenantResolver, roleGuard("ADMIN", "SUPER_ADMIN"), asyncHandler(createUser));
