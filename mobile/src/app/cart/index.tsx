@@ -2,9 +2,10 @@ import { Ionicons } from "@expo/vector-icons";
 import { Link, useRouter } from "expo-router";
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useCart } from "../../hooks/useCart";
+import { useCartStore } from '../../stores/useCartStore';
 import { useTheme } from "../../hooks/useTheme";
 import { CanteenHeader } from "../../components/CanteenHeader";
+import { Button } from "../../components/ui/Button";
 import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../utils/responsive';
 
 const formatCurrency = (value: number): string => `₹ ${value.toFixed(2)}`;
@@ -14,16 +15,19 @@ export default function Screen() {
   const styles = createStyles(colors);
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { items, itemCount, subtotal, updateQuantity, updateNote, removeItem } = useCart();
+  const { items, updateQuantity, updateNote, removeItem } = useCartStore();
+  const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
+  const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const taxAmount = subtotal * 0.05;
   const estimatedTotal = subtotal + taxAmount;
 
   return (
-    <ScrollView
-      style={styles.screen}
-      contentContainerStyle={[styles.content, { paddingTop: insets.top + 16 }]}
-      showsVerticalScrollIndicator={false}
-    >
+    <View style={styles.screen}>
+      <ScrollView
+        style={styles.screen}
+        contentContainerStyle={[styles.content, { paddingTop: insets.top + 16 }]}
+        showsVerticalScrollIndicator={false}
+      >
       <CanteenHeader showBackButton title="Your Cart" subtitle={`${itemCount} items`} />
 
       {items.length === 0 ? (
@@ -114,19 +118,30 @@ export default function Screen() {
             </View>
           </View>
 
-          <Link href="/cart/checkout" asChild>
-            <Pressable style={[styles.checkoutBtn, { backgroundColor: colors.accent, shadowColor: colors.accent }]}>
-              <Text style={styles.checkoutBtnText}>Proceed to Checkout</Text>
-              <Ionicons name="arrow-forward" size={20} color="white" />
-            </Pressable>
-          </Link>
         </View>
       )}
-    </ScrollView>
+      </ScrollView>
+
+      {items.length > 0 && (
+        <View style={[styles.checkoutBar, { paddingBottom: Math.max(insets.bottom, moderateScale(16)), backgroundColor: colors.card, borderTopColor: colors.border }]}>
+          <Button
+            onPress={() => router.push("/cart/checkout")}
+            title="Proceed to Checkout"
+            icon={<Ionicons name="arrow-forward" size={20} color="white" />}
+            style={{
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.2,
+              shadowRadius: moderateScale(8),
+              elevation: 4,
+            }}
+          />
+        </View>
+      )}
+    </View>
   );
 }
 
-const createStyles = (colors: any) => ({
+const createStyles = (colors: any) => StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: colors.background
@@ -134,7 +149,7 @@ const createStyles = (colors: any) => ({
   content: {
     padding: moderateScale(16),
     gap: moderateScale(12),
-    paddingBottom: verticalScale(28)
+    paddingBottom: verticalScale(120) // Add padding so content isn't hidden behind the floating bar
   },
   emptyStateContainer: {
     alignItems: "center",
@@ -320,22 +335,18 @@ const createStyles = (colors: any) => ({
     fontWeight: "900",
     color: colors.accent
   },
-  checkoutBtn: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    paddingVertical: moderateScale(16),
-    borderRadius: moderateScale(16),
-    marginTop: verticalScale(12),
-    gap: moderateScale(8),
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: moderateScale(8),
-    elevation: 4
-  },
-  checkoutBtnText: {
-    color: "white",
-    fontSize: fontScale(16),
-    fontWeight: "800"
+  checkoutBar: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingHorizontal: moderateScale(16),
+    paddingTop: moderateScale(16),
+    borderTopWidth: 1,
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: -4 },
+    elevation: 10
   }
 });

@@ -1,7 +1,7 @@
 import { useRouter } from "expo-router";
 import { useState, useRef, useEffect } from "react";
 import { Alert, Pressable, Text, TextInput, View, StyleSheet, KeyboardAvoidingView, Platform, SafeAreaView } from "react-native";
-import { useAuth } from "../../hooks/useAuth";
+import { useAuthStore } from '../../stores/useAuthStore';
 import { Ionicons } from "@expo/vector-icons";
 import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
 import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../utils/responsive';
@@ -15,7 +15,7 @@ export default function OtpScreen() {
   const { colors, isDark } = theme;
   const styles = createStyles(theme);
   const router = useRouter();
-  const { pendingRegistration, registerAfterOtp, confirmationResult } = useAuth();
+  const { pendingRegistration, registerAfterOtp, confirmationResult } = useAuthStore();
   
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
@@ -158,7 +158,7 @@ export default function OtpScreen() {
   );
 }
 
-const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => ({
+const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,

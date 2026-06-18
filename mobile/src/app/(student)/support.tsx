@@ -107,7 +107,7 @@ export default function SupportScreen() {
   );
 }
 
-const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => ({
+const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: colors.background

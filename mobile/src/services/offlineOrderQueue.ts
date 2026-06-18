@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as SQLite from "expo-sqlite";
-import { PaymentMethod, PaymentStatus } from "./types";
+import type { PaymentMethod, PaymentStatus, QueuedOrder, PosMenuCache } from "../types";
 
 const DB_NAME = "canteen-offline.db";
 const LEGACY_QUEUE_KEY = (tenantId: string, userId: string) => `offline_order_queue:${tenantId}:${userId}`;
@@ -25,22 +25,7 @@ type MenuCacheRow = {
   updated_at: string;
 };
 
-export type QueuedOrder = {
-  items: { menuItemId: string; quantity: number; note?: string }[];
-  paymentMethod?: PaymentMethod;
-  paymentStatus?: PaymentStatus;
-  customerPhone?: string;
-  source?: "STUDENT" | "POS";
-  queuedAt: string;
-};
-
 type QueueItem = { menuItemId: string; quantity: number; note?: string };
-
-export type PosMenuCache = {
-  categories: { id: string; name: string }[];
-  menu: { id: string; categoryId?: string; name: string; price: number; stockQty: number }[];
-  updatedAt: string;
-};
 
 let dbPromise: Promise<SQLite.SQLiteDatabase> | null = null;
 let schemaInitialized = false;

@@ -3,8 +3,10 @@ import * as ImageManipulator from "expo-image-manipulator";
 import * as ImagePicker from "expo-image-picker";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Alert, Image, Pressable, ScrollView, Text, TextInput, View } from "react-native";
-import { useAuth } from "../../../hooks/useAuth";
-import { menuService, type Category, type MenuItem } from "../../../services/menuService";
+import { useAuthStore } from '../../../stores/useAuthStore';
+import { Category } from "../../../types";
+import { MenuItem } from "../../../types";
+import { menuService } from "../../../services/menuService";
 import { tenantService } from "../../../services/tenantService";
 import { useTheme } from '../../../hooks/useTheme';
 
@@ -30,7 +32,7 @@ export default function Screen() {
     shadowOffset: { width: 0, height: 4 },
     elevation: 2
   } as const;
-  const { user, accessToken } = useAuth();
+  const { user, accessToken } = useAuthStore();
   const [categories, setCategories] = useState<Category[]>([]);
   const [items, setItems] = useState<MenuItem[]>([]);
 

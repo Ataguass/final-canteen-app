@@ -13,10 +13,10 @@ import {
   ImageBackground
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useAuth } from "../../hooks/useAuth";
-import { useCart } from "../../hooks/useCart";
+import { useAuthStore } from '../../stores/useAuthStore';
+import { useCartStore } from '../../stores/useCartStore';
 import { useToast } from "../../components/Toast";
-import { menuService } from "../../services/menuService";
+import { useCategories, useMenuItems } from "../../hooks/queries/useMenu";
 import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../utils/responsive';
 import { useTheme } from '../../hooks/useTheme';
 
@@ -48,32 +48,17 @@ export default function Screen() {
   const { width: screenWidth } = useWindowDimensions();
   const router = useRouter();
   const { categoryId } = useLocalSearchParams<{ categoryId: string }>();
-  const { user, accessToken } = useAuth();
-  const { addItem } = useCart();
+  const { user, accessToken } = useAuthStore();
+  const { addItem } = useCartStore();
   const { showToast } = useToast();
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [items, setItems] = useState<MenuItem[]>([]);
-  const [loading, setLoading] = useState(false);
+  
+  const { data: categories = [], isLoading: isCategoriesLoading } = useCategories();
+  const { data: items = [], isLoading: isItemsLoading } = useMenuItems();
+  
+  const loading = isCategoriesLoading || isItemsLoading;
+  
   const itemColumns = screenWidth >= 700 ? 3 : 2;
   const itemCardWidth = itemColumns === 3 ? "32%" : "48.5%";
-
-  useEffect(() => {
-    const load = async () => {
-      if (!user?.tenantId || !accessToken) return;
-      try {
-        setLoading(true);
-        const [cats, menu] = await Promise.all([
-          menuService.listCategories(accessToken, user.tenantId),
-          menuService.listItems(accessToken, user.tenantId)
-        ]);
-        setCategories(cats.data);
-        setItems(menu.data.filter((x) => x.isAvailable));
-      } finally {
-        setLoading(false);
-      }
-    };
-    load().catch(() => undefined);
-  }, [user?.tenantId, accessToken]);
 
   const currentCategoryObj = useMemo(
     () => categories.find((c) => c.id === categoryId),
@@ -83,7 +68,7 @@ export default function Screen() {
   const currentCategory = currentCategoryObj?.name ?? "Category";
 
   const filtered = useMemo(() => {
-    return items.filter((item) => item.categoryId === categoryId);
+    return items.filter((item) => item.categoryId === categoryId && item.isAvailable);
   }, [items, categoryId]);
 
   const onAddToCart = (item: MenuItem) => {
@@ -223,7 +208,7 @@ export default function Screen() {
   );
 }
 
-const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => ({
+const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: colors.background

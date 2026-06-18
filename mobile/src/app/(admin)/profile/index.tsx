@@ -2,7 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Alert, ActivityIndicator, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
-import { useAuth } from "../../../hooks/useAuth";
+import { useAuthStore } from '../../../stores/useAuthStore';
 import { userService } from "../../../services/userService";
 import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../../utils/responsive';
 
@@ -106,7 +106,7 @@ export default function Screen() {
   const { colors, isDark } = useTheme();
   const styles = createStyles(colors);
   const router = useRouter();
-  const { user, accessToken, logout, setSessionUser } = useAuth();
+  const { user, accessToken, logout, setSessionUser } = useAuthStore();
   
   // Change Password State
   const [modalVisible, setModalVisible] = useState(false);
@@ -420,7 +420,7 @@ export default function Screen() {
   );
 }
 
-const createStyles = (colors: any) => ({
+const createStyles = (colors: any) => StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: colors.background

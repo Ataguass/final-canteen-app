@@ -75,7 +75,7 @@ export default function TrackingScreen() {
   );
 }
 
-const createStyles = (colors: any) => ({
+const createStyles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,

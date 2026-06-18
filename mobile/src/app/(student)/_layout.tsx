@@ -15,8 +15,8 @@ import {
   View,
   DeviceEventEmitter
 } from "react-native";
-import { useAuth } from "../../hooks/useAuth";
-import { useCart } from "../../hooks/useCart";
+import { useAuthStore } from '../../stores/useAuthStore';
+import { useCartStore } from '../../stores/useCartStore';
 
 type DrawerItem = {
   label: string;
@@ -92,8 +92,9 @@ export default function StudentLayout() {
   const { colors, isDark, toggleTheme } = useTheme();
   const router = useRouter();
   const pathname = usePathname();
-  const { user, logout } = useAuth();
-  const { itemCount } = useCart();
+  const { user, logout } = useAuthStore();
+  const items = useCartStore((s) => s.items);
+  const itemCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [profileMenuVisible, setProfileMenuVisible] = useState(false);

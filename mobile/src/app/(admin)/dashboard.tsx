@@ -3,10 +3,10 @@ import { useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View, RefreshControl } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useAuth } from "../../hooks/useAuth";
-import { menuService } from "../../services/menuService";
-import { orderService, type Order } from "../../services/orderService";
-import { userService, type ManagedUser } from "../../services/userService";
+import { useAuthStore } from '../../stores/useAuthStore';
+import { useOrders } from "../../hooks/queries/useOrders";
+import { useMenuItems } from "../../hooks/queries/useMenu";
+import { useManagedUsers } from "../../hooks/queries/useUsers";
 import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../utils/responsive';
 import { useTheme } from '../../hooks/useTheme';
 
@@ -75,42 +75,29 @@ export default function Screen() {
   const styles = createStyles(theme);
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { user, accessToken } = useAuth();
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [items, setItems] = useState<MenuItem[]>([]);
-  const [users, setUsers] = useState<ManagedUser[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const { user, accessToken } = useAuthStore();
+  const { data: orders = [], isLoading: isOrdersLoading, isFetching: isOrdersFetching, refetch: refetchOrders } = useOrders();
+  const { data: items = [], isLoading: isItemsLoading, isFetching: isItemsFetching, refetch: refetchItems } = useMenuItems();
+  const { data: users = [], isLoading: isUsersLoading, isFetching: isUsersFetching, refetch: refetchUsers } = useManagedUsers();
+
+  const loading = isOrdersLoading || isItemsLoading || isUsersLoading;
+  const refreshing = !loading && (isOrdersFetching || isItemsFetching || isUsersFetching);
+  
+  // Since react-query handles this, we just capture the time when data changes
+  const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
+  useEffect(() => {
+    if (!loading && !refreshing) {
+      setLastUpdated(new Date());
+    }
+  }, [orders, items, users, loading, refreshing]);
+
   const [chartWidth, setChartWidth] = useState(0);
 
-  const loadDashboard = useCallback(async (isRefresh = false) => {
-    if (!user?.tenantId || !accessToken) return;
-    try {
-      if (isRefresh) setRefreshing(true);
-      else setLoading(true);
-      
-      const [ordersResponse, itemsResponse, usersResponse] = await Promise.all([
-        orderService.listOrders(accessToken, user.tenantId),
-        menuService.listItems(accessToken, user.tenantId),
-        userService.listUsers(accessToken, user.tenantId)
-      ]);
-
-      setOrders(ordersResponse.data);
-      setItems(itemsResponse.data);
-      setUsers(usersResponse.data);
-      setLastUpdated(new Date());
-    } catch (error) {
-      Alert.alert("Error", error instanceof Error ? error.message : "Could not load dashboard");
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
+  const loadDashboard = async (isRefresh = false) => {
+    if (isRefresh) {
+      await Promise.all([refetchOrders(), refetchItems(), refetchUsers()]);
     }
-  }, [accessToken, user?.tenantId]);
-
-  useEffect(() => {
-    loadDashboard().catch(() => undefined);
-  }, [loadDashboard]);
+  };
 
   const dashboardData = useMemo(() => {
     const now = new Date();

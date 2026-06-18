@@ -2,8 +2,9 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Alert, Image, Linking, Pressable, ScrollView, Text, TextInput, View, RefreshControl } from "react-native";
-import { useAuth } from "../../../hooks/useAuth";
-import { communityService, type CommunityPost } from "../../../services/communityService";
+import { useAuthStore } from '../../../stores/useAuthStore';
+import { CommunityPost } from "../../../types";
+import { communityService} from "../../../services/communityService";
 import { useTheme } from '../../../hooks/useTheme';
 
 type VisibilityFilter = "ALL" | "PINNED" | "VISIBLE" | "HIDDEN";
@@ -15,7 +16,7 @@ export default function Screen() {
   const theme = useTheme();
   const { colors, isDark } = theme;
   const router = useRouter();
-  const { user, accessToken } = useAuth();
+  const { user, accessToken } = useAuthStore();
   
   const cardShadow = {
     borderWidth: 1,

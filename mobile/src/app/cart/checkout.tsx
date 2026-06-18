@@ -2,10 +2,10 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import { useAuth } from "../../hooks/useAuth";
-import { useCart } from "../../hooks/useCart";
+import { useAuthStore } from '../../stores/useAuthStore';
+import { useCartStore } from '../../stores/useCartStore';
 import { orderService } from "../../services/orderService";
-import { PaymentMethod } from "../../services/types";
+import { PaymentMethod } from "../../types";
 import { walletService } from "../../services/walletService";
 import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../utils/responsive';
 import { useTheme } from '../../hooks/useTheme';
@@ -71,8 +71,9 @@ export default function Screen() {
   const { colors, isDark } = theme;
   const styles = createStyles(theme);
   const router = useRouter();
-  const { user, accessToken } = useAuth();
-  const { items, subtotal, clearCart } = useCart();
+  const { user, accessToken } = useAuthStore();
+  const { items, clearCart } = useCartStore();
+  const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("CASH");
   const [preOrderEnabled, setPreOrderEnabled] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState<PickupSlot | null>(null);
@@ -301,7 +302,7 @@ export default function Screen() {
   );
 }
 
-const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => ({
+const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: colors.background

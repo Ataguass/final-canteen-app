@@ -1,14 +1,24 @@
 import { Redirect, Stack, useSegments } from "expo-router";
 import { ActivityIndicator, View } from "react-native";
 import { useAutoOrderSync } from "../hooks/useAutoOrderSync";
-import { AuthProvider, useAuth } from "../hooks/useAuth";
-import { CartProvider } from "../hooks/useCart";
+import { useAuthStore } from '../stores/useAuthStore';
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
 import { ErrorBoundary } from "../components/ErrorBoundary";
 import { ThemeProvider } from "../hooks/useTheme";
 import { useEffect, useState, createContext, useContext } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import { usePushNotifications } from "../hooks/usePushNotifications";
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes default
+      retry: 2,
+    },
+  },
+});
 
 export const OnboardingContext = createContext<{
   hasSeenOnboarding: boolean | null;
@@ -19,7 +29,7 @@ export const OnboardingContext = createContext<{
 });
 
 const GuardedStack = () => {
-  const { user, isHydrated } = useAuth();
+  const { user, isHydrated } = useAuthStore();
   const { hasSeenOnboarding } = useContext(OnboardingContext);
   useAutoOrderSync();
   usePushNotifications();
@@ -97,11 +107,9 @@ export default function RootLayout() {
       <ThemeProvider>
         <ToastProvider>
           <OnboardingContext.Provider value={{ hasSeenOnboarding, completeOnboarding }}>
-            <AuthProvider>
-              <CartProvider>
-                <GuardedStack />
-              </CartProvider>
-            </AuthProvider>
+            <QueryClientProvider client={queryClient}>
+              <GuardedStack />
+            </QueryClientProvider>
           </OnboardingContext.Provider>
         </ToastProvider>
       </ThemeProvider>

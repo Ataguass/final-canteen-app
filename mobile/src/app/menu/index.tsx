@@ -13,10 +13,10 @@ import {
   useWindowDimensions
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useAuth } from "../../hooks/useAuth";
+import { useAuthStore } from '../../stores/useAuthStore';
 import { useTheme } from "../../hooks/useTheme";
 import { CanteenHeader } from "../../components/CanteenHeader";
-import { menuService } from "../../services/menuService";
+import { useCategories, useMenuItems } from "../../hooks/queries/useMenu";
 import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../utils/responsive';
 
 type Category = {
@@ -52,14 +52,24 @@ export default function Screen() {
   const styles = createStyles(theme);
   const { width: screenWidth } = useWindowDimensions();
   const insets = useSafeAreaInsets();
-  const { user, accessToken } = useAuth();
-  const [loading, setLoading] = useState(false);
+  const { user, accessToken } = useAuthStore();
   const [query, setQuery] = useState("");
   const [categoryMode, setCategoryMode] = useState<CategoryMode>("POPULAR");
   const [selectedCategoryId, setSelectedCategoryId] = useState<string>("ALL");
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [items, setItems] = useState<MenuItem[]>([]);
   const [failedImageMap, setFailedImageMap] = useState<Record<string, true>>({});
+  
+  const { data: categories = [], isLoading: isCategoriesLoading, error: categoriesError } = useCategories();
+  const { data: items = [], isLoading: isItemsLoading, error: itemsError } = useMenuItems();
+  
+  const loading = isCategoriesLoading || isItemsLoading;
+  
+  // Show error if failed
+  useEffect(() => {
+    if (categoriesError || itemsError) {
+      Alert.alert("Error", "Could not load categories or items");
+    }
+  }, [categoriesError, itemsError]);
+
   const categoryColumns = screenWidth >= 1000 ? 4 : screenWidth >= 760 ? 3 : 2;
   const gap = moderateScale(12);
   const paddingX = moderateScale(16) * 2;
@@ -76,26 +86,6 @@ export default function Screen() {
   const onCategoryImageError = useCallback((categoryId: string) => {
     setFailedImageMap((prev) => (prev[categoryId] ? prev : { ...prev, [categoryId]: true }));
   }, []);
-
-  useEffect(() => {
-    const load = async () => {
-      if (!user?.tenantId || !accessToken) return;
-      try {
-        setLoading(true);
-        const [categoryResponse, itemResponse] = await Promise.all([
-          menuService.listCategories(accessToken, user.tenantId),
-          menuService.listItems(accessToken, user.tenantId)
-        ]);
-        setCategories(categoryResponse.data);
-        setItems(itemResponse.data);
-      } catch (error) {
-        Alert.alert("Error", error instanceof Error ? error.message : "Could not load categories");
-      } finally {
-        setLoading(false);
-      }
-    };
-    load().catch(() => undefined);
-  }, [user?.tenantId, accessToken]);
 
   const availableItems = useMemo(
     () => items.filter((item) => item.isAvailable !== false),
@@ -285,7 +275,7 @@ export default function Screen() {
   );
 }
 
-const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => ({
+const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: colors.background

@@ -3,7 +3,7 @@ import { Link, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { Alert, Pressable, Text, TextInput, View, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, Modal, FlatList } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useAuth } from "../../hooks/useAuth";
+import { useAuthStore } from '../../stores/useAuthStore';
 import { authService } from "../../services/authService";
 import { Ionicons } from "@expo/vector-icons";
 import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
@@ -19,7 +19,7 @@ export default function RegisterScreen() {
   const { colors, isDark } = theme;
   const styles = createStyles(theme);
   const router = useRouter();
-  const { setPendingRegistration, setConfirmationResult } = useAuth();
+  const { setPendingRegistration, setConfirmationResult } = useAuthStore();
   
   const [tenants, setTenants] = useState<Tenant[]>([]);
   const [selectedTenant, setSelectedTenant] = useState<Tenant | null>(null);
@@ -249,7 +249,7 @@ export default function RegisterScreen() {
   );
 }
 
-const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => ({
+const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,

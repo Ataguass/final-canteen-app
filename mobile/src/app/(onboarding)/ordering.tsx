@@ -13,7 +13,7 @@ const BRAND_COLOR = "#080d2b"; // Navy Blue from logo
 
 export default function OrderingScreen() {
   const { colors, isDark } = useTheme();
-  const styles = createStyles(colors);
+  const styles = createStyles({ colors, isDark });
   const router = useRouter();
   const { completeOnboarding } = useContext(OnboardingContext);
   
@@ -117,7 +117,7 @@ export default function OrderingScreen() {
   );
 }
 
-const createStyles = (colors: any) => ({
+const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,

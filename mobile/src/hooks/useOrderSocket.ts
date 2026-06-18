@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { io } from "socket.io-client";
 import { config } from "../constants/config";
-import { Order } from "../services/orderService";
+import type { Order } from "../types";
 
 type SocketHandlers = {
   tenantId?: string;

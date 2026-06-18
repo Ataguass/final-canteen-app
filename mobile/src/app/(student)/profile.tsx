@@ -16,11 +16,18 @@ import {
   Switch
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useAuth } from "../../hooks/useAuth";
+import { useAuthStore } from '../../stores/useAuthStore';
 import { CanteenHeader } from "../../components/CanteenHeader";
-import { Order, orderService } from "../../services/orderService";
-import { MyProfile, userService } from "../../services/userService";
-import { WalletTransaction, walletService } from "../../services/walletService";
+import { Card } from "../../components/ui/Card";
+import { Avatar } from "../../components/ui/Avatar";
+import { InputField } from "../../components/ui/InputField";
+import { Button } from "../../components/ui/Button";
+import { Order } from "../../types";
+import {  orderService } from "../../services/orderService";
+import { MyProfile } from "../../types";
+import {  userService } from "../../services/userService";
+import { WalletTransaction } from "../../types";
+import {  walletService } from "../../services/walletService";
 import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../utils/responsive';
 import { useTheme } from '../../hooks/useTheme';
 
@@ -62,7 +69,7 @@ export default function Screen() {
   const styles = createStyles(theme);
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { user, accessToken, logout, setSessionUser } = useAuth();
+  const { user, accessToken, logout, setSessionUser } = useAuthStore();
 
   const [profile, setProfile] = useState<MyProfile | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
@@ -330,11 +337,9 @@ export default function Screen() {
         refreshControl={<RefreshControl refreshing={loading} onRefresh={load} tintColor="#FF6B35" />}
       >
         <CanteenHeader showBackButton title="My Profile" subtitle="Manage your account" />
-          <View style={[styles.heroCard, { backgroundColor: isDark ? colors.surfaceAlt : "#0F172A" }]}>
+          <Card variant="flat" style={[styles.heroCard, { backgroundColor: isDark ? colors.surfaceAlt : "#0F172A" }]}>
             <View style={styles.heroTopRow}>
-              <View style={styles.avatarCircle}>
-                <Text style={styles.avatarText}>{avatarLetter}</Text>
-              </View>
+              <Avatar name={profileView.name ?? "S"} size="large" />
               <View style={{ flex: 1 }}>
                 <Text style={[styles.heroName, isDark && { color: colors.text }]}>{profileView.name}</Text>
                 <Text style={styles.heroRole}>
@@ -342,7 +347,7 @@ export default function Screen() {
                 </Text>
               </View>
             </View>
-          </View>
+          </Card>
 
         <View style={styles.statsRow}>
           <View style={styles.statBox}>
@@ -367,7 +372,7 @@ export default function Screen() {
         </View>
 
         {!isStudentRole && (
-          <View style={styles.walletCard}>
+          <Card style={styles.walletCard}>
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Wallet</Text>
               <Text style={styles.walletBalanceText}>
@@ -375,13 +380,12 @@ export default function Screen() {
               </Text>
             </View>
             <Text style={styles.helperText}>Use wallet for faster checkout in class or at canteen.</Text>
-            <Pressable
+            <Button
               onPress={() => setWalletModalVisible(true)}
+              title="Top Up via UPI"
+              icon={<Ionicons name="add-circle-outline" size={16} color="white" />}
               style={styles.walletTopupBtn}
-            >
-              <Ionicons name="add-circle-outline" size={16} color="white" />
-              <Text style={styles.walletTopupBtnText}>Top Up via UPI</Text>
-            </Pressable>
+            />
             {recentWalletTransactions.length > 0 ? (
               <View style={styles.walletTxnList}>
                 {recentWalletTransactions.map((txn) => {
@@ -402,12 +406,12 @@ export default function Screen() {
                 })}
               </View>
             ) : null}
-          </View>
+          </Card>
         )}
 
         <View style={styles.menuSection}>
           <Text style={styles.sectionLabel}>ACCOUNT SETTINGS</Text>
-          <View style={styles.menuCard}>
+          <Card padding="none" style={styles.menuCard}>
             <Pressable onPress={onOpenEdit} style={styles.menuItem} android_ripple={{ color: colors.surfaceAlt }}>
               <View style={[styles.menuIcon, { backgroundColor: isDark ? "rgba(75, 85, 99, 0.2)" : "#F3F4F6" }]}>
                 <Ionicons name="person-outline" size={18} color={colors.textSecondary} />
@@ -453,12 +457,12 @@ export default function Screen() {
               <Text style={styles.menuText}>Dark Theme</Text>
               <Switch value={isDark} onValueChange={theme.toggleTheme} thumbColor={isDark ? "#FFF" : "#FF6B35"} trackColor={{ false: "#E2E8F0", true: "#FF6B35" }} />
             </Pressable>
-          </View>
+          </Card>
         </View>
 
         <View style={styles.menuSection}>
           <Text style={styles.sectionLabel}>SUPPORT & MORE</Text>
-          <View style={styles.menuCard}>
+          <Card padding="none" style={styles.menuCard}>
             <Pressable onPress={() => Alert.alert("Help Center", "Support contact: support@collegecanteen.com")} style={styles.menuItem} android_ripple={{ color: colors.surfaceAlt }}>
               <View style={[styles.menuIcon, { backgroundColor: isDark ? "rgba(75, 85, 99, 0.2)" : "#F3F4F6" }]}>
                 <Ionicons name="help-circle-outline" size={18} color={colors.textSecondary} />
@@ -476,13 +480,17 @@ export default function Screen() {
               <Text style={styles.menuText}>About</Text>
               <Ionicons name="chevron-forward" size={18} color={colors.textMuted} />
             </Pressable>
-          </View>
+          </Card>
         </View>
 
-        <Pressable onPress={onLogout} style={[styles.logoutBtn, { backgroundColor: isDark ? "rgba(220, 38, 38, 0.1)" : "#FFF1F2" }]} android_ripple={{ color: isDark ? "rgba(220, 38, 38, 0.2)" : "#FECDD3" }}>
-          <Ionicons name="log-out-outline" size={18} color={isDark ? "#F87171" : "#DC2626"} />
-          <Text style={[styles.logoutBtnText, { color: isDark ? "#F87171" : "#DC2626" }]}>Log Out</Text>
-        </Pressable>
+        <Button
+          onPress={onLogout}
+          title="Log Out"
+          variant="secondary"
+          icon={<Ionicons name="log-out-outline" size={18} color={isDark ? "#F87171" : "#DC2626"} />}
+          style={[styles.logoutBtn, { backgroundColor: isDark ? "rgba(220, 38, 38, 0.1)" : "#FFF1F2" }]}
+          textStyle={{ color: isDark ? "#F87171" : "#DC2626" }}
+        />
       </ScrollView>
 
       <Modal
@@ -492,53 +500,46 @@ export default function Screen() {
         onRequestClose={() => setEditVisible(false)}
       >
         <KeyboardAvoidingView style={styles.modalBackdrop} behavior={Platform.OS === "ios" ? "padding" : "height"}>
-          <View style={styles.modalCard}>
+          <Card style={styles.modalCard}>
             <Text style={styles.modalTitle}>Edit Profile</Text>
-            <TextInput
+            <InputField
               value={editName}
               onChangeText={setEditName}
               placeholder="Full name"
-              style={styles.modalInput}
             />
-            <TextInput
+            <InputField
               value={editPhone}
               onChangeText={setEditPhone}
               keyboardType="phone-pad"
               placeholder="Phone (10 digits)"
-              style={styles.modalInput}
             />
-            <TextInput
+            <InputField
               value={editEmail}
               onChangeText={setEditEmail}
               keyboardType="email-address"
               autoCapitalize="none"
               placeholder="Email (optional)"
-              style={styles.modalInput}
             />
-            <TextInput
+            <InputField
               value={editRollNumber}
               onChangeText={setEditRollNumber}
               placeholder={`${profileIdLabel} (optional)`}
-              style={styles.modalInput}
             />
             <View style={styles.modalActions}>
-              <Pressable
+              <Button
                 onPress={onSaveEdit}
-                disabled={savingEdit}
-                style={[styles.modalActionBtn, styles.modalActionPrimary]}
-              >
-                <Text style={styles.modalActionPrimaryText}>
-                  {savingEdit ? "Saving..." : "Save"}
-                </Text>
-              </Pressable>
-              <Pressable
+                loading={savingEdit}
+                title="Save"
+                style={{ flex: 1 }}
+              />
+              <Button
                 onPress={() => setEditVisible(false)}
-                style={[styles.modalActionBtn, styles.modalActionSecondary]}
-              >
-                <Text style={styles.modalActionSecondaryText}>Cancel</Text>
-              </Pressable>
+                title="Cancel"
+                variant="outline"
+                style={{ flex: 1 }}
+              />
             </View>
-          </View>
+          </Card>
         </KeyboardAvoidingView>
       </Modal>
 
@@ -549,47 +550,41 @@ export default function Screen() {
         onRequestClose={() => setPasswordVisible(false)}
       >
         <KeyboardAvoidingView style={styles.modalBackdrop} behavior={Platform.OS === "ios" ? "padding" : "height"}>
-          <View style={styles.modalCard}>
+          <Card style={styles.modalCard}>
             <Text style={styles.modalTitle}>Change Password</Text>
-            <TextInput
+            <InputField
               value={currentPassword}
               onChangeText={setCurrentPassword}
               placeholder="Current password"
               secureTextEntry
-              style={styles.modalInput}
             />
-            <TextInput
+            <InputField
               value={newPassword}
               onChangeText={setNewPassword}
               placeholder="New password"
               secureTextEntry
-              style={styles.modalInput}
             />
-            <TextInput
+            <InputField
               value={confirmPassword}
               onChangeText={setConfirmPassword}
               placeholder="Confirm new password"
               secureTextEntry
-              style={styles.modalInput}
             />
             <View style={styles.modalActions}>
-              <Pressable
+              <Button
                 onPress={onChangePassword}
-                disabled={savingPassword}
-                style={[styles.modalActionBtn, styles.modalActionPrimary]}
-              >
-                <Text style={styles.modalActionPrimaryText}>
-                  {savingPassword ? "Updating..." : "Update"}
-                </Text>
-              </Pressable>
-              <Pressable
+                loading={savingPassword}
+                title="Update"
+                style={{ flex: 1 }}
+              />
+              <Button
                 onPress={() => setPasswordVisible(false)}
-                style={[styles.modalActionBtn, styles.modalActionSecondary]}
-              >
-                <Text style={styles.modalActionSecondaryText}>Cancel</Text>
-              </Pressable>
+                title="Cancel"
+                variant="outline"
+                style={{ flex: 1 }}
+              />
             </View>
-          </View>
+          </Card>
         </KeyboardAvoidingView>
       </Modal>
 
@@ -600,46 +595,41 @@ export default function Screen() {
         onRequestClose={() => setWalletModalVisible(false)}
       >
         <KeyboardAvoidingView style={styles.modalBackdrop} behavior={Platform.OS === "ios" ? "padding" : "height"}>
-          <View style={styles.modalCard}>
+          <Card style={styles.modalCard}>
             <Text style={styles.modalTitle}>Top Up Wallet (UPI)</Text>
-            <TextInput
+            <InputField
               value={topupAmount}
               onChangeText={setTopupAmount}
               keyboardType="numeric"
               placeholder="Amount"
-              style={styles.modalInput}
             />
-            <TextInput
+            <InputField
               value={topupReference}
               onChangeText={setTopupReference}
               placeholder="UPI Reference (optional)"
-              style={styles.modalInput}
             />
             <View style={styles.modalActions}>
-              <Pressable
+              <Button
                 onPress={onTopupWallet}
-                disabled={savingTopup}
-                style={[styles.modalActionBtn, styles.modalActionPrimary]}
-              >
-                <Text style={styles.modalActionPrimaryText}>
-                  {savingTopup ? "Processing..." : "Top Up"}
-                </Text>
-              </Pressable>
-              <Pressable
+                loading={savingTopup}
+                title="Top Up"
+                style={{ flex: 1 }}
+              />
+              <Button
                 onPress={() => setWalletModalVisible(false)}
-                style={[styles.modalActionBtn, styles.modalActionSecondary]}
-              >
-                <Text style={styles.modalActionSecondaryText}>Cancel</Text>
-              </Pressable>
+                title="Cancel"
+                variant="outline"
+                style={{ flex: 1 }}
+              />
             </View>
-          </View>
+          </Card>
         </KeyboardAvoidingView>
       </Modal>
     </>
   );
 }
 
-const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => ({
+const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: colors.background

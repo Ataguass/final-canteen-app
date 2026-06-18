@@ -1,35 +1,5 @@
-import { PaymentMethod, PaymentStatus } from "./types";
 import { apiRequest } from "./api";
-
-export type OrderItem = {
-  id: string;
-  menuItemId: string;
-  name: string;
-  price: number;
-  quantity: number;
-  note?: string | null;
-};
-
-export type Order = {
-  id: string;
-  tenantId: string;
-  userId?: string | null;
-  orderNumber: string;
-  status: string;
-  serviceLane?: "REGULAR" | "TEACHER_PRIORITY" | string;
-  laneToken?: string | null;
-  isPreOrder?: boolean;
-  pickupSlotLabel?: string | null;
-  pickupSlotStart?: string | null;
-  pickupSlotEnd?: string | null;
-  subtotal: number;
-  taxAmount: number;
-  totalAmount: number;
-  paymentMethod: PaymentMethod;
-  paymentStatus?: PaymentStatus;
-  createdAt: string;
-  items: OrderItem[];
-};
+import type { PaymentMethod, PaymentStatus, OrderItem, Order } from "../types";
 
 type OrderPlacementPayload = {
   items: { menuItemId: string; quantity: number; note?: string }[];

@@ -1,16 +1,6 @@
 import { apiRequest } from "./api";
 
-export type Banner = {
-  id: string;
-  tenantId: string;
-  title: string;
-  imageUrl: string;
-  actionUrl?: string | null;
-  sortOrder: number;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-};
+import type { Banner } from "../types";
 
 export const bannerService = {
   listBanners: (token: string, tenantId: string, includeInactive = false) =>

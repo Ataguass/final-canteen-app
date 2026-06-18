@@ -13,9 +13,12 @@ import {
 } from "react-native";
 import { Video, ResizeMode } from "expo-av";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useAuth } from "../../hooks/useAuth";
+import { useAuthStore } from '../../stores/useAuthStore';
 import { CanteenHeader } from "../../components/CanteenHeader";
-import { communityService, type CommunityPost } from "../../services/communityService";
+import { Card } from "../../components/ui/Card";
+import { Avatar } from "../../components/ui/Avatar";
+import { Badge } from "../../components/ui/Badge";
+import { useCommunityPosts } from "../../hooks/queries/useCommunity";
 import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../utils/responsive';
 import { useTheme } from '../../hooks/useTheme';
 
@@ -24,32 +27,17 @@ export default function Screen() {
   const { colors, isDark } = theme;
   const styles = createStyles(theme);
   const insets = useSafeAreaInsets();
-  const { user, accessToken } = useAuth();
-  const [posts, setPosts] = useState<CommunityPost[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
+  const { user, accessToken } = useAuthStore();
+  const { data: posts = [], isLoading, isFetching, refetch } = useCommunityPosts(false);
 
-  const load = useCallback(async (isRefresh = false) => {
-    if (!user?.tenantId || !accessToken) return;
-    try {
-      if (isRefresh) setRefreshing(true);
-      else setLoading(true);
-      const response = await communityService.listPosts(accessToken, user.tenantId);
-      setPosts(response.data);
-    } catch (error) {
-      Alert.alert(
-        "Error",
-        error instanceof Error ? error.message : "Failed to load community posts"
-      );
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
+  const loading = isLoading;
+  const refreshing = isFetching && !isLoading;
+
+  const load = async (isRefresh = false) => {
+    if (isRefresh) {
+      await refetch();
     }
-  }, [accessToken, user?.tenantId]);
-
-  useEffect(() => {
-    load().catch(() => undefined);
-  }, [load]);
+  };
 
   const orderedPosts = useMemo(
     () =>
@@ -72,13 +60,13 @@ export default function Screen() {
       <CanteenHeader showBackButton title="Community" subtitle="Announcements and updates" />
 
       {orderedPosts.length === 0 && !loading && !refreshing ? (
-        <View style={styles.emptyCard}>
+        <Card style={styles.emptyCard} padding="large">
           <View style={styles.emptyIconWrap}>
             <Ionicons name="megaphone-outline" size={32} color={colors.textMuted} />
           </View>
           <Text style={styles.emptyTitle}>No announcements yet</Text>
           <Text style={styles.emptySub}>New updates from the canteen admin will appear here.</Text>
-        </View>
+        </Card>
       ) : null}
 
       {loading && !refreshing && orderedPosts.length === 0 ? (
@@ -92,12 +80,10 @@ export default function Screen() {
         {orderedPosts.map((post) => {
           const isPinned = post.isPinned;
           return (
-            <View key={post.id} style={[styles.postCard, isPinned && styles.postCardPinned]}>
+            <Card key={post.id} style={[styles.postCard, isPinned && styles.postCardPinned]}>
               <View style={styles.postHeaderRow}>
                 <View style={styles.authorWrap}>
-                  <View style={styles.authorAvatar}>
-                    <Ionicons name="person" size={16} color={colors.textSecondary} />
-                  </View>
+                  <Avatar size="small" name={post.author?.name ?? "Canteen Admin"} />
                   <View>
                     <Text style={styles.authorName}>{post.author?.name ?? "Canteen Admin"}</Text>
                     <Text style={styles.postDate}>{new Date(post.createdAt).toLocaleString(undefined, { 
@@ -137,7 +123,7 @@ export default function Screen() {
                   isLooping={false}
                 />
               ) : null}
-            </View>
+            </Card>
           );
         })}
       </View>
@@ -145,7 +131,7 @@ export default function Screen() {
   );
 }
 
-const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => ({
+const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: colors.background
@@ -167,11 +153,6 @@ const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => (
     fontSize: fontScale(15)
   },
   emptyCard: {
-    borderRadius: moderateScale(16),
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.card,
-    padding: moderateScale(32),
     alignItems: "center",
     justifyContent: "center",
     gap: moderateScale(8),
@@ -201,17 +182,7 @@ const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => (
     gap: moderateScale(16)
   },
   postCard: {
-    borderRadius: moderateScale(16),
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.card,
-    padding: moderateScale(16),
     gap: moderateScale(14),
-    shadowColor: colors.text,
-    shadowOpacity: 0.05,
-    shadowRadius: moderateScale(8),
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 2
   },
   postCardPinned: {
     borderColor: isDark ? "rgba(79, 70, 229, 0.4)" : "#C7D2FE",

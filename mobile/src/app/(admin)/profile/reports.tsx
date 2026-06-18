@@ -1,9 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Alert, Pressable, ScrollView, Share, Text, TextInput, View, RefreshControl } from "react-native";
-import { useAuth } from "../../../hooks/useAuth";
-import { orderService, type Order } from "../../../services/orderService";
-import type { PaymentMethod, PaymentStatus } from "../../../services/types";
+import { useAuthStore } from '../../../stores/useAuthStore';
+import { Order } from "../../../types";
+import { orderService} from "../../../services/orderService";
+import { PaymentMethod, PaymentStatus } from "../../../types";
 import { useTheme } from '../../../hooks/useTheme';
 
 type RangeKey = "TODAY" | "WEEK" | "MONTH" | "ALL" | "CUSTOM";
@@ -67,7 +68,7 @@ const statusColorMap: Record<string, string> = {
 export default function Screen() {
   const theme = useTheme();
   const { colors, isDark } = theme;
-  const { user, accessToken } = useAuth();
+  const { user, accessToken } = useAuthStore();
 
   const cardShadow = {
     borderWidth: 1,

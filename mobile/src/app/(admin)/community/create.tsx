@@ -4,7 +4,7 @@ import * as ImagePicker from "expo-image-picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import { Alert, Image, Linking, Pressable, ScrollView, Text, TextInput, View } from "react-native";
-import { useAuth } from "../../../hooks/useAuth";
+import { useAuthStore } from '../../../stores/useAuthStore';
 import { communityService } from "../../../services/communityService";
 import { useTheme } from '../../../hooks/useTheme';
 
@@ -20,7 +20,7 @@ export default function Screen() {
   const { colors, isDark } = theme;
   const router = useRouter();
   const { resetKey } = useLocalSearchParams<{ resetKey?: string }>();
-  const { user, accessToken } = useAuth();
+  const { user, accessToken } = useAuthStore();
   
   const cardShadow = {
     borderWidth: 1,

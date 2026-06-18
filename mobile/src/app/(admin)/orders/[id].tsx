@@ -2,9 +2,10 @@ import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import { useAuth } from "../../../hooks/useAuth";
+import { useAuthStore } from '../../../stores/useAuthStore';
 import { useOrderSocket } from "../../../hooks/useOrderSocket";
-import { Order, orderService } from "../../../services/orderService";
+import { Order } from "../../../types";
+import {  orderService } from "../../../services/orderService";
 import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../../utils/responsive';
 import { useTheme } from '../../../hooks/useTheme';
 
@@ -37,7 +38,7 @@ export default function Screen() {
   const { colors, isDark } = theme;
   const styles = createStyles(theme);
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { user, accessToken } = useAuth();
+  const { user, accessToken } = useAuthStore();
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(false);
   const [updating, setUpdating] = useState(false);
@@ -255,7 +256,7 @@ export default function Screen() {
   );
 }
 
-const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => ({
+const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => StyleSheet.create({
   centerScreen: {
     flex: 1,
     justifyContent: "center",

@@ -86,7 +86,7 @@ export default function ForgotPasswordScreen() {
   );
 }
 
-const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => ({
+const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,

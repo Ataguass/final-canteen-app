@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useRef } from "react";
 import { AppState } from "react-native";
-import { useAuth } from "./useAuth";
+import { useAuthStore } from "../stores/useAuthStore";
 import { useNetworkStatus } from "./useNetworkStatus";
 import { offlineOrderQueue } from "../services/offlineOrderQueue";
 import { orderService } from "../services/orderService";
 
 export const useAutoOrderSync = () => {
-  const { user, accessToken } = useAuth();
+  const { user, accessToken } = useAuthStore();
   const { isConnected } = useNetworkStatus();
   const syncingRef = useRef(false);
   const isAdminRole = user?.role === "ADMIN" || user?.role === "SUPER_ADMIN";

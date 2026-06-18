@@ -1,8 +1,9 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Alert, Pressable, ScrollView, Text, TextInput, View } from "react-native";
-import { useAuth } from "../../../hooks/useAuth";
-import { menuService, type StockMovement } from "../../../services/menuService";
+import { useAuthStore } from '../../../stores/useAuthStore';
+import { StockMovement } from "../../../types";
+import { menuService} from "../../../services/menuService";
 import { useTheme } from '../../../hooks/useTheme';
 
 
@@ -23,7 +24,7 @@ const isLowStockItem = (item: StockItem): boolean => item.stockQty <= thresholdF
 export default function Screen() {
   const theme = useTheme();
   const { colors, isDark } = theme;
-  const { user, accessToken } = useAuth();
+  const { user, accessToken } = useAuthStore();
   
   const card = {
     borderWidth: 1,

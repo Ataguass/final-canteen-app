@@ -1,7 +1,7 @@
 import { Link, useRouter } from "expo-router";
 import { useState } from "react";
 import { Alert, Pressable, Text, TextInput, View, StyleSheet, KeyboardAvoidingView, Platform, SafeAreaView, Image } from "react-native";
-import { useAuth } from "../../hooks/useAuth";
+import { useAuthStore } from '../../stores/useAuthStore';
 import { Ionicons } from "@expo/vector-icons";
 import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
 import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../utils/responsive';
@@ -14,7 +14,7 @@ export default function LoginScreen() {
   const { colors, isDark } = theme;
   const styles = createStyles(theme);
   const router = useRouter();
-  const { login } = useAuth();
+  const { login } = useAuthStore();
   const [phone, setPhone] = useState("");
   const [rollNumber, setRollNumber] = useState("");
   const [password, setPassword] = useState("");
@@ -142,7 +142,7 @@ export default function LoginScreen() {
   );
 }
 
-const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => ({
+const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,

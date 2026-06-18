@@ -2,9 +2,10 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View, RefreshControl } from "react-native";
-import { useAuth } from "../../../hooks/useAuth";
+import { useAuthStore } from '../../../stores/useAuthStore';
 import { useOrderSocket } from "../../../hooks/useOrderSocket";
-import { Order, orderService } from "../../../services/orderService";
+import { Order } from "../../../types";
+import {  orderService } from "../../../services/orderService";
 import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../../utils/responsive';
 import { useTheme } from '../../../hooks/useTheme';
 
@@ -50,7 +51,7 @@ export default function Screen() {
   const { colors, isDark } = theme;
   const styles = createStyles(theme);
   const router = useRouter();
-  const { user, accessToken } = useAuth();
+  const { user, accessToken } = useAuthStore();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(false);
   const [query, setQuery] = useState("");
@@ -249,7 +250,7 @@ export default function Screen() {
   );
 }
 
-const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => ({
+const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: colors.background

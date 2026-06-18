@@ -1,30 +1,7 @@
 import { apiRequest } from "./api";
 import { config } from "../constants/config";
 
-export type BackupFile = {
-  id: string;
-  sizeBytes: number;
-  createdAt: string;
-  updatedAt: string;
-};
-
-export type BackupCounts = {
-  users: number;
-  categories: number;
-  menuItems: number;
-  banners: number;
-  communityPosts: number;
-  orders: number;
-  orderItems: number;
-  stockMovements: number;
-};
-
-export type CreatedBackup = {
-  id: string;
-  createdAt: string;
-  sizeBytes: number;
-  counts: BackupCounts;
-};
+import type { BackupFile, BackupCounts, CreatedBackup } from "../types";
 
 export const backupService = {
   listBackups: (token: string, tenantId: string) =>

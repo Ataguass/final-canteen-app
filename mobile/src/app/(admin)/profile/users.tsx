@@ -1,8 +1,10 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Alert, Modal, Pressable, ScrollView, Text, TextInput, View } from "react-native";
-import { useAuth } from "../../../hooks/useAuth";
-import { ManageableUserRole, ManagedUser, userService } from "../../../services/userService";
+import { useAuthStore } from '../../../stores/useAuthStore';
+import { ManageableUserRole } from "../../../types";
+import { ManagedUser } from "../../../types";
+import {   userService } from "../../../services/userService";
 import { useTheme } from '../../../hooks/useTheme';
 
 type RoleFilter = "ALL" | ManageableUserRole;
@@ -117,7 +119,7 @@ const parseBulkCsv = (raw: string, defaultRole: ManageableUserRole) => {
 export default function Screen() {
   const theme = useTheme();
   const { colors, isDark } = theme;
-  const { user, accessToken } = useAuth();
+  const { user, accessToken } = useAuthStore();
   
   const getRoleBadgeStyle = (role: ManageableUserRole) =>
     role === "TEACHER"

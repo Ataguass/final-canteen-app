@@ -3,8 +3,9 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { File, Paths } from "expo-file-system";
 import * as DocumentPicker from "expo-document-picker";
-import { useAuth } from "../../../hooks/useAuth";
-import { backupService, type BackupFile } from "../../../services/backupService";
+import { useAuthStore } from '../../../stores/useAuthStore';
+import { BackupFile } from "../../../types";
+import { backupService} from "../../../services/backupService";
 import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../../utils/responsive';
 import { useTheme } from '../../../hooks/useTheme';
 
@@ -37,7 +38,7 @@ export default function Screen() {
   const theme = useTheme();
   const { colors, isDark } = theme;
   const styles = createStyles(theme);
-  const { user, accessToken } = useAuth();
+  const { user, accessToken } = useAuthStore();
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -296,7 +297,7 @@ export default function Screen() {
   );
 }
 
-const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => ({
+const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: colors.background

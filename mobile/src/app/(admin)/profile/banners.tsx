@@ -3,8 +3,9 @@ import * as ImageManipulator from "expo-image-manipulator";
 import * as ImagePicker from "expo-image-picker";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Alert, Image, Pressable, ScrollView, Text, TextInput, View } from "react-native";
-import { useAuth } from "../../../hooks/useAuth";
-import { bannerService, type Banner } from "../../../services/bannerService";
+import { useAuthStore } from '../../../stores/useAuthStore';
+import { Banner } from "../../../types";
+import { bannerService} from "../../../services/bannerService";
 import { useTheme } from '../../../hooks/useTheme';
 
 const MAX_BANNER_SIZE_BYTES = 2 * 1024 * 1024;
@@ -16,7 +17,7 @@ const estimateBase64Bytes = (base64: string): number => Math.floor((base64.lengt
 export default function Screen() {
   const theme = useTheme();
   const { colors, isDark } = theme;
-  const { user, accessToken } = useAuth();
+  const { user, accessToken } = useAuthStore();
   
   const cardShadow = {
     borderWidth: 1,

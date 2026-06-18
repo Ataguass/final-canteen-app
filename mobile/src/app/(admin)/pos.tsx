@@ -16,13 +16,13 @@ import * as Print from "expo-print";
 import { Audio } from "expo-av";
 import { Ionicons } from "@expo/vector-icons";
 import { ConnectionBadge } from "../../components/ui/ConnectionBadge";
-import { useAuth } from "../../hooks/useAuth";
+import { useAuthStore } from '../../stores/useAuthStore';
 import { useNetworkStatus } from "../../hooks/useNetworkStatus";
 import { menuService } from "../../services/menuService";
 import { offlineOrderQueue } from "../../services/offlineOrderQueue";
-import { orderService, type Order } from "../../services/orderService";
-import { tenantService, type InvoiceSettings } from "../../services/tenantService";
-import { PaymentMethod, PaymentStatus } from "../../services/types";
+import { orderService } from "../../services/orderService";
+import { tenantService } from "../../services/tenantService";
+import { PaymentMethod, PaymentStatus, Order, InvoiceSettings } from "../../types";
 import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../utils/responsive';
 import { useTheme } from '../../hooks/useTheme';
 
@@ -93,7 +93,7 @@ export default function Screen() {
   const { colors, isDark } = theme;
   const styles = createStyles(theme);
   const { width: screenWidth } = useWindowDimensions();
-  const { user, accessToken } = useAuth();
+  const { user, accessToken } = useAuthStore();
   const { isConnected } = useNetworkStatus();
   const [categories, setCategories] = useState<Category[]>([]);
   const [menu, setMenu] = useState<MenuItem[]>([]);
@@ -1040,7 +1040,7 @@ export default function Screen() {
   );
 }
 
-const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => ({
+const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: colors.background

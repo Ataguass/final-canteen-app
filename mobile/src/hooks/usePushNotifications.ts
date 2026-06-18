@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import * as Device from 'expo-device';
 import Constants from 'expo-constants';
 import { Platform } from 'react-native';
-import { useAuth } from './useAuth';
+import { useAuthStore } from '../stores/useAuthStore';
 
 // Determine if we're running in Expo Go
 const isExpoGo = Constants.executionEnvironment === 'storeClient';
@@ -28,7 +28,7 @@ export function usePushNotifications() {
   const [notification, setNotification] = useState<any>(undefined);
   const notificationListener = useRef<any>(null);
   const responseListener = useRef<any>(null);
-  const { user, accessToken } = useAuth();
+  const { user, accessToken } = useAuthStore();
   const pushTokenRegisteredRef = useRef<boolean>(false);
 
   useEffect(() => {

@@ -3,8 +3,9 @@ import { Alert, Image, Pressable, ScrollView, StyleSheet, Switch, Text, TextInpu
 import { Ionicons } from "@expo/vector-icons";
 import * as ImageManipulator from "expo-image-manipulator";
 import * as ImagePicker from "expo-image-picker";
-import { useAuth } from "../../../hooks/useAuth";
-import { tenantService, type InvoiceSettings } from "../../../services/tenantService";
+import { useAuthStore } from '../../../stores/useAuthStore';
+import { InvoiceSettings } from "../../../types";
+import { tenantService} from "../../../services/tenantService";
 import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../../utils/responsive';
 import { useTheme } from '../../../hooks/useTheme';
 
@@ -72,7 +73,7 @@ export default function Screen() {
   const theme = useTheme();
   const { colors, isDark } = theme;
   const styles = createStyles(theme);
-  const { user, accessToken } = useAuth();
+  const { user, accessToken } = useAuthStore();
   const [settings, setSettings] = useState<InvoiceSettings | null>(null);
   const [logoUrl, setLogoUrl] = useState("");
   const [footerNote, setFooterNote] = useState("");
@@ -350,7 +351,7 @@ export default function Screen() {
   );
 }
 
-const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => ({
+const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: colors.background

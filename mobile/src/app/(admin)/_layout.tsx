@@ -15,9 +15,10 @@ import {
   Text,
   View
 } from "react-native";
-import { useAuth } from "../../hooks/useAuth";
+import { useAuthStore } from '../../stores/useAuthStore';
 import { useOrderSocket } from "../../hooks/useOrderSocket";
-import type { Order } from "../../services/orderService";
+import { Order } from "../../types";
+
 
 type DrawerItem = {
   label: string;
@@ -125,7 +126,7 @@ export default function AdminLayout() {
   const { colors, isDark, toggleTheme } = useTheme();
   const router = useRouter();
   const pathname = usePathname();
-  const { user, logout } = useAuth();
+  const { user, logout } = useAuthStore();
 
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [newOrderCount, setNewOrderCount] = useState(0);
@@ -333,14 +334,12 @@ export default function AdminLayout() {
           tabBarInactiveTintColor: colors.textSecondary,
           tabBarStyle: {
             backgroundColor: colors.tabBarBg,
-            borderTopColor: colors.border,
-          },
+            borderTopColor: colors.border},
           headerStyle: {
             backgroundColor: colors.headerBg,
             elevation: 0,
             shadowOpacity: 0,
-            borderBottomWidth: 0,
-          },
+            borderBottomWidth: 0},
           headerShadowVisible: false,
           headerTitleAlign: "left",
           headerTitle: () => (

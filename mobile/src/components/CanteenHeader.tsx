@@ -2,8 +2,8 @@ import React from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useAuth } from '../hooks/useAuth';
-import { useCart } from '../hooks/useCart';
+import { useAuthStore } from '../stores/useAuthStore';
+import { useCartStore } from '../stores/useCartStore';
 import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../utils/responsive';
 import { useTheme } from '../hooks/useTheme';
 
@@ -21,8 +21,8 @@ export function CanteenHeader({
   showLocationIcon = false,
 }: CanteenHeaderProps) {
   const router = useRouter();
-  const { user } = useAuth();
-  const { items: cartItems } = useCart();
+  const { user } = useAuthStore();
+  const { items: cartItems } = useCartStore();
   const { colors, isDark, toggleTheme } = useTheme();
   const styles = createStyles(colors, isDark);
 

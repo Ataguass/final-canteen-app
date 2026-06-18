@@ -16,15 +16,16 @@ import {
   useWindowDimensions,
   DeviceEventEmitter
 } from "react-native";
-import { useAuth } from "../../hooks/useAuth";
-import { useCart } from "../../hooks/useCart";
-import { bannerService, type Banner } from "../../services/bannerService";
-import { menuService } from "../../services/menuService";
-import { orderService, type Order } from "../../services/orderService";
-import { tenantService, type FeatureSettings } from "../../services/tenantService";
+import { useAuthStore } from '../../stores/useAuthStore';
+import { useCartStore } from '../../stores/useCartStore';
+import { useOrders } from "../../hooks/queries/useOrders";
+import { useBanners } from "../../hooks/queries/useBanners";
+import { useCategories, useMenuItems } from "../../hooks/queries/useMenu";
+import { useFeatureSettings } from "../../hooks/queries/useSettings";
 import { useToast } from "../../components/Toast";
 import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../utils/responsive';
 import { useTheme } from '../../hooks/useTheme';
+import { Banner } from "../../types";
 
 type Category = {
   id: string;
@@ -56,8 +57,8 @@ export default function Screen() {
   const styles = createStyles(theme);
   const router = useRouter();
   const { width: screenWidth } = useWindowDimensions();
-  const { user, accessToken } = useAuth();
-  const { items: cartItems, addItem } = useCart();
+  const { user, accessToken } = useAuthStore();
+  const { items: cartItems, addItem } = useCartStore();
   const { showToast } = useToast();
   const cartItemsCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   const bannerScrollRef = useRef<ScrollView | null>(null);
@@ -67,46 +68,16 @@ export default function Screen() {
   const bannerInteractingRef = useRef(false);
   const specialInteractingRef = useRef(false);
 
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [items, setItems] = useState<MenuItem[]>([]);
-  const [banners, setBanners] = useState<Banner[]>([]);
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [featureSettings, setFeatureSettings] = useState<FeatureSettings | null>(null);
-  const [loading, setLoading] = useState(false);
+  const { data: categories = [], isLoading: isCategoriesLoading } = useCategories();
+  const { data: items = [], isLoading: isItemsLoading } = useMenuItems();
+  const { data: banners = [], isLoading: isBannersLoading } = useBanners();
+  const { data: orders = [], isLoading: isOrdersLoading } = useOrders();
+  const { data: featureSettings, isLoading: isSettingsLoading } = useFeatureSettings();
+
+  const loading = isCategoriesLoading || isItemsLoading || isBannersLoading || isOrdersLoading || isSettingsLoading;
+
   const bannerCardWidth = Math.max(280, screenWidth - 32);
   const bannerPitch = bannerCardWidth + HORIZONTAL_GAP;
-
-  const load = useCallback(async () => {
-    if (!user?.tenantId || !accessToken) return;
-    try {
-      setLoading(true);
-      const [cats, menu, bannerList, orderList, featureConfig] = await Promise.all([
-        menuService.listCategories(accessToken, user.tenantId),
-        menuService.listItems(accessToken, user.tenantId),
-        bannerService.listBanners(accessToken, user.tenantId),
-        orderService.listOrders(accessToken, user.tenantId),
-        tenantService
-          .getFeatureSettings(accessToken, user.tenantId)
-          .catch(() => ({ success: true, data: { id: "", name: "", todaySpecialsEnabled: true } }))
-      ]);
-      setCategories(cats.data);
-      setItems(menu.data.filter((x) => x.isAvailable));
-      setBanners(bannerList.data);
-      setOrders(orderList.data);
-      setFeatureSettings(featureConfig.data);
-    } catch (error) {
-      Alert.alert(
-        "Error",
-        error instanceof Error ? error.message : "Failed to load dashboard"
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, [accessToken, user?.tenantId]);
-
-  useEffect(() => {
-    load().catch(() => undefined);
-  }, [load]);
 
   const todaySpecialItemIds = useMemo(
     () => new Set(items.filter((item) => item.stockQty > 0 && item.isTodaySpecial).map((item) => item.id)),
@@ -116,7 +87,7 @@ export default function Screen() {
   const todaySpecialItems = useMemo(
     () =>
       items
-        .filter((item) => todaySpecialItemIds.has(item.id))
+        .filter((item) => item.isAvailable && todaySpecialItemIds.has(item.id))
         .sort((a, b) => a.name.localeCompare(b.name))
         .slice(0, 8),
     [items, todaySpecialItemIds]
@@ -445,7 +416,7 @@ export default function Screen() {
   );
 }
 
-const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => ({
+const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: colors.background,

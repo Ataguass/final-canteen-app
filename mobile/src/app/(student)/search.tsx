@@ -15,8 +15,8 @@ import {
   useWindowDimensions
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useAuth } from "../../hooks/useAuth";
-import { useCart } from "../../hooks/useCart";
+import { useAuthStore } from '../../stores/useAuthStore';
+import { useCartStore } from '../../stores/useCartStore';
 import { useToast } from "../../components/Toast";
 import { menuService } from "../../services/menuService";
 import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../utils/responsive';
@@ -63,8 +63,8 @@ export default function Screen() {
   const router = useRouter();
   const { width: screenWidth } = useWindowDimensions();
   const insets = useSafeAreaInsets();
-  const { user, accessToken } = useAuth();
-  const { addItem } = useCart();
+  const { user, accessToken } = useAuthStore();
+  const { addItem } = useCartStore();
   const { showToast } = useToast();
   const searchInputRef = useRef<TextInput>(null);
   const speechModuleRef = useRef<SpeechRecognitionModule | null>(null);
@@ -435,7 +435,7 @@ export default function Screen() {
   );
 }
 
-const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => ({
+const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: colors.background
