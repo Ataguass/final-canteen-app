@@ -66,5 +66,12 @@ export const tenantService = {
       token,
       tenantId,
       body: payload
+    }),
+
+  createTenantByAdmin: (token: string, payload: any) =>
+    apiRequest<{ success: boolean; data: any }>("/tenants/admin", {
+      method: "POST",
+      token,
+      body: payload
     })
 };

@@ -6,12 +6,24 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   View,
-  LayoutAnimation
+  LayoutAnimation,
+  Alert
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../utils/responsive';
 import { useTheme } from '../../hooks/useTheme';
+
+const supportSchema = z.object({
+  subject: z.string().min(3, "Subject must be at least 3 characters").max(50, "Subject is too long"),
+  message: z.string().min(10, "Message must be at least 10 characters").max(500, "Message is too long")
+});
+
+type SupportFormData = z.infer<typeof supportSchema>;
 
 const faqs = [
   {
@@ -36,6 +48,22 @@ export default function SupportScreen() {
   const insets = useSafeAreaInsets();
   
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
+  const [focusedField, setFocusedField] = useState<string | null>(null);
+
+  const { control, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm<SupportFormData>({
+    resolver: zodResolver(supportSchema),
+    defaultValues: { subject: "", message: "" }
+  });
+
+  const onSubmit = async (data: SupportFormData) => {
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    Alert.alert(
+      "Ticket Submitted",
+      "Thank you for contacting support! Your message has been received and our team will look into it.",
+      [{ text: "OK", onPress: () => reset() }]
+    );
+  };
 
   const toggleAccordion = (index: number) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -56,20 +84,94 @@ export default function SupportScreen() {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.contactCard}>
-          <View style={styles.contactHeader}>
-            <View style={styles.contactIconWrap}>
-              <Ionicons name="headset" size={24} color="white" />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.contactTitle}>Need immediate help?</Text>
-              <Text style={styles.contactSub}>Reach out to the canteen administration for order issues.</Text>
-            </View>
+        {/* Hero Section */}
+        <View style={styles.heroSection}>
+          <View style={styles.heroIconWrap}>
+            <Ionicons name="chatbubbles-outline" size={36} color={colors.primary} />
           </View>
-          <Pressable style={styles.contactBtn} android_ripple={{ color: isDark ? "#C2410C" : "#EA580C" }}>
-            <Ionicons name="call" size={18} color={isDark ? colors.background : "white"} />
-            <Text style={styles.contactBtnText}>Call Administration</Text>
-          </Pressable>
+          <Text style={styles.heroTitle}>How can we help you?</Text>
+          <Text style={styles.heroSub}>
+            Whether you have a question about your order, pricing, or anything else, our team is ready to answer all your questions.
+          </Text>
+        </View>
+        <View style={styles.contactCard}>
+          <Text style={styles.contactTitle}>Send a Message</Text>
+          <Text style={styles.contactSub}>We usually respond within 15 minutes.</Text>
+          
+          <View style={{ gap: moderateScale(16), marginTop: verticalScale(16) }}>
+            <View>
+              <Text style={styles.fieldLabel}>Subject</Text>
+              <Controller
+                control={control}
+                name="subject"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <View style={[
+                    styles.inputContainer, 
+                    focusedField === 'subject' && { borderColor: colors.primary, backgroundColor: isDark ? 'rgba(37, 99, 235, 0.05)' : '#EFF6FF' },
+                    errors.subject && styles.inputError
+                  ]}>
+                    <Ionicons name="help-circle-outline" size={20} color={focusedField === 'subject' ? colors.primary : colors.textMuted} style={styles.inputIcon} />
+                    <TextInput
+                      style={styles.input}
+                      placeholder="e.g. Missing Item in Order"
+                      placeholderTextColor={colors.textMuted}
+                      onFocus={() => setFocusedField('subject')}
+                      onBlur={() => { setFocusedField(null); onBlur(); }}
+                      onChangeText={onChange}
+                      value={value}
+                    />
+                  </View>
+                )}
+              />
+              {errors.subject && <Text style={styles.errorText}>{errors.subject.message}</Text>}
+            </View>
+
+            <View>
+              <Text style={styles.fieldLabel}>Message</Text>
+              <Controller
+                control={control}
+                name="message"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <View style={[
+                    styles.inputContainer,
+                    styles.textAreaContainer,
+                    focusedField === 'message' && { borderColor: colors.primary, backgroundColor: isDark ? 'rgba(37, 99, 235, 0.05)' : '#EFF6FF' },
+                    errors.message && styles.inputError
+                  ]}>
+                    <Ionicons name="document-text-outline" size={20} color={focusedField === 'message' ? colors.primary : colors.textMuted} style={[styles.inputIcon, { marginTop: 12 }]} />
+                    <TextInput
+                      style={[styles.input, styles.textArea]}
+                      placeholder="Describe your issue..."
+                      placeholderTextColor={colors.textMuted}
+                      onFocus={() => setFocusedField('message')}
+                      onBlur={() => { setFocusedField(null); onBlur(); }}
+                      onChangeText={onChange}
+                      value={value}
+                      multiline
+                      numberOfLines={4}
+                      textAlignVertical="top"
+                    />
+                  </View>
+                )}
+              />
+              {errors.message && <Text style={styles.errorText}>{errors.message.message}</Text>}
+            </View>
+
+            <Pressable 
+              onPress={handleSubmit(onSubmit)} 
+              style={({ pressed }) => [
+                styles.submitBtn, 
+                isSubmitting && styles.submitBtnDisabled,
+                pressed && { opacity: 0.8, transform: [{ scale: 0.98 }] }
+              ]}
+              disabled={isSubmitting}
+            >
+              <Ionicons name="paper-plane-outline" size={18} color="white" />
+              <Text style={styles.submitBtnText}>
+                {isSubmitting ? "Sending..." : "Submit Ticket"}
+              </Text>
+            </Pressable>
+          </View>
         </View>
 
         <View style={styles.section}>
@@ -81,18 +183,20 @@ export default function SupportScreen() {
               return (
                 <View key={idx} style={styles.faqCard}>
                   <Pressable 
-                    style={styles.faqHeader} 
+                    style={[styles.faqHeader, isExpanded && { backgroundColor: isDark ? 'rgba(37, 99, 235, 0.08)' : '#F8FAFC' }]} 
                     onPress={() => toggleAccordion(idx)}
                   >
-                    <Text style={styles.faqQuestion}>{faq.question}</Text>
-                    <Ionicons 
-                      name={isExpanded ? "chevron-up" : "chevron-down"} 
-                      size={20} 
-                      color={colors.textSecondary} 
-                    />
+                    <Text style={[styles.faqQuestion, isExpanded && { color: colors.primary }]}>{faq.question}</Text>
+                    <View style={[styles.faqIconWrap, isExpanded && { backgroundColor: isDark ? 'rgba(37, 99, 235, 0.15)' : '#EFF6FF' }]}>
+                      <Ionicons 
+                        name={isExpanded ? "chevron-up" : "chevron-down"} 
+                        size={18} 
+                        color={isExpanded ? colors.primary : colors.textSecondary} 
+                      />
+                    </View>
                   </Pressable>
                   {isExpanded && (
-                    <View style={styles.faqBody}>
+                    <View style={[styles.faqBody, { backgroundColor: isDark ? 'rgba(37, 99, 235, 0.08)' : '#F8FAFC' }]}>
                       <Text style={styles.faqAnswer}>{faq.answer}</Text>
                     </View>
                   )}
@@ -142,54 +246,121 @@ const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => S
     paddingBottom: verticalScale(40),
     gap: moderateScale(32)
   },
-  contactCard: {
-    backgroundColor: isDark ? colors.surfaceAlt : "#0F172A",
-    borderRadius: moderateScale(20),
-    padding: moderateScale(20),
-    gap: moderateScale(16),
-    shadowColor: colors.text,
-    shadowOpacity: 0.15,
-    shadowRadius: moderateScale(16),
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 5
-  },
-  contactHeader: {
-    flexDirection: "row",
+  heroSection: {
     alignItems: "center",
-    gap: moderateScale(16)
+    paddingVertical: verticalScale(16),
+    paddingHorizontal: moderateScale(16)
   },
-  contactIconWrap: {
-    width: moderateScale(50),
-    height: moderateScale(50),
-    borderRadius: moderateScale(25),
-    backgroundColor: isDark ? colors.card : "#1E293B",
-    alignItems: "center",
-    justifyContent: "center"
-  },
-  contactTitle: {
-    fontSize: fontScale(18),
-    fontWeight: "900",
-    color: isDark ? colors.text : "white"
-  },
-  contactSub: {
-    color: colors.textMuted,
-    fontSize: fontScale(13),
-    marginTop: verticalScale(4),
-    lineHeight: 18
-  },
-  contactBtn: {
-    backgroundColor: isDark ? "#FF6B35" : "#FF6B35",
-    flexDirection: "row",
+  heroIconWrap: {
+    width: moderateScale(72),
+    height: moderateScale(72),
+    borderRadius: moderateScale(36),
+    backgroundColor: isDark ? 'rgba(37, 99, 235, 0.15)' : '#EFF6FF',
     alignItems: "center",
     justifyContent: "center",
-    gap: moderateScale(8),
-    paddingVertical: moderateScale(14),
-    borderRadius: moderateScale(12)
+    marginBottom: verticalScale(16)
   },
-  contactBtnText: {
-    color: isDark ? colors.background : "white",
-    fontWeight: "800",
+  heroTitle: {
+    color: colors.text,
+    fontSize: fontScale(26),
+    fontWeight: "900",
+    textAlign: "center",
+    marginBottom: verticalScale(8)
+  },
+  heroSub: {
+    color: colors.textSecondary,
+    fontSize: fontScale(15),
+    textAlign: "center",
+    lineHeight: 22
+  },
+  contactCard: {
+    backgroundColor: colors.card,
+    borderRadius: moderateScale(24),
+    padding: moderateScale(24),
+    shadowColor: "#000",
+    shadowOpacity: 0.06,
+    shadowRadius: moderateScale(20),
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: colors.border
+  },
+  contactTitle: {
+    fontSize: fontScale(22),
+    fontWeight: "900",
+    color: colors.text
+  },
+  contactSub: {
+    color: colors.textSecondary,
+    fontSize: fontScale(14),
+    marginTop: verticalScale(4),
+    lineHeight: 20
+  },
+  fieldLabel: {
+    color: colors.text,
+    fontWeight: "700",
+    marginBottom: verticalScale(8),
+    fontSize: fontScale(14)
+  },
+  inputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.background,
+    borderRadius: moderateScale(14),
+    overflow: "hidden"
+  },
+  textAreaContainer: {
+    alignItems: "flex-start"
+  },
+  inputIcon: {
+    paddingLeft: moderateScale(14),
+    paddingRight: moderateScale(10)
+  },
+  input: {
+    flex: 1,
+    paddingVertical: moderateScale(14),
+    paddingRight: moderateScale(16),
+    color: colors.text,
     fontSize: fontScale(15)
+  },
+  textArea: {
+    minHeight: moderateScale(120),
+    paddingTop: moderateScale(14),
+    paddingLeft: 0
+  },
+  inputError: {
+    borderColor: "#EF4444"
+  },
+  errorText: {
+    color: "#EF4444",
+    fontSize: fontScale(12),
+    marginTop: verticalScale(6),
+    fontWeight: "600"
+  },
+  submitBtn: {
+    flexDirection: "row",
+    backgroundColor: colors.primary,
+    paddingVertical: moderateScale(16),
+    borderRadius: moderateScale(14),
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: verticalScale(12),
+    gap: moderateScale(8),
+    shadowColor: colors.primary,
+    shadowOpacity: 0.3,
+    shadowRadius: moderateScale(8),
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 4
+  },
+  submitBtnDisabled: {
+    opacity: 0.7
+  },
+  submitBtnText: {
+    color: "white",
+    fontWeight: "800",
+    fontSize: fontScale(16)
   },
   section: {
     gap: moderateScale(16)
@@ -222,10 +393,18 @@ const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => S
     flex: 1,
     marginRight: moderateScale(16)
   },
+  faqIconWrap: {
+    width: moderateScale(32),
+    height: moderateScale(32),
+    borderRadius: moderateScale(16),
+    backgroundColor: colors.surfaceAlt,
+    alignItems: "center",
+    justifyContent: "center"
+  },
   faqBody: {
     paddingHorizontal: moderateScale(16),
     paddingBottom: verticalScale(16),
-    paddingTop: 0
+    paddingTop: moderateScale(4)
   },
   faqAnswer: {
     fontSize: fontScale(14),

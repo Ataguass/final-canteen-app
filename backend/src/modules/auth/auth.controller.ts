@@ -175,3 +175,104 @@ export const refreshToken = async (req: Request, res: Response): Promise<void> =
     }
   });
 };
+
+export const forgotPassword = async (req: Request, res: Response): Promise<void> => {
+  const { identifier, method } = req.body as { identifier: string; method: "email" | "phone" };
+
+  if (!identifier || !method) {
+    throw new AppError("identifier and method are required", 400);
+  }
+
+  if (method === "email") {
+    // Check if user exists
+    const user = await prisma.user.findFirst({ where: { email: identifier.trim() } });
+    if (!user) {
+      // Return 200 anyway to prevent email enumeration
+      res.status(200).json({ success: true, message: "If this email exists, an OTP was sent." });
+      return;
+    }
+
+    // Generate 6-digit OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    
+    // Store in Redis with 10 minute TTL
+    const redisKey = `password_reset_otp:${identifier.trim().toLowerCase()}`;
+    await redis.setex(redisKey, 600, otp);
+
+    // Mock sending email
+    console.log(`\n\n==============================================`);
+    console.log(`✉️ MOCK EMAIL SENT`);
+    console.log(`To: ${identifier}`);
+    console.log(`Subject: Password Reset OTP`);
+    console.log(`OTP Code: ${otp}`);
+    console.log(`==============================================\n\n`);
+
+    res.status(200).json({ success: true, message: "If this email exists, an OTP was sent." });
+    return;
+  } else if (method === "phone") {
+    // For phone, the client directly uses Firebase to get OTP
+    res.status(200).json({ success: true, message: "Proceed with Firebase phone verification" });
+    return;
+  }
+
+  throw new AppError("Invalid method", 400);
+};
+
+export const resetPassword = async (req: Request, res: Response): Promise<void> => {
+  const { identifier, token, newPassword, method } = req.body as {
+    identifier: string;
+    token: string;
+    newPassword: string;
+    method: "email" | "phone";
+  };
+
+  if (!identifier || !token || !newPassword || !method) {
+    throw new AppError("identifier, token, newPassword, and method are required", 400);
+  }
+
+  let user;
+
+  if (method === "email") {
+    const redisKey = `password_reset_otp:${identifier.trim().toLowerCase()}`;
+    const storedOtp = await redis.get(redisKey);
+
+    if (!storedOtp || storedOtp !== token.trim()) {
+      throw new AppError("Invalid or expired OTP", 400);
+    }
+
+    user = await prisma.user.findFirst({ where: { email: identifier.trim() } });
+    if (!user) {
+      throw new AppError("User not found", 404);
+    }
+
+    // OTP used, delete it
+    await redis.del(redisKey);
+
+  } else if (method === "phone") {
+    try {
+      const decodedToken = await firebaseAdmin.auth().verifyIdToken(token);
+      // Ensure phone from token matches the requested identifier
+      if (!decodedToken.phone_number || decodedToken.phone_number !== identifier.trim()) {
+        throw new AppError("Phone number mismatch", 400);
+      }
+    } catch (error) {
+      throw new AppError("Invalid or expired Firebase ID token", 401);
+    }
+
+    user = await prisma.user.findFirst({ where: { phone: identifier.trim() } });
+    if (!user) {
+      throw new AppError("User not found", 404);
+    }
+  } else {
+    throw new AppError("Invalid method", 400);
+  }
+
+  // Update password
+  const passwordHash = await bcrypt.hash(newPassword, 10);
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { passwordHash }
+  });
+
+  res.status(200).json({ success: true, message: "Password updated successfully" });
+};

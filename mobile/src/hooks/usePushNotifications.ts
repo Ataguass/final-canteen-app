@@ -3,6 +3,7 @@ import * as Device from 'expo-device';
 import Constants from 'expo-constants';
 import { Platform } from 'react-native';
 import { useAuthStore } from '../stores/useAuthStore';
+import { userService } from '../services/userService';
 
 // Determine if we're running in Expo Go
 const isExpoGo = Constants.executionEnvironment === 'storeClient';
@@ -66,22 +67,11 @@ export function usePushNotifications() {
   useEffect(() => {
     // Send token to backend if user is logged in
     if (expoPushToken && user?.id && accessToken && !pushTokenRegisteredRef.current) {
-      const apiUrl = Constants.expoConfig?.extra?.apiUrl || 'http://localhost:4000/api';
-      fetch(`${apiUrl}/users/me/push-token`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`,
-          'x-tenant-id': user.tenantId
-        },
-        body: JSON.stringify({ pushToken: expoPushToken })
-      })
-      .then(res => {
-        if (res.ok) {
+      userService.updatePushToken(accessToken, user.tenantId, expoPushToken)
+        .then(() => {
           pushTokenRegisteredRef.current = true;
-        }
-      })
-      .catch(console.error);
+        })
+        .catch((error) => console.error("Failed to update push token:", error));
     }
   }, [expoPushToken, user?.id, accessToken]);
 

@@ -18,6 +18,7 @@ import {
 import { useAuthStore } from '../../stores/useAuthStore';
 import { useOrderSocket } from "../../hooks/useOrderSocket";
 import { Order } from "../../types";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 
 type DrawerItem = {
@@ -127,6 +128,7 @@ export default function AdminLayout() {
   const router = useRouter();
   const pathname = usePathname();
   const { user, logout } = useAuthStore();
+  const insets = useSafeAreaInsets();
 
   const [drawerVisible, setDrawerVisible] = useState(false);
   const [newOrderCount, setNewOrderCount] = useState(0);
@@ -505,6 +507,7 @@ export default function AdminLayout() {
         <Tabs.Screen name="profile/invoice-settings" options={{ href: null }} />
         <Tabs.Screen name="profile/backups" options={{ href: null }} />
         <Tabs.Screen name="profile/banners" options={{ href: null }} />
+        <Tabs.Screen name="profile/schools" options={{ href: null }} />
       </Tabs>
 
       <Modal visible={drawerVisible} transparent animationType="none" onRequestClose={() => closeDrawer()}>
@@ -578,7 +581,7 @@ export default function AdminLayout() {
               ))}
             </ScrollView>
 
-            <View style={{ padding: 16, borderTopWidth: 1, borderColor: colors.border, backgroundColor: colors.background }}>
+            <View style={{ padding: 16, paddingBottom: Math.max(16, insets.bottom + 12), borderTopWidth: 1, borderColor: colors.border, backgroundColor: colors.background }}>
               <View style={{ flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 12, paddingHorizontal: 8 }}>
                 <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: colors.border, alignItems: "center", justifyContent: "center" }}>
                   <Text style={{ color: colors.text, fontWeight: "800", fontSize: 16 }}>{avatarText}</Text>

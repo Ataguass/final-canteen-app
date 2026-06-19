@@ -2,6 +2,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Alert, Image, Linking, Pressable, ScrollView, Text, TextInput, View, RefreshControl } from "react-native";
+import { Video, ResizeMode } from "expo-av";
 import { useAuthStore } from '../../../stores/useAuthStore';
 import { CommunityPost } from "../../../types";
 import { communityService} from "../../../services/communityService";
@@ -205,26 +206,13 @@ export default function Screen() {
               />
             ) : null}
             {post.mediaUrl && post.mediaType === "VIDEO" ? (
-              <Pressable
-                onPress={async () => {
-                  const canOpen = await Linking.canOpenURL(post.mediaUrl as string);
-                  if (canOpen) await Linking.openURL(post.mediaUrl as string);
-                }}
-                style={{
-                  borderRadius: 12,
-                  paddingVertical: 12,
-                  backgroundColor: colors.surfaceAlt,
-                  alignItems: "center",
-                  justifyContent: "center",
-                  flexDirection: "row",
-                  gap: 8,
-                  borderWidth: 1,
-                  borderColor: colors.border
-                }}
-              >
-                <Ionicons name="play-circle" size={20} color={colors.text} />
-                <Text style={{ color: colors.text, fontWeight: "800" }}>Watch Attached Video</Text>
-              </Pressable>
+              <Video
+                source={{ uri: post.mediaUrl }}
+                style={{ width: "100%", height: 200, borderRadius: 12, backgroundColor: colors.surfaceAlt, borderWidth: 1, borderColor: colors.border }}
+                useNativeControls
+                resizeMode={ResizeMode.COVER}
+                isLooping={false}
+              />
             ) : null}
 
             <View style={{ flexDirection: "row", gap: 8, marginTop: 4, paddingTop: 16, borderTopWidth: 1, borderColor: colors.border }}>

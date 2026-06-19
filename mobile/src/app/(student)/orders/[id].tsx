@@ -1,15 +1,21 @@
 import { Ionicons } from "@expo/vector-icons";
-import { Stack, useLocalSearchParams } from "expo-router";
+import { Stack, useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import * as Print from "expo-print";
+import * as Sharing from "expo-sharing";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuthStore } from '../../../stores/useAuthStore';
+import { useCartStore } from '../../../stores/useCartStore';
 import { useOrderSocket } from "../../../hooks/useOrderSocket";
 import { Order } from "../../../types";
-import {  orderService } from "../../../services/orderService";
+import { orderService } from "../../../services/orderService";
+import { useOrder, orderKeys } from "../../../hooks/queries/useOrders";
+import { useQueryClient } from "@tanstack/react-query";
 import { CanteenHeader } from "../../../components/CanteenHeader";
 import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../../utils/responsive';
 import { useTheme } from '../../../hooks/useTheme';
+import { Shimmer } from "../../../components/Shimmer";
 
 const TIMELINE = ["PENDING", "ACCEPTED", "PREPARING", "READY", "COMPLETED"];
 
@@ -32,48 +38,107 @@ export default function Screen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const insets = useSafeAreaInsets();
   const { user, accessToken } = useAuthStore();
-  const [order, setOrder] = useState<Order | null>(null);
-  const [loading, setLoading] = useState(false);
+  const queryClient = useQueryClient();
 
-  const load = useCallback(async () => {
-    if (!user?.tenantId || !accessToken || !id) return;
-    try {
-      setLoading(true);
-      const response = await orderService.getOrder(accessToken, user.tenantId, id);
-      setOrder(response.data);
-    } finally {
-      setLoading(false);
-    }
-  }, [id, user?.tenantId, accessToken]);
-
-  useEffect(() => {
-    load().catch(() => undefined);
-  }, [load]);
+  const { data: order, isLoading } = useOrder(id);
 
   useOrderSocket({
     tenantId: user?.tenantId,
     userId: user?.id,
     onOrderStatusChanged: (incoming) => {
       if (incoming.id === id) {
-        setOrder(incoming);
+        queryClient.setQueryData(orderKeys.detail(id), incoming);
       }
     }
   });
+
+  const router = useRouter();
+  const { addItem, clearCart } = useCartStore();
+
+  const handleReorder = () => {
+    if (!order) return;
+    Alert.alert("Reorder", "This will clear your current cart and add these items. Continue?", [
+      { text: "Cancel", style: "cancel" },
+      { 
+        text: "Yes", 
+        onPress: () => {
+          clearCart();
+          order.items.forEach(item => {
+            addItem({
+              menuItemId: item.menuItemId,
+              name: item.name,
+              price: item.price,
+              note: item.note ?? undefined
+            }, item.quantity);
+          });
+          router.push("/cart");
+        } 
+      }
+    ]);
+  };
+
+  const handleDownloadReceipt = async () => {
+    if (!order) return;
+    try {
+      const html = `
+        <html>
+          <head>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no" />
+          </head>
+          <body style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 20px;">
+            <h1 style="text-align: center; color: #333;">College Canteen Receipt</h1>
+            <p style="text-align: center; color: #666; margin-bottom: 30px;">Order ID: ${order.orderNumber}</p>
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+              <tr style="border-bottom: 2px solid #eee;">
+                <th style="text-align: left; padding: 10px 0;">Item</th>
+                <th style="text-align: right; padding: 10px 0;">Qty</th>
+                <th style="text-align: right; padding: 10px 0;">Price</th>
+              </tr>
+              ${order.items.map(i => `
+                <tr style="border-bottom: 1px solid #eee;">
+                  <td style="padding: 10px 0;">${i.name}</td>
+                  <td style="text-align: right; padding: 10px 0;">${i.quantity}</td>
+                  <td style="text-align: right; padding: 10px 0;">${formatCurrency(i.price * i.quantity)}</td>
+                </tr>
+              `).join('')}
+            </table>
+            <div style="text-align: right; margin-top: 20px; font-size: 18px;">
+              <strong>Total Paid: ${formatCurrency(order.totalAmount)}</strong>
+            </div>
+            <p style="text-align: center; color: #666; margin-top: 40px; font-size: 14px;">Thank you for your order!</p>
+          </body>
+        </html>
+      `;
+      const { uri } = await Print.printToFileAsync({ html });
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(uri, { UTI: '.pdf', mimeType: 'application/pdf' });
+      } else {
+        Alert.alert("Success", "Receipt generated, but sharing is not available on this device.");
+      }
+    } catch (e) {
+      Alert.alert("Error", "Could not generate receipt.");
+    }
+  };
 
   const statusIndex = useMemo(() => {
     if (!order) return -1;
     return TIMELINE.indexOf(order.status);
   }, [order]);
 
-  if (loading && !order) {
+  if (isLoading || !order) {
     return (
       <View style={[styles.screen, { paddingTop: insets.top }]}>
         <Stack.Screen options={{ headerShown: false }} />
         <CanteenHeader showBackButton title="Order Details" subtitle="Loading..." />
-        <View style={styles.loadingWrap}>
-          <Ionicons name="hourglass-outline" size={24} color={colors.textMuted} />
-          <Text style={styles.loadingText}>Loading order details...</Text>
-        </View>
+        <ScrollView contentContainerStyle={{ padding: 16, gap: 16 }}>
+          <Shimmer width="50%" height={24} borderRadius={4} />
+          <Shimmer width="30%" height={16} borderRadius={4} />
+          
+          <View style={{ marginTop: 24, gap: 12 }}>
+            <Shimmer width="100%" height={80} borderRadius={12} />
+            <Shimmer width="100%" height={80} borderRadius={12} />
+          </View>
+        </ScrollView>
       </View>
     );
   }
@@ -244,6 +309,18 @@ export default function Screen() {
             <Text style={styles.summaryTotalLabel}>Total Paid</Text>
             <Text style={styles.summaryTotalValue}>{formatCurrency(order.totalAmount)}</Text>
           </View>
+        </View>
+
+        <View style={styles.actionButtons}>
+          <Pressable onPress={handleReorder} style={[styles.actionBtn, { backgroundColor: colors.primary }]}>
+            <Ionicons name="refresh-outline" size={20} color="white" />
+            <Text style={[styles.actionBtnText, { color: "white" }]}>Reorder Items</Text>
+          </Pressable>
+          
+          <Pressable onPress={handleDownloadReceipt} style={[styles.actionBtn, { backgroundColor: colors.surfaceAlt }]}>
+            <Ionicons name="document-text-outline" size={20} color={colors.text} />
+            <Text style={[styles.actionBtnText, { color: colors.text }]}>Download Receipt</Text>
+          </Pressable>
         </View>
         
       </ScrollView>
@@ -583,5 +660,21 @@ const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => S
     height: 1,
     backgroundColor: colors.border,
     marginVertical: moderateScale(4)
+  },
+  actionButtons: {
+    gap: moderateScale(12),
+    marginTop: verticalScale(8)
+  },
+  actionBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: moderateScale(8),
+    paddingVertical: moderateScale(16),
+    borderRadius: moderateScale(12)
+  },
+  actionBtnText: {
+    fontWeight: "800",
+    fontSize: fontScale(16)
   }
 });

@@ -3,11 +3,16 @@ import { Alert, Image, Pressable, ScrollView, StyleSheet, Switch, Text, TextInpu
 import { Ionicons } from "@expo/vector-icons";
 import * as ImageManipulator from "expo-image-manipulator";
 import * as ImagePicker from "expo-image-picker";
+import { Controller, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuthStore } from '../../../stores/useAuthStore';
 import { InvoiceSettings } from "../../../types";
 import { tenantService} from "../../../services/tenantService";
 import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../../utils/responsive';
 import { useTheme } from '../../../hooks/useTheme';
+import { invoiceSettingsSchema, InvoiceSettingsFormData } from "../../../schemas/admin";
+import { InputField } from "../../../components/ui/InputField";
+import Animated, { FadeInUp } from "react-native-reanimated";
 
 type ToggleField =
   | "invoiceShowLogo"
@@ -75,18 +80,44 @@ export default function Screen() {
   const styles = createStyles(theme);
   const { user, accessToken } = useAuthStore();
   const [settings, setSettings] = useState<InvoiceSettings | null>(null);
-  const [logoUrl, setLogoUrl] = useState("");
-  const [footerNote, setFooterNote] = useState("");
   const [saving, setSaving] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
+
+  const { control, handleSubmit, setValue, watch, reset } = useForm<InvoiceSettingsFormData>({
+    resolver: zodResolver(invoiceSettingsSchema),
+    defaultValues: {
+      invoiceLogoUrl: "",
+      invoiceFooterNote: "",
+      invoiceShowLogo: true,
+      invoiceShowSchoolName: true,
+      invoiceShowOrderNumber: true,
+      invoiceShowDate: true,
+      invoiceShowCashier: true,
+      invoiceShowPaymentDetails: true,
+      invoiceShowTaxBreakup: true,
+      invoiceShowNotes: true,
+    }
+  });
+
+  const logoUrl = watch("invoiceLogoUrl");
 
   const loadSettings = useCallback(async () => {
     if (!user?.tenantId || !accessToken) return;
     const response = await tenantService.getInvoiceSettings(accessToken, user.tenantId);
     setSettings(response.data);
-    setLogoUrl(response.data.invoiceLogoUrl ?? response.data.logo ?? "");
-    setFooterNote(response.data.invoiceFooterNote ?? "");
-  }, [accessToken, user?.tenantId]);
+    reset({
+      invoiceLogoUrl: response.data.invoiceLogoUrl ?? response.data.logo ?? "",
+      invoiceFooterNote: response.data.invoiceFooterNote ?? "",
+      invoiceShowLogo: response.data.invoiceShowLogo ?? true,
+      invoiceShowSchoolName: response.data.invoiceShowSchoolName ?? true,
+      invoiceShowOrderNumber: response.data.invoiceShowOrderNumber ?? true,
+      invoiceShowDate: response.data.invoiceShowDate ?? true,
+      invoiceShowCashier: response.data.invoiceShowCashier ?? true,
+      invoiceShowPaymentDetails: response.data.invoiceShowPaymentDetails ?? true,
+      invoiceShowTaxBreakup: response.data.invoiceShowTaxBreakup ?? true,
+      invoiceShowNotes: response.data.invoiceShowNotes ?? true,
+    });
+  }, [accessToken, user?.tenantId, reset]);
 
   useEffect(() => {
     loadSettings().catch((error: unknown) => {
@@ -94,26 +125,28 @@ export default function Screen() {
     });
   }, [loadSettings]);
 
-  const toggleField = (field: ToggleField) => {
-    if (!settings) return;
-    setSettings({ ...settings, [field]: !settings[field] });
+  const toggleField = (field: keyof InvoiceSettingsFormData) => {
+    const current = watch(field);
+    if (typeof current === "boolean") {
+      setValue(field, !current);
+    }
   };
 
-  const saveSettings = async () => {
+  const saveSettings = async (data: InvoiceSettingsFormData) => {
     if (!settings || !user?.tenantId || !accessToken) return;
     try {
       setSaving(true);
       const response = await tenantService.updateInvoiceSettings(accessToken, user.tenantId, {
-        invoiceLogoUrl: logoUrl.trim() || null,
-        invoiceFooterNote: footerNote.trim() || null,
-        invoiceShowLogo: settings.invoiceShowLogo,
-        invoiceShowSchoolName: settings.invoiceShowSchoolName,
-        invoiceShowOrderNumber: settings.invoiceShowOrderNumber,
-        invoiceShowDate: settings.invoiceShowDate,
-        invoiceShowCashier: settings.invoiceShowCashier,
-        invoiceShowPaymentDetails: settings.invoiceShowPaymentDetails,
-        invoiceShowTaxBreakup: settings.invoiceShowTaxBreakup,
-        invoiceShowNotes: settings.invoiceShowNotes
+        invoiceLogoUrl: data.invoiceLogoUrl?.trim() || null,
+        invoiceFooterNote: data.invoiceFooterNote?.trim() || null,
+        invoiceShowLogo: data.invoiceShowLogo,
+        invoiceShowSchoolName: data.invoiceShowSchoolName,
+        invoiceShowOrderNumber: data.invoiceShowOrderNumber,
+        invoiceShowDate: data.invoiceShowDate,
+        invoiceShowCashier: data.invoiceShowCashier,
+        invoiceShowPaymentDetails: data.invoiceShowPaymentDetails,
+        invoiceShowTaxBreakup: data.invoiceShowTaxBreakup,
+        invoiceShowNotes: data.invoiceShowNotes
       });
       setSettings(response.data);
       Alert.alert("Saved", "Invoice settings updated.");
@@ -199,7 +232,7 @@ export default function Screen() {
       setUploadingLogo(true);
       const response = await tenantService.uploadInvoiceLogo(accessToken, user.tenantId, uploadDataUrl);
       setSettings(response.data);
-      setLogoUrl(response.data.invoiceLogoUrl ?? "");
+      setValue("invoiceLogoUrl", response.data.invoiceLogoUrl ?? "");
       Alert.alert("Uploaded", mode === "square" ? "Square logo uploaded successfully." : "Logo uploaded successfully.");
     } catch (error) {
       Alert.alert("Upload failed", error instanceof Error ? error.message : "Could not upload logo");
@@ -214,7 +247,7 @@ export default function Screen() {
       setUploadingLogo(true);
       const response = await tenantService.removeInvoiceLogo(accessToken, user.tenantId);
       setSettings(response.data);
-      setLogoUrl("");
+      setValue("invoiceLogoUrl", "");
       Alert.alert("Removed", "Logo removed successfully.");
     } catch (error) {
       Alert.alert("Remove failed", error instanceof Error ? error.message : "Could not remove logo");
@@ -241,10 +274,12 @@ export default function Screen() {
     );
   }
 
+  const formValues = watch();
+
   return (
     <View style={styles.screen}>
       <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
-        <View style={styles.sectionCard}>
+        <Animated.View entering={FadeInUp.delay(100).springify()} style={styles.sectionCard}>
           <Text style={styles.sectionTitle}>Branding</Text>
 
           <View style={{ alignItems: "center", paddingVertical: verticalScale(8) }}>
@@ -291,36 +326,49 @@ export default function Screen() {
 
           <View style={{ marginTop: verticalScale(4) }}>
             <Text style={{ color: colors.textSecondary, fontSize: fontScale(11), fontWeight: "700", textTransform: "uppercase", marginBottom: verticalScale(6), marginLeft: moderateScale(2) }}>Or enter logo URL</Text>
-            <TextInput
-              value={logoUrl}
-              onChangeText={setLogoUrl}
-              placeholder="https://your-domain.com/logo.png"
-              autoCapitalize="none"
-              autoCorrect={false}
-              style={{ backgroundColor: colors.background, borderWidth: 1, borderColor: colors.border, borderRadius: moderateScale(12), padding: moderateScale(10), fontSize: fontScale(13), color: colors.text, fontWeight: "500" }}
+            <Controller
+              control={control}
+              name="invoiceLogoUrl"
+              render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
+                <InputField
+                  leftIcon="link-outline"
+                  placeholder="https://your-domain.com/logo.png"
+                  value={value || ""}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  error={error?.message}
+                />
+              )}
             />
           </View>
-        </View>
+        </Animated.View>
 
-        <View style={styles.sectionCard}>
+        <Animated.View entering={FadeInUp.delay(200).springify()} style={styles.sectionCard}>
           <Text style={styles.sectionTitle}>Footer Note</Text>
           <Text style={styles.sectionHint}>Optional message printed at the bottom of receipt.</Text>
-          <TextInput
-            value={footerNote}
-            onChangeText={setFooterNote}
-            placeholder="Thank you for visiting our canteen"
-            multiline
-            style={[styles.input, styles.multilineInput, { color: colors.text }]}
+          <Controller
+            control={control}
+            name="invoiceFooterNote"
+            render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
+              <InputField
+                leftIcon="document-text-outline"
+                placeholder="Thank you for visiting our canteen"
+                value={value || ""}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                error={error?.message}
+              />
+            )}
           />
-        </View>
+        </Animated.View>
 
-        <View style={styles.sectionCard}>
+        <Animated.View entering={FadeInUp.delay(300).springify()} style={styles.sectionCard}>
           <Text style={styles.sectionTitle}>Receipt Fields</Text>
           <Text style={styles.sectionHint}>Enable or hide fields shown on invoice print.</Text>
 
           <View style={styles.toggleListContainer}>
             {toggleRows.map((row, index) => {
-              const enabled = settings[row.key];
+              const enabled = formValues[row.key as keyof InvoiceSettingsFormData] as boolean;
               return (
                 <View key={row.key} style={[styles.toggleRow, index === toggleRows.length - 1 && styles.toggleRowLast]}>
                   <View style={styles.toggleIconWrap}>
@@ -332,7 +380,7 @@ export default function Screen() {
                   </View>
                   <Switch
                     value={enabled}
-                    onValueChange={() => toggleField(row.key)}
+                    onValueChange={() => toggleField(row.key as keyof InvoiceSettingsFormData)}
                     thumbColor="white"
                     trackColor={{ false: "#CBD5E1", true: "#10B981" }}
                   />
@@ -340,9 +388,9 @@ export default function Screen() {
               );
             })}
           </View>
-        </View>
+        </Animated.View>
 
-        <Pressable onPress={saveSettings} disabled={saving} style={[styles.saveButton, saving && styles.buttonDisabled]}>
+        <Pressable onPress={handleSubmit(saveSettings)} disabled={saving} style={[styles.saveButton, saving && styles.buttonDisabled]}>
           <Ionicons name="save-outline" size={17} color="white" />
           <Text style={styles.saveButtonText}>{saving ? "Saving..." : "Save Invoice Settings"}</Text>
         </Pressable>

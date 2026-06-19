@@ -1,5 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { Shimmer } from "../../components/Shimmer";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View, RefreshControl } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -254,6 +255,46 @@ export default function Screen() {
     }
   ];
 
+  if (loading && !refreshing) {
+    return (
+      <View key={isDark ? "dark" : "light"} style={styles.screen}>
+        <ScrollView contentContainerStyle={[styles.content, { paddingTop: 16 }]} showsVerticalScrollIndicator={false}>
+          <View style={{ gap: 24 }}>
+            <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 12 }}>
+              <Shimmer width={100} height={24} borderRadius={4} />
+              <Shimmer width={120} height={16} borderRadius={4} />
+            </View>
+            <View style={styles.kpiGrid}>
+              {[1, 2, 3, 4].map((i) => (
+                <View key={i} style={[styles.kpiCard, { backgroundColor: colors.card }]}>
+                  <Shimmer width={38} height={38} borderRadius={12} style={{ marginBottom: 10 }} />
+                  <Shimmer width={80} height={14} borderRadius={4} style={{ marginBottom: 6 }} />
+                  <Shimmer width="100%" height={24} borderRadius={4} style={{ marginBottom: 6 }} />
+                  <Shimmer width={60} height={12} borderRadius={4} />
+                </View>
+              ))}
+            </View>
+            <View style={styles.sectionWrap}>
+              <Shimmer width={120} height={20} borderRadius={4} />
+              <View style={styles.quickGrid}>
+                {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
+                  <View key={i} style={[styles.quickCard, { backgroundColor: colors.card, alignItems: "center" }]}>
+                    <Shimmer width={44} height={44} borderRadius={22} style={{ marginBottom: 8 }} />
+                    <Shimmer width={50} height={12} borderRadius={4} />
+                  </View>
+                ))}
+              </View>
+            </View>
+            <View style={styles.sectionWrap}>
+              <Shimmer width={140} height={20} borderRadius={4} />
+              <Shimmer width="100%" height={260} borderRadius={16} />
+            </View>
+          </View>
+        </ScrollView>
+      </View>
+    );
+  }
+
   return (
     <View key={isDark ? "dark" : "light"} style={styles.screen}>
       <ScrollView 
@@ -274,8 +315,14 @@ export default function Screen() {
         {/* Top KPIs */}
         <View style={styles.kpiGrid}>
           {topKpis.map((kpi) => (
-            <View key={kpi.title} style={styles.kpiCard}>
-              <View style={[styles.kpiIconWrap, { backgroundColor: kpi.tint }]}>
+            <View
+              key={kpi.title}
+              style={[
+                styles.kpiCard, 
+                { backgroundColor: isDark ? colors.card : kpi.tint }
+              ]}
+            >
+              <View style={[styles.kpiIconWrap, { backgroundColor: isDark ? `${kpi.color}20` : "white" }]}>
                 <Ionicons name={kpi.icon} size={20} color={kpi.color} />
               </View>
               <Text style={styles.kpiTitle}>{kpi.title}</Text>
@@ -544,7 +591,6 @@ const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => S
     borderRadius: moderateScale(16),
     borderWidth: 1,
     borderColor: colors.border,
-    backgroundColor: colors.card,
     padding: moderateScale(14),
     shadowColor: "#0F172A",
     shadowOpacity: 0.03,

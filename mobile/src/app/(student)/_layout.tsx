@@ -36,6 +36,7 @@ const drawerSections: DrawerSection[] = [
       { label: "Dashboard", path: "/(student)/dashboard", icon: "home-outline" },
       { label: "Search Menu", path: "/(student)/search", icon: "search-outline" },
       { label: "Orders", path: "/(student)/orders", icon: "receipt-outline" },
+      { label: "Favorites", path: "/(student)/favorites", icon: "heart-outline" },
       { label: "Cart", path: "/cart", icon: "cart-outline" }
     ]
   },
@@ -79,6 +80,7 @@ const getHeaderTitle = (pathname: string, role?: string): string => {
   if (normalizedPath.startsWith("/menu")) return "Menu";
   if (normalizedPath.startsWith("/search")) return "Search";
   if (normalizedPath.startsWith("/orders")) return "Orders";
+  if (normalizedPath.startsWith("/favorites")) return "Favorites";
   if (normalizedPath.startsWith("/community")) return "Community";
   if (normalizedPath.startsWith("/profile")) return "Profile";
   if (normalizedPath.startsWith("/cart/checkout")) return "Checkout";
@@ -218,6 +220,23 @@ export default function StudentLayout() {
               </Pressable>
 
               <Pressable
+                onPress={() => router.push("/(student)/favorites")}
+                android_ripple={{ color: colors.border, borderless: true }}
+                style={{
+                  width: 40,
+                  height: 40,
+                  borderRadius: 10,
+                  borderWidth: 1,
+                  borderColor: colors.border,
+                  backgroundColor: colors.card,
+                  alignItems: "center",
+                  justifyContent: "center"
+                }}
+              >
+                <Ionicons name="heart-outline" size={20} color={colors.text} />
+              </Pressable>
+
+              <Pressable
                 onPress={() => router.push("/cart")}
                 android_ripple={{ color: colors.border, borderless: true }}
                 style={{
@@ -323,6 +342,7 @@ export default function StudentLayout() {
         <Tabs.Screen name="orders/[id]" options={{ href: null }} />
         <Tabs.Screen name="settings" options={{ href: null, headerShown: false }} />
         <Tabs.Screen name="support" options={{ href: null, headerShown: false }} />
+        <Tabs.Screen name="favorites" options={{ href: null, headerShown: false }} />
       </Tabs>
 
       <Modal

@@ -4,6 +4,9 @@ const { getDefaultConfig } = require("expo/metro-config");
 const projectRoot = __dirname;
 const monorepoRoot = path.resolve(projectRoot, "..");
 
+console.log("METRO CONFIG LOADED! projectRoot:", projectRoot);
+console.log("METRO CONFIG LOADED! monorepoRoot:", monorepoRoot);
+
 const config = getDefaultConfig(projectRoot);
 const defaultResolveRequest = config.resolver.resolveRequest;
 

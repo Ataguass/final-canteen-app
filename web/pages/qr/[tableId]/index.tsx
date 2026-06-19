@@ -148,6 +148,31 @@ export default function QrTablePage() {
     }
   };
 
+  const placeGuestOrder = async () => {
+    setLoading(true); setError("");
+    try {
+      const res = await fetch(`${API}/orders/public`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-tenant-id": tenantIdHeader
+        },
+        body: JSON.stringify({
+          items: cart.map(c => ({ menuItemId: c.item.id, quantity: c.qty, note: c.note || undefined }))
+        })
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.message || "Order failed");
+      setOrderResult({ orderNumber: json.data.orderNumber, total: json.data.totalAmount });
+      setCart([]);
+      setPhase("confirm");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Order failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   /* ── resolve phase ── */
   if (phase === "resolve" && !loading) {
     return (
@@ -280,12 +305,17 @@ export default function QrTablePage() {
                   <div className="cartSummaryRow total"><span>Total</span><strong>{money(cartTotal)}</strong></div>
                 </div>
                 {error && <div className="errorBanner">{error}</div>}
-                <button className="orderBtn" onClick={() => {
-                  if (token) { placeOrder(token); }
-                  else { setPhase("login"); }
-                }}>
-                  {token ? `Place Order — ${money(cartTotal)}` : `Login & Order — ${money(cartTotal)}`}
-                </button>
+                <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginTop: "16px" }}>
+                  <button className="orderBtn" onClick={placeGuestOrder} disabled={loading} style={{ background: "linear-gradient(135deg, #10b981, #059669)", margin: 0 }}>
+                    {loading ? "Processing..." : `Pay Online as Guest — ${money(cartTotal)}`}
+                  </button>
+                  <button className="orderBtn" onClick={() => {
+                    if (token) { placeOrder(token); }
+                    else { setPhase("login"); }
+                  }} disabled={loading} style={{ background: "var(--surface2)", color: "var(--text)", margin: 0 }}>
+                    {token ? `Pay with Cash / Wallet` : `Login to Pay (Student)`}
+                  </button>
+                </div>
               </>
             )}
           </div>

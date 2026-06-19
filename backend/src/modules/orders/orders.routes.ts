@@ -3,11 +3,12 @@ import { auth } from "../../middleware/auth.js";
 import { asyncHandler } from "../../middleware/asyncHandler.js";
 import { roleGuard } from "../../middleware/roleGuard.js";
 import { tenantResolver } from "../../middleware/tenantResolver.js";
-import { getOrderById, listOrders, placeOrder, syncOrders, updateOrderStatus } from "./orders.controller.js";
+import { getOrderById, listOrders, placeOrder, syncOrders, updateOrderStatus, placeOrderPublic } from "./orders.controller.js";
 
 export const ordersRouter = Router();
 
 ordersRouter.post("/", auth, tenantResolver, asyncHandler(placeOrder));
+ordersRouter.post("/public", tenantResolver, asyncHandler(placeOrderPublic));
 ordersRouter.post("/sync", auth, tenantResolver, asyncHandler(syncOrders));
 ordersRouter.get("/", auth, tenantResolver, asyncHandler(listOrders));
 ordersRouter.get("/:id", auth, tenantResolver, asyncHandler(getOrderById));

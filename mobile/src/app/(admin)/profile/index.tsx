@@ -245,6 +245,31 @@ export default function Screen() {
         </View>
       </View>
 
+      {/* Super Admin Area */}
+      {user?.role === "SUPER_ADMIN" && (
+        <View style={styles.sectionWrap}>
+          <Text style={styles.sectionTitle}>Super Admin</Text>
+          <View style={styles.listWrap}>
+            <Pressable
+              style={({ pressed }) => [
+                styles.listItem,
+                pressed && { backgroundColor: isDark ? colors.surfaceAlt : "#F1F5F9" }
+              ]}
+              onPress={() => router.push("/(admin)/profile/schools" as never)}
+            >
+              <View style={[styles.iconWrapSmall, { backgroundColor: isDark ? 'rgba(59, 130, 246, 0.15)' : "#EFF6FF" }]}>
+                <Ionicons name="business-outline" size={18} color={isDark ? '#60A5FA' : "#2563EB"} />
+              </View>
+              <View style={styles.listItemTextWrap}>
+                <Text style={styles.listItemTitle}>Manage Schools</Text>
+                <Text style={styles.listItemSubtitle}>Add and configure new tenants</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={18} color="#94A3B8" />
+            </Pressable>
+          </View>
+        </View>
+      )}
+
       {/* Management List */}
       <View style={styles.sectionWrap}>
         <Text style={styles.sectionTitle}>Management</Text>

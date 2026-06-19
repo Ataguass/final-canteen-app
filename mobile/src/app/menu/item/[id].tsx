@@ -14,9 +14,11 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuthStore } from '../../../stores/useAuthStore';
 import { useCartStore } from '../../../stores/useCartStore';
-import { menuService } from "../../../services/menuService";
+import { useFavoritesStore } from '../../../stores/useFavoritesStore';
+import { useMenuItem } from "../../../hooks/queries/useMenu";
 import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../../utils/responsive';
 import { useTheme } from '../../../hooks/useTheme';
+import { Shimmer } from "../../../components/Shimmer";
 
 const formatCurrency = (value: number): string => `₹ ${value.toFixed(2)}`;
 
@@ -29,25 +31,12 @@ export default function Screen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { user, accessToken } = useAuthStore();
   const { addItem } = useCartStore();
-  const [item, setItem] = useState<{
-    id: string;
-    name: string;
-    price: number;
-    description?: string | null;
-    image?: string | null;
-    stockQty: number;
-  } | null>(null);
+  const { addFavorite, removeFavorite, isFavorite } = useFavoritesStore();
+  
+  const { data: item, isLoading } = useMenuItem(id);
+
   const [quantity, setQuantity] = useState(1);
   const [note, setNote] = useState("");
-
-  useEffect(() => {
-    const load = async () => {
-      if (!user?.tenantId || !accessToken || !id) return;
-      const response = await menuService.getItem(accessToken, user.tenantId, id);
-      setItem(response.data);
-    };
-    load().catch(() => undefined);
-  }, [id, user?.tenantId, accessToken]);
 
   const isOutOfStock = useMemo(() => (item ? item.stockQty <= 0 : true), [item]);
 
@@ -61,18 +50,16 @@ export default function Screen() {
       Alert.alert("Not enough stock", `Only ${item.stockQty} item(s) available.`);
       return;
     }
-    addItem({ menuItemId: item.id, name: item.name, price: item.price, note }, quantity);
-    Alert.alert("Added to cart", `${item.name} added to cart.`);
-    router.push("/cart");
-  };
-
-  if (!item) {
-    return (
-      <View style={styles.loadingWrap}>
-        <Text style={styles.loadingText}>Loading item...</Text>
-      </View>
+    addItem({ menuItemId: item.id, name: item.name, price: item.price, note: note.trim() || undefined }, quantity);
+    Alert.alert(
+      "Added to Cart",
+      `${quantity}x ${item.name} has been added.`,
+      [
+        { text: "Continue Shopping", style: "cancel" },
+        { text: "View Cart", onPress: () => router.push("/cart") }
+      ]
     );
-  }
+  };
 
   return (
     <View style={[styles.screen, { paddingTop: insets.top > 0 ? insets.top + 10 : 20 }]}>
@@ -89,7 +76,11 @@ export default function Screen() {
       showsVerticalScrollIndicator={false}
     >
       <View style={styles.heroCard}>
-        {item.image ? (
+        {isLoading ? (
+          <View style={[styles.itemImage, { backgroundColor: isDark ? "#1E293B" : "#F1F5F9", justifyContent: "center", alignItems: "center" }]}>
+            <Shimmer width="100%" height="100%" borderRadius={0} />
+          </View>
+        ) : item?.image ? (
           <Image source={{ uri: item.image }} style={styles.itemImage} resizeMode="cover" />
         ) : (
           <View style={styles.itemImageFallback}>
@@ -97,26 +88,59 @@ export default function Screen() {
           </View>
         )}
         <View style={styles.heroContent}>
-          <Text style={styles.itemName}>{item.name}</Text>
+          <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", gap: 8 }}>
+            {isLoading ? (
+              <Shimmer width={200} height={32} borderRadius={8} />
+            ) : (
+              <Text style={[styles.itemName, { flex: 1 }]}>{item?.name}</Text>
+            )}
+            {!isLoading && item && (
+              <Pressable
+                onPress={() => isFavorite(item.id) ? removeFavorite(item.id) : addFavorite(item.id)}
+                style={styles.heartBtn}
+              >
+                <Ionicons 
+                  name={isFavorite(item.id) ? "heart" : "heart-outline"} 
+                  size={24} 
+                  color={isFavorite(item.id) ? "#EF4444" : colors.textSecondary} 
+                />
+              </Pressable>
+            )}
+          </View>
+          
           <View style={styles.badgeRow}>
-            <View style={styles.priceBadge}>
-              <Text style={styles.priceBadgeText}>{formatCurrency(item.price)}</Text>
-            </View>
-            <View style={[styles.stockBadge, isOutOfStock ? styles.stockBadgeOut : styles.stockBadgeIn]}>
-              <Ionicons
-                name={isOutOfStock ? "alert-circle-outline" : "checkmark-circle-outline"}
-                size={14}
-                color={isOutOfStock ? "#B91C1C" : "#047857"}
-              />
-              <Text style={[styles.stockBadgeText, isOutOfStock ? styles.stockOut : styles.stockIn]}>
-                {isOutOfStock ? "Out of stock" : `${item.stockQty} available`}
-              </Text>
-            </View>
+            {isLoading ? (
+              <Shimmer width={80} height={28} borderRadius={14} />
+            ) : (
+              <View style={styles.priceBadge}>
+                <Text style={styles.priceBadgeText}>{formatCurrency(item?.price || 0)}</Text>
+              </View>
+            )}
+            {isLoading ? (
+              <Shimmer width={100} height={28} borderRadius={14} />
+            ) : item && item.stockQty > 0 ? (
+              <View style={styles.stockBadge}>
+                <Ionicons name="checkmark-circle" size={14} color="#059669" />
+                <Text style={styles.stockBadgeText}>In Stock ({item.stockQty})</Text>
+              </View>
+            ) : !isLoading && item ? (
+              <View style={[styles.stockBadge, { backgroundColor: "#FEF2F2", borderColor: "#FECACA" }]}>
+                <Ionicons name="close-circle" size={14} color="#DC2626" />
+                <Text style={[styles.stockBadgeText, { color: "#DC2626" }]}>Out of Stock</Text>
+              </View>
+            ) : null}
           </View>
         </View>
       </View>
 
-      {item.description ? (
+      {isLoading ? (
+        <View style={styles.infoCard}>
+          <Shimmer width="40%" height={20} style={{ marginBottom: 12 }} />
+          <Shimmer width="100%" height={16} style={{ marginBottom: 8 }} />
+          <Shimmer width="90%" height={16} style={{ marginBottom: 8 }} />
+          <Shimmer width="60%" height={16} />
+        </View>
+      ) : item?.description ? (
         <View style={styles.infoCard}>
           <Text style={styles.cardTitle}>About this item</Text>
           <Text style={styles.itemDescription}>
@@ -148,7 +172,7 @@ export default function Screen() {
             <Pressable
               onPress={() =>
                 setQuantity((q) => {
-                  if (item.stockQty <= 0) return 1;
+                  if (!item || item.stockQty <= 0) return 1;
                   return Math.min(q + 1, item.stockQty);
                 })
               }
@@ -174,7 +198,7 @@ export default function Screen() {
 
       <View style={styles.totalCard}>
         <Text style={styles.totalLabel}>Line Total</Text>
-        <Text style={styles.totalValue}>{formatCurrency(item.price * quantity)}</Text>
+        <Text style={styles.totalValue}>{formatCurrency((item?.price || 0) * quantity)}</Text>
       </View>
 
       <Pressable
@@ -254,6 +278,11 @@ const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => S
     color: colors.text,
     fontWeight: "800",
     fontSize: fontScale(23)
+  },
+  heartBtn: {
+    padding: moderateScale(4),
+    backgroundColor: colors.surfaceAlt,
+    borderRadius: moderateScale(20)
   },
   badgeRow: {
     flexDirection: "row",

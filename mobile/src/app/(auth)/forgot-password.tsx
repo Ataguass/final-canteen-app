@@ -3,7 +3,10 @@ import { useState } from "react";
 import { Alert, Pressable, Text, TextInput, View, StyleSheet, KeyboardAvoidingView, Platform, SafeAreaView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
-import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../utils/responsive';
+import auth from "@react-native-firebase/auth";
+import { useAuthStore } from "../../stores/useAuthStore";
+import { authService } from "../../services/authService";
+import { moderateScale, fontScale, verticalScale } from '../../utils/responsive';
 import { useTheme } from '../../hooks/useTheme';
 
 const BRAND_COLOR = "#080d2b";
@@ -13,25 +16,47 @@ export default function ForgotPasswordScreen() {
   const { colors, isDark } = theme;
   const styles = createStyles(theme);
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const { setConfirmationResult } = useAuthStore();
+  
+  const [identifier, setIdentifier] = useState("");
   const [loading, setLoading] = useState(false);
 
   const onResetPassword = async () => {
-    if (!email) {
-      Alert.alert("Missing Field", "Please enter your email address.");
+    if (!identifier) {
+      Alert.alert("Missing Field", "Please enter your email or phone number.");
       return;
     }
 
+    const trimmed = identifier.trim();
+    const isEmail = trimmed.includes("@");
+
     try {
       setLoading(true);
-      // Firebase Email Password Reset will go here
-      // await auth().sendPasswordResetEmail(email.trim());
       
-      Alert.alert("Link Sent", "If an account exists with this email, a password reset link has been sent.", [
-        { text: "OK", onPress: () => router.back() }
-      ]);
+      if (isEmail) {
+        // Email reset flow
+        await authService.forgotPassword({ identifier: trimmed, method: "email" });
+        router.push({
+          pathname: "/(auth)/forgot-password-otp",
+          params: { method: "email", identifier: trimmed }
+        });
+      } else {
+        // Phone reset flow
+        let formattedPhone = trimmed.replace(/\s+/g, "");
+        if (!formattedPhone.startsWith("+")) {
+          formattedPhone = `+91${formattedPhone}`; 
+        }
+
+        const confirmation = await auth().signInWithPhoneNumber(formattedPhone);
+        setConfirmationResult(confirmation);
+        
+        router.push({
+          pathname: "/(auth)/forgot-password-otp",
+          params: { method: "phone", identifier: formattedPhone }
+        });
+      }
     } catch (error) {
-      Alert.alert("Reset failed", error instanceof Error ? error.message : "Please try again");
+      Alert.alert("Request failed", error instanceof Error ? error.message : "Please try again");
     } finally {
       setLoading(false);
     }
@@ -49,17 +74,17 @@ export default function ForgotPasswordScreen() {
             <Ionicons name="lock-open" size={32} color="#ffffff" />
           </View>
           <Text style={styles.title}>Reset Password</Text>
-          <Text style={styles.subtitle}>Enter your email address to receive a password reset link.</Text>
+          <Text style={styles.subtitle}>Enter your phone number or email to receive a reset code.</Text>
         </Animated.View>
 
         <Animated.View entering={FadeInUp.delay(300).springify()} style={styles.form}>
           <View style={styles.inputContainer}>
-            <Ionicons name="mail-outline" size={20} color="#8e8e93" style={styles.inputIcon} />
+            <Ionicons name="person-outline" size={20} color="#8e8e93" style={styles.inputIcon} />
             <TextInput
-              placeholder="Email Address"
+              placeholder="Phone or Email"
               placeholderTextColor="#8e8e93"
-              value={email}
-              onChangeText={setEmail}
+              value={identifier}
+              onChangeText={setIdentifier}
               keyboardType="email-address"
               autoCapitalize="none"
               style={styles.input}
@@ -76,7 +101,7 @@ export default function ForgotPasswordScreen() {
             disabled={loading}
           >
             <Text style={styles.primaryButtonText}>
-              {loading ? "Sending link..." : "Send Reset Link"}
+              {loading ? "Sending..." : "Send Reset Code"}
             </Text>
           </Pressable>
         </Animated.View>

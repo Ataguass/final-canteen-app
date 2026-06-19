@@ -62,11 +62,8 @@ export default function Screen() {
   const { showToast } = useToast();
   const cartItemsCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
   const bannerScrollRef = useRef<ScrollView | null>(null);
-  const specialScrollRef = useRef<ScrollView | null>(null);
   const bannerIndexRef = useRef(0);
-  const specialIndexRef = useRef(0);
   const bannerInteractingRef = useRef(false);
-  const specialInteractingRef = useRef(false);
 
   const { data: categories = [], isLoading: isCategoriesLoading } = useCategories();
   const { data: items = [], isLoading: isItemsLoading } = useMenuItems();
@@ -96,14 +93,6 @@ export default function Screen() {
   const bannerLoopData = useMemo(
     () => (banners.length > 1 ? [...banners, ...banners, ...banners] : banners),
     [banners]
-  );
-
-  const specialLoopData = useMemo(
-    () =>
-      todaySpecialItems.length > 1
-        ? [...todaySpecialItems, ...todaySpecialItems, ...todaySpecialItems]
-        : todaySpecialItems,
-    [todaySpecialItems]
   );
 
   const recentOrders = useMemo(
@@ -162,18 +151,6 @@ export default function Screen() {
     bannerInteractingRef.current = false;
   };
 
-  const onSpecialMomentumEnd = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const rawIndex = Math.round(event.nativeEvent.contentOffset.x / SPECIAL_PITCH);
-    normalizeCarouselIndex(
-      rawIndex,
-      todaySpecialItems.length,
-      SPECIAL_PITCH,
-      specialScrollRef,
-      specialIndexRef
-    );
-    specialInteractingRef.current = false;
-  };
-
   useEffect(() => {
     if (banners.length <= 1) return;
     const start = banners.length;
@@ -183,16 +160,6 @@ export default function Screen() {
     }, 80);
     return () => clearTimeout(timer);
   }, [banners.length, bannerPitch]);
-
-  useEffect(() => {
-    if (todaySpecialItems.length <= 1) return;
-    const start = todaySpecialItems.length;
-    specialIndexRef.current = start;
-    const timer = setTimeout(() => {
-      specialScrollRef.current?.scrollTo({ x: start * SPECIAL_PITCH, animated: false });
-    }, 80);
-    return () => clearTimeout(timer);
-  }, [todaySpecialItems.length]);
 
   useEffect(() => {
     if (banners.length <= 1) return;
@@ -210,26 +177,6 @@ export default function Screen() {
     }, 3400);
     return () => clearInterval(interval);
   }, [banners.length, bannerPitch]);
-
-  useEffect(() => {
-    if (todaySpecialItems.length <= 1) return;
-    const interval = setInterval(() => {
-      if (specialInteractingRef.current) return;
-      const next = specialIndexRef.current + 1;
-      specialIndexRef.current = next;
-      specialScrollRef.current?.scrollTo({ x: next * SPECIAL_PITCH, animated: true });
-      if (next >= todaySpecialItems.length * 2) {
-        setTimeout(() => {
-          specialIndexRef.current = todaySpecialItems.length;
-          specialScrollRef.current?.scrollTo({
-            x: todaySpecialItems.length * SPECIAL_PITCH,
-            animated: false
-          });
-        }, 420);
-      }
-    }, 3600);
-    return () => clearInterval(interval);
-  }, [todaySpecialItems.length]);
 
   return (
     <View style={styles.screen}>
@@ -296,7 +243,7 @@ export default function Screen() {
               }}
               contentContainerStyle={{ paddingRight: 16 }}
             >
-              {banners.map((banner, i) => (
+              {bannerLoopData.map((banner, i) => (
                 <Pressable
                   key={banner.id + "_" + i}
                   onPress={() => onOpenBanner(banner)}

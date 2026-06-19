@@ -2,13 +2,18 @@ import { Ionicons } from "@expo/vector-icons";
 import * as ImageManipulator from "expo-image-manipulator";
 import * as ImagePicker from "expo-image-picker";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Alert, Image, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { Alert, Image, Pressable, ScrollView, Text, View, Switch, TextInput } from "react-native";
 import { useAuthStore } from '../../../stores/useAuthStore';
 import { Category } from "../../../types";
 import { MenuItem } from "../../../types";
 import { menuService } from "../../../services/menuService";
 import { tenantService } from "../../../services/tenantService";
 import { useTheme } from '../../../hooks/useTheme';
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { categorySchema, CategoryFormData, menuItemSchema, MenuItemFormData } from "../../../schemas/menu";
+import { InputField } from "../../../components/ui/InputField";
+import Animated, { FadeInUp } from "react-native-reanimated";
 
 const MAX_IMAGE_BYTES = 2 * 1024 * 1024;
 const MAX_IMAGE_WIDTH = 1280;
@@ -35,19 +40,21 @@ export default function Screen() {
   const { user, accessToken } = useAuthStore();
   const [categories, setCategories] = useState<Category[]>([]);
   const [items, setItems] = useState<MenuItem[]>([]);
-
-  const [newCategoryName, setNewCategoryName] = useState("");
-  const [newCategoryDescription, setNewCategoryDescription] = useState("");
-  const [newCategoryImageUrl, setNewCategoryImageUrl] = useState("");
   const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null);
 
-  const [itemName, setItemName] = useState("");
-  const [itemDescription, setItemDescription] = useState("");
-  const [itemImageUrl, setItemImageUrl] = useState("");
-  const [itemIsTodaySpecial, setItemIsTodaySpecial] = useState(false);
-  const [itemPrice, setItemPrice] = useState("");
-  const [itemStock, setItemStock] = useState("");
-  const [categoryId, setCategoryId] = useState("");
+  const { control: categoryControl, handleSubmit: handleCategorySubmit, reset: resetCategory, formState: { errors: categoryErrors }, setValue: setCategoryValue } = useForm<CategoryFormData>({
+    resolver: zodResolver(categorySchema),
+    defaultValues: { name: "", description: "", imageUrl: "" }
+  });
+
+  const { control: itemControl, handleSubmit: handleItemSubmit, reset: resetItem, formState: { errors: itemErrors }, setValue: setItemValue, watch: watchItem } = useForm<MenuItemFormData>({
+    resolver: zodResolver(menuItemSchema),
+    defaultValues: { categoryId: "", name: "", description: "", price: 0, stockQty: 0, image: "", isTodaySpecial: false }
+  });
+
+  const itemCategoryId = watchItem("categoryId");
+  const itemIsTodaySpecial = watchItem("isTodaySpecial");
+  
   const [todaySpecialsEnabled, setTodaySpecialsEnabled] = useState(true);
 
   const [loading, setLoading] = useState(false);
@@ -64,10 +71,10 @@ export default function Screen() {
     setCategories(categoryRes.data);
     setItems(itemRes.data);
     setTodaySpecialsEnabled(featureRes.data.todaySpecialsEnabled);
-    if (!categoryId && categoryRes.data.length > 0) {
-      setCategoryId(categoryRes.data[0].id);
+    if (!itemCategoryId && categoryRes.data.length > 0) {
+      setItemValue("categoryId", categoryRes.data[0].id);
     }
-  }, [user?.tenantId, accessToken, categoryId]);
+  }, [user?.tenantId, accessToken, itemCategoryId]);
 
   useEffect(() => {
     loadData().catch((error: unknown) => {
@@ -76,19 +83,12 @@ export default function Screen() {
   }, [loadData]);
 
   const resetCategoryForm = () => {
-    setNewCategoryName("");
-    setNewCategoryDescription("");
-    setNewCategoryImageUrl("");
+    resetCategory({ name: "", description: "", imageUrl: "" });
     setEditingCategoryId(null);
   };
 
   const resetItemForm = () => {
-    setItemName("");
-    setItemDescription("");
-    setItemImageUrl("");
-    setItemIsTodaySpecial(false);
-    setItemPrice("");
-    setItemStock("");
+    resetItem({ categoryId: itemCategoryId, name: "", description: "", price: 0, stockQty: 0, image: "", isTodaySpecial: false });
   };
 
   const pickAndUploadImageAndReturnUrl = async (target: "CATEGORY" | "ITEM"): Promise<string | null> => {
@@ -160,9 +160,9 @@ export default function Screen() {
     const imageUrl = await pickAndUploadImageAndReturnUrl(target);
     if (!imageUrl) return;
     if (target === "CATEGORY") {
-      setNewCategoryImageUrl(imageUrl);
+      setCategoryValue("imageUrl", imageUrl, { shouldValidate: true });
     } else {
-      setItemImageUrl(imageUrl);
+      setItemValue("image", imageUrl, { shouldValidate: true });
     }
     Alert.alert("Uploaded", `${target === "CATEGORY" ? "Category" : "Item"} image uploaded.`);
   };
@@ -183,25 +183,22 @@ export default function Screen() {
     }
   };
 
-  const onSaveCategory = async () => {
-    if (!user?.tenantId || !accessToken || !newCategoryName.trim()) {
-      Alert.alert("Missing fields", "Category name is required.");
-      return;
-    }
+  const onSaveCategory = async (data: CategoryFormData) => {
+    if (!user?.tenantId || !accessToken) return;
 
     try {
       setLoading(true);
       if (editingCategoryId) {
         await menuService.updateCategory(accessToken, user.tenantId, editingCategoryId, {
-          name: newCategoryName.trim(),
-          description: newCategoryDescription.trim() || null,
-          imageUrl: newCategoryImageUrl.trim() || null
+          name: data.name.trim(),
+          description: data.description?.trim() || null,
+          imageUrl: data.imageUrl?.trim() || null
         });
       } else {
         await menuService.createCategory(accessToken, user.tenantId, {
-          name: newCategoryName.trim(),
-          description: newCategoryDescription.trim() || undefined,
-          imageUrl: newCategoryImageUrl.trim() || undefined
+          name: data.name.trim(),
+          description: data.description?.trim() || undefined,
+          imageUrl: data.imageUrl?.trim() || undefined
         });
       }
       resetCategoryForm();
@@ -214,22 +211,19 @@ export default function Screen() {
     }
   };
 
-  const onCreateItem = async () => {
-    if (!user?.tenantId || !accessToken || !itemName.trim() || !categoryId) {
-      Alert.alert("Missing fields", "Select category and enter item name.");
-      return;
-    }
+  const onCreateItem = async (data: any) => {
+    if (!user?.tenantId || !accessToken) return;
 
     try {
       setLoading(true);
       await menuService.createItem(accessToken, user.tenantId, {
-        categoryId,
-        name: itemName.trim(),
-        description: itemDescription.trim() || undefined,
-        image: itemImageUrl.trim() || undefined,
-        price: Number(itemPrice || 0),
-        stockQty: Number(itemStock || 0),
-        isTodaySpecial: itemIsTodaySpecial
+        categoryId: data.categoryId,
+        name: data.name.trim(),
+        description: data.description?.trim() || undefined,
+        image: data.image?.trim() || undefined,
+        price: data.price,
+        stockQty: data.stockQty,
+        isTodaySpecial: data.isTodaySpecial
       });
       resetItemForm();
       await loadData();
@@ -327,7 +321,7 @@ export default function Screen() {
     <ScrollView ref={scrollViewRef} style={{ flex: 1, backgroundColor: colors.background }} contentContainerStyle={{ padding: 16, gap: 12, paddingBottom: 24 }}>
 
 
-      <View style={{ ...card, padding: 16, flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
+      <Animated.View entering={FadeInUp.delay(100).springify()} style={{ ...card, padding: 16, flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 16 }}>
         <View style={{ flex: 1 }}>
           <Text style={{ fontSize: 16, fontWeight: "800", color: colors.text }}>Today's Specials Feature</Text>
           <Text style={{ color: colors.textSecondary, fontSize: 12, marginTop: 2 }}>
@@ -348,9 +342,9 @@ export default function Screen() {
             {todaySpecialsEnabled ? "Enabled" : "Disabled"}
           </Text>
         </Pressable>
-      </View>
+      </Animated.View>
 
-      <View style={{ ...card, padding: 16, gap: 12 }}>
+      <Animated.View entering={FadeInUp.delay(150).springify()} style={{ ...card, padding: 16, gap: 12 }}>
         <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
           <View>
             <Text style={{ fontSize: 16, fontWeight: "800", color: colors.text }}>Category Details</Text>
@@ -365,27 +359,46 @@ export default function Screen() {
 
         <View style={{ flexDirection: "row", gap: 12 }}>
           <View style={{ flex: 1, gap: 8 }}>
-            <TextInput
-              placeholder="Category Name"
-              placeholderTextColor={colors.textSecondary}
-              value={newCategoryName}
-              onChangeText={setNewCategoryName}
-              style={{ borderWidth: 1, borderColor: colors.border, borderRadius: 10, padding: 10, backgroundColor: colors.surfaceAlt, fontSize: 14, color: colors.text }}
+            <Controller
+              control={categoryControl}
+              name="name"
+              render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
+                <InputField
+                  placeholder="Category Name"
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  error={error?.message}
+                />
+              )}
             />
-            <TextInput
-              placeholder="Description (optional)"
-              placeholderTextColor={colors.textSecondary}
-              value={newCategoryDescription}
-              onChangeText={setNewCategoryDescription}
-              multiline
-              style={{ borderWidth: 1, borderColor: colors.border, borderRadius: 10, padding: 10, height: 60, textAlignVertical: "top", backgroundColor: colors.surfaceAlt, fontSize: 14, color: colors.text }}
+            <Controller
+              control={categoryControl}
+              name="description"
+              render={({ field: { onChange, onBlur, value } }) => (
+                <TextInput
+                  placeholder="Description (optional)"
+                  placeholderTextColor={colors.textSecondary}
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  multiline
+                  style={{ borderWidth: 1, borderColor: colors.border, borderRadius: 10, padding: 10, height: 60, textAlignVertical: "top", backgroundColor: colors.surfaceAlt, fontSize: 14, color: colors.text }}
+                />
+              )}
             />
           </View>
 
           <View style={{ width: 120 }}>
-            {newCategoryImageUrl ? (
+            {categoryControl._defaultValues.imageUrl || watchItem("image") ? (
               <View style={{ borderRadius: 10, overflow: "hidden", borderWidth: 1, borderColor: colors.border, width: 120, height: 67 }}>
-                <Image source={{ uri: newCategoryImageUrl }} style={{ width: "100%", height: "100%", backgroundColor: colors.surfaceAlt }} resizeMode="cover" />
+                <Controller 
+                  control={categoryControl}
+                  name="imageUrl"
+                  render={({ field: { value } }) => (
+                    value ? <Image source={{ uri: value }} style={{ width: "100%", height: "100%", backgroundColor: colors.surfaceAlt }} resizeMode="cover" /> : <View/>
+                  )}
+                />
                 <Pressable onPress={() => pickAndUploadImage("CATEGORY")} disabled={uploadingCategoryImage} style={{ position: "absolute", bottom: 4, right: 4, backgroundColor: "rgba(15, 23, 42, 0.7)", borderRadius: 999, padding: 4 }}>
                   <Ionicons name="camera" size={14} color="white" />
                 </Pressable>
@@ -402,7 +415,7 @@ export default function Screen() {
             )}
             
             <Pressable
-              onPress={onSaveCategory}
+              onPress={handleCategorySubmit(onSaveCategory)}
               disabled={loading}
               style={{ backgroundColor: isDark ? colors.text : "#0F172A", borderRadius: 10, paddingVertical: 10, alignItems: "center", marginTop: "auto" }}
             >
@@ -412,56 +425,87 @@ export default function Screen() {
             </Pressable>
           </View>
         </View>
-      </View>
+      </Animated.View>
 
-      <View style={{ ...card, padding: 16, gap: 12 }}>
+      <Animated.View entering={FadeInUp.delay(200).springify()} style={{ ...card, padding: 16, gap: 12 }}>
         <View>
           <Text style={{ fontSize: 16, fontWeight: "800", color: colors.text }}>Item Details</Text>
           <Text style={{ color: colors.textSecondary, fontSize: 12 }}>Add a new food or beverage item</Text>
         </View>
 
         <View style={{ gap: 8 }}>
-          <TextInput
-            placeholder="Item Name (e.g. Classic Cheeseburger)"
-            placeholderTextColor={colors.textSecondary}
-            value={itemName}
-            onChangeText={setItemName}
-            style={{ borderWidth: 1, borderColor: colors.border, borderRadius: 10, padding: 10, backgroundColor: colors.surfaceAlt, fontSize: 14, color: colors.text }}
+          <Controller
+            control={itemControl}
+            name="name"
+            render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
+              <InputField
+                placeholder="Item Name (e.g. Classic Cheeseburger)"
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                error={error?.message}
+              />
+            )}
           />
-          <TextInput
-            placeholder="Description (optional)"
-            placeholderTextColor={colors.textSecondary}
-            value={itemDescription}
-            onChangeText={setItemDescription}
-            multiline
-            style={{ borderWidth: 1, borderColor: colors.border, borderRadius: 10, padding: 10, height: 60, textAlignVertical: "top", backgroundColor: colors.surfaceAlt, fontSize: 14, color: colors.text }}
+          <Controller
+            control={itemControl}
+            name="description"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextInput
+                placeholder="Description (optional)"
+                placeholderTextColor={colors.textSecondary}
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                multiline
+                style={{ borderWidth: 1, borderColor: colors.border, borderRadius: 10, padding: 10, height: 60, textAlignVertical: "top", backgroundColor: colors.surfaceAlt, fontSize: 14, color: colors.text }}
+              />
+            )}
           />
         </View>
 
         <View style={{ flexDirection: "row", gap: 12 }}>
           <View style={{ flex: 1, gap: 8 }}>
-            <TextInput
-              placeholder="Price (INR)"
-              placeholderTextColor={colors.textSecondary}
-              keyboardType="numeric"
-              value={itemPrice}
-              onChangeText={setItemPrice}
-              style={{ borderWidth: 1, borderColor: colors.border, borderRadius: 10, padding: 10, backgroundColor: colors.surfaceAlt, fontSize: 14, color: colors.text }}
+            <Controller
+              control={itemControl}
+              name="price"
+              render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
+                <InputField
+                  placeholder="Price (INR)"
+                  keyboardType="numeric"
+                  value={value?.toString() || ""}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  error={error?.message}
+                />
+              )}
             />
-            <TextInput
-              placeholder="Stock Qty"
-              placeholderTextColor={colors.textSecondary}
-              keyboardType="numeric"
-              value={itemStock}
-              onChangeText={setItemStock}
-              style={{ borderWidth: 1, borderColor: colors.border, borderRadius: 10, padding: 10, backgroundColor: colors.surfaceAlt, fontSize: 14, color: colors.text }}
+            <Controller
+              control={itemControl}
+              name="stockQty"
+              render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
+                <InputField
+                  placeholder="Stock Qty"
+                  keyboardType="numeric"
+                  value={value?.toString() || ""}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  error={error?.message}
+                />
+              )}
             />
           </View>
 
           <View style={{ width: 90 }}>
-            {itemImageUrl ? (
+            {itemControl._defaultValues.image || watchItem("image") ? (
               <View style={{ position: "relative", borderRadius: 10, overflow: "hidden", borderWidth: 1, borderColor: colors.border, width: 90, height: 90 }}>
-                <Image source={{ uri: itemImageUrl }} style={{ width: "100%", height: "100%", backgroundColor: colors.surfaceAlt }} resizeMode="cover" />
+                <Controller
+                  control={itemControl}
+                  name="image"
+                  render={({ field: { value } }) => (
+                    value ? <Image source={{ uri: value }} style={{ width: "100%", height: "100%", backgroundColor: colors.surfaceAlt }} resizeMode="cover" /> : <View/>
+                  )}
+                />
                 <Pressable
                   onPress={() => pickAndUploadImage("ITEM")}
                   disabled={uploadingItemImage}
@@ -486,7 +530,7 @@ export default function Screen() {
         <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
           <Text style={{ color: colors.textSecondary, fontWeight: "700", fontSize: 13 }}>Mark as Today's Special</Text>
           <Pressable
-            onPress={() => setItemIsTodaySpecial((value) => !value)}
+            onPress={() => setItemValue("isTodaySpecial", !itemIsTodaySpecial, { shouldValidate: true })}
             style={{
               paddingVertical: 6,
               paddingHorizontal: 12,
@@ -510,11 +554,11 @@ export default function Screen() {
           <Text style={{ color: colors.textSecondary, fontWeight: "700", fontSize: 13, marginLeft: 4 }}>Select Category</Text>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8, paddingRight: 8 }}>
             {categories.map((category) => {
-              const selected = categoryId === category.id;
+              const selected = itemCategoryId === category.id;
               return (
                 <Pressable
                   key={category.id}
-                  onPress={() => setCategoryId(category.id)}
+                  onPress={() => setItemValue("categoryId", category.id, { shouldValidate: true })}
                   style={{
                     paddingVertical: 10,
                     paddingHorizontal: 16,
@@ -530,15 +574,15 @@ export default function Screen() {
         </View>
 
         <Pressable
-          onPress={onCreateItem}
+          onPress={handleItemSubmit(onCreateItem)}
           disabled={loading}
           style={{ backgroundColor: colors.primary, borderRadius: 10, paddingVertical: 12, alignItems: "center", marginTop: 4 }}
         >
           <Text style={{ color: "white", fontWeight: "800", fontSize: 14 }}>{loading ? "Saving..." : "Add New Item"}</Text>
         </Pressable>
-      </View>
+      </Animated.View>
 
-      <View style={{ ...card, padding: 20, gap: 16 }}>
+      <Animated.View entering={FadeInUp.delay(250).springify()} style={{ ...card, padding: 20, gap: 16 }}>
         <Text style={{ fontSize: 18, fontWeight: "800", color: colors.text }}>Categories ({categories.length})</Text>
         {categories.length === 0 ? <Text style={{ color: colors.textSecondary }}>No categories yet.</Text> : null}
         {categories.map((category) => (
@@ -557,9 +601,9 @@ export default function Screen() {
             <Pressable
               onPress={() => {
                 setEditingCategoryId(category.id);
-                setNewCategoryName(category.name);
-                setNewCategoryDescription(category.description ?? "");
-                setNewCategoryImageUrl(category.imageUrl ?? "");
+                setCategoryValue("name", category.name);
+                setCategoryValue("description", category.description ?? "");
+                setCategoryValue("imageUrl", category.imageUrl ?? "");
                 scrollViewRef.current?.scrollTo({ y: 0, animated: true });
               }}
               style={{ padding: 12, borderLeftWidth: 1, borderColor: colors.border, backgroundColor: colors.surfaceAlt, alignSelf: "stretch", justifyContent: "center" }}
@@ -568,9 +612,9 @@ export default function Screen() {
             </Pressable>
           </View>
         ))}
-      </View>
+      </Animated.View>
 
-      <View style={{ ...card, padding: 20, gap: 16 }}>
+      <Animated.View entering={FadeInUp.delay(300).springify()} style={{ ...card, padding: 20, gap: 16 }}>
         <Text style={{ fontSize: 18, fontWeight: "800", color: colors.text }}>Menu Items ({items.length})</Text>
         {items.length === 0 ? <Text style={{ color: colors.textSecondary }}>No items yet.</Text> : null}
         {items.map((item) => (
@@ -624,7 +668,7 @@ export default function Screen() {
             </View>
           </View>
         ))}
-      </View>
+      </Animated.View>
     </ScrollView>
   );
 }

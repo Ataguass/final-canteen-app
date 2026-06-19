@@ -109,6 +109,9 @@ const resolveOrderOwnership = async (
 ): Promise<ResolvedOrderOwnership> => {
   const paymentMethod = payload.paymentMethod ?? PaymentMethod.CASH;
   if (paymentMethod !== PaymentMethod.WALLET) {
+    if (!requesterUserId && requesterRole === "GUEST") {
+      return { orderUserId: undefined, orderRole: "GUEST", walletPayer: null };
+    }
     return {
       orderUserId: requesterUserId,
       orderRole: requesterRole,
@@ -351,6 +354,21 @@ export const placeOrder = async (req: Request, res: Response): Promise<void> => 
   const userId = req.user?.sub;
   const role = req.user?.role;
   const order = await createOrder(tenantId, userId, role, req.body as CreateOrderInput);
+  emitOrderEvents(order);
+
+  res.status(201).json({ success: true, data: order });
+};
+
+export const placeOrderPublic = async (req: Request, res: Response): Promise<void> => {
+  const tenantId = req.tenantId as string;
+  const payload = req.body as CreateOrderInput;
+  
+  // Force payment parameters for guest checkout (simulated online payment)
+  payload.paymentMethod = PaymentMethod.UPI;
+  payload.paymentStatus = PaymentStatus.PAID;
+
+  // Pass undefined for userId and "GUEST" for role
+  const order = await createOrder(tenantId, undefined, "GUEST", payload);
   emitOrderEvents(order);
 
   res.status(201).json({ success: true, data: order });

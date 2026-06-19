@@ -1,11 +1,15 @@
 import { Link, useRouter } from "expo-router";
 import { useState } from "react";
-import { Alert, Pressable, Text, TextInput, View, StyleSheet, KeyboardAvoidingView, Platform, SafeAreaView, Image } from "react-native";
+import { Alert, Pressable, Text, View, StyleSheet, KeyboardAvoidingView, Platform, SafeAreaView, Image } from "react-native";
 import { useAuthStore } from '../../stores/useAuthStore';
 import { Ionicons } from "@expo/vector-icons";
 import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
 import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../utils/responsive';
 import { useTheme } from '../../hooks/useTheme';
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { loginSchema, LoginFormData } from "../../schemas/auth";
+import { InputField } from "../../components/ui/InputField";
 
 const BRAND_COLOR = "#080d2b";
 
@@ -15,22 +19,28 @@ export default function LoginScreen() {
   const styles = createStyles(theme);
   const router = useRouter();
   const { login } = useAuthStore();
-  const [phone, setPhone] = useState("");
-  const [rollNumber, setRollNumber] = useState("");
-  const [password, setPassword] = useState("");
+  
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
   const [isAdminLogin, setIsAdminLogin] = useState(false);
 
-  const onLogin = async () => {
-    if (!phone || (!isAdminLogin && !rollNumber) || !password) {
-      Alert.alert("Missing Fields", "Please fill in all fields.");
+  const { control, handleSubmit, formState: { errors } } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      phone: "",
+      rollNumber: "",
+      password: ""
+    }
+  });
+
+  const onLogin = async (data: LoginFormData) => {
+    if (!isAdminLogin && !data.rollNumber) {
+      Alert.alert("Missing Fields", "Please enter your roll number.");
       return;
     }
     
     try {
       setLoading(true);
-      await login(phone.trim(), isAdminLogin ? undefined : rollNumber.trim(), password, isAdminLogin);
+      await login(data.phone.trim(), isAdminLogin ? undefined : data.rollNumber?.trim(), data.password, isAdminLogin);
       router.replace("/");
     } catch (error) {
       Alert.alert("Login failed", error instanceof Error ? error.message : "Please try again");
@@ -60,53 +70,62 @@ export default function LoginScreen() {
         </Animated.View>
 
         <Animated.View entering={FadeInUp.delay(300).springify()} style={styles.form}>
-          <View style={styles.inputContainer}>
-            <Ionicons name="call-outline" size={20} color="#8e8e93" style={styles.inputIcon} />
-            <TextInput
-              placeholder="Phone Number"
-              placeholderTextColor="#8e8e93"
-              value={phone}
-              onChangeText={setPhone}
-              keyboardType="phone-pad"
-              style={styles.input}
-            />
-          </View>
+          <Controller
+            control={control}
+            name="phone"
+            render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
+              <InputField
+                leftIcon="call-outline"
+                placeholder="Phone Number"
+                keyboardType="phone-pad"
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                error={error?.message}
+              />
+            )}
+          />
 
           {!isAdminLogin && (
-            <View style={styles.inputContainer}>
-              <Ionicons name="id-card-outline" size={20} color="#8e8e93" style={styles.inputIcon} />
-              <TextInput
-                placeholder="Roll Number"
-                placeholderTextColor="#8e8e93"
-                value={rollNumber}
-                onChangeText={setRollNumber}
-                autoCapitalize="characters"
-                style={styles.input}
-              />
-            </View>
+            <Controller
+              control={control}
+              name="rollNumber"
+              render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
+                <InputField
+                  leftIcon="id-card-outline"
+                  placeholder="Roll Number"
+                  autoCapitalize="characters"
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  error={error?.message}
+                />
+              )}
+            />
           )}
 
-          <View style={styles.inputContainer}>
-            <Ionicons name="lock-closed-outline" size={20} color="#8e8e93" style={styles.inputIcon} />
-            <TextInput
-              placeholder="Password"
-              placeholderTextColor="#8e8e93"
-              secureTextEntry={!showPassword}
-              value={password}
-              onChangeText={setPassword}
-              style={styles.input}
-            />
-            <Pressable onPress={() => setShowPassword(!showPassword)} style={styles.eyeIcon}>
-              <Ionicons name={showPassword ? "eye-off-outline" : "eye-outline"} size={20} color="#8e8e93" />
-            </Pressable>
-          </View>
+          <Controller
+            control={control}
+            name="password"
+            render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
+              <InputField
+                leftIcon="lock-closed-outline"
+                placeholder="Password"
+                isPassword={true}
+                value={value}
+                onChangeText={onChange}
+                onBlur={onBlur}
+                error={error?.message}
+              />
+            )}
+          />
 
           <Pressable onPress={() => router.push("/(auth)/forgot-password")} style={styles.forgotPassword}>
             <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
           </Pressable>
 
           <Pressable
-            onPress={onLogin}
+            onPress={handleSubmit(onLogin)}
             style={({ pressed }) => [
               styles.loginButton,
               pressed && { opacity: 0.8 },
@@ -185,28 +204,6 @@ const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => S
   },
   form: {
     gap: moderateScale(16),
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.card,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: moderateScale(16),
-    paddingHorizontal: moderateScale(16),
-    height: moderateScale(56),
-  },
-  inputIcon: {
-    marginRight: moderateScale(12),
-  },
-  input: {
-    flex: 1,
-    fontSize: fontScale(16),
-    color: colors.text,
-    height: '100%',
-  },
-  eyeIcon: {
-    padding: moderateScale(8),
   },
   forgotPassword: {
     alignSelf: 'flex-end',

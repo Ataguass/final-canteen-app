@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet, Image, TouchableOpacity, Dimensions, Platform } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 import Animated, { FadeIn, FadeInDown, SlideInDown, withRepeat, withTiming, withSequence, useAnimatedStyle, useSharedValue, Easing } from "react-native-reanimated";
 import { useEffect, useContext } from "react";
 import { OnboardingContext } from "../_layout";
@@ -13,7 +13,8 @@ const BRAND_COLOR = "#080d2b"; // Navy Blue from logo
 
 export default function OrderingScreen() {
   const { colors, isDark } = useTheme();
-  const styles = createStyles({ colors, isDark });
+  const insets = useSafeAreaInsets();
+  const styles = createStyles({ colors, isDark, insets });
   const router = useRouter();
   const { completeOnboarding } = useContext(OnboardingContext);
   
@@ -117,7 +118,7 @@ export default function OrderingScreen() {
   );
 }
 
-const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => StyleSheet.create({
+const createStyles = ({ colors, isDark, insets }: { colors: any, isDark: boolean, insets: any }) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
@@ -295,7 +296,7 @@ const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => S
   },
   footer: {
     position: 'absolute',
-    bottom: Platform.OS === 'ios' ? 40 : 24,
+    bottom: Math.max(insets.bottom + 16, 24),
     left: moderateScale(24),
     right: moderateScale(24),
     zIndex: 20,

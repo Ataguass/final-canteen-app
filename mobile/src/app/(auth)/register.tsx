@@ -1,7 +1,7 @@
 import auth from "@react-native-firebase/auth";
 import { Link, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
-import { Alert, Pressable, Text, TextInput, View, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, Modal, FlatList } from "react-native";
+import { Alert, Pressable, Text, View, StyleSheet, KeyboardAvoidingView, Platform, ScrollView, Modal, FlatList } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuthStore } from '../../stores/useAuthStore';
 import { authService } from "../../services/authService";
@@ -9,6 +9,10 @@ import { Ionicons } from "@expo/vector-icons";
 import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
 import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../utils/responsive';
 import { useTheme } from '../../hooks/useTheme';
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { registerSchema, RegisterFormData } from "../../schemas/auth";
+import { InputField } from "../../components/ui/InputField";
 
 const BRAND_COLOR = "#080d2b";
 
@@ -25,14 +29,20 @@ export default function RegisterScreen() {
   const [selectedTenant, setSelectedTenant] = useState<Tenant | null>(null);
   const [showTenantModal, setShowTenantModal] = useState(false);
 
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [rollNumber, setRollNumber] = useState("");
-  const [password, setPassword] = useState("");
-  
+  const { control, handleSubmit, formState: { errors }, setValue, watch } = useForm<RegisterFormData>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      tenantId: "",
+      name: "",
+      email: "",
+      phone: "",
+      rollNumber: "",
+      password: ""
+    }
+  });
+
   const [loading, setLoading] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
+  const selectedTenantId = watch("tenantId");
 
   useEffect(() => {
     const fetchTenants = async () => {
@@ -46,17 +56,12 @@ export default function RegisterScreen() {
     fetchTenants();
   }, []);
 
-  const onRegister = async () => {
-    if (!selectedTenant || !name || !email || !phone || !rollNumber || !password) {
-      Alert.alert("Missing Fields", "Please fill in all fields and select a school.");
-      return;
-    }
-
+  const onRegister = async (data: RegisterFormData) => {
     try {
       setLoading(true);
       // Trigger Firebase Phone Authentication
       // Ensure phone number starts with country code (e.g., +91 for India)
-      let formattedPhone = phone.replace(/\s+/g, "");
+      let formattedPhone = data.phone.replace(/\s+/g, "");
       if (!formattedPhone.startsWith("+")) {
         // Default to +91 if no country code provided, but you can adjust this logic based on target region
         formattedPhone = `+91${formattedPhone}`; 
@@ -66,12 +71,12 @@ export default function RegisterScreen() {
       setConfirmationResult(confirmation);
       
       setPendingRegistration({
-        tenantId: selectedTenant.id,
-        name: name.trim(),
-        email: email.trim(),
+        tenantId: data.tenantId,
+        name: data.name.trim(),
+        email: data.email.trim(),
         phone: formattedPhone,
-        password,
-        rollNumber: rollNumber.trim()
+        password: data.password,
+        rollNumber: data.rollNumber.trim()
       });
 
       router.push("/(auth)/otp");
@@ -101,84 +106,104 @@ export default function RegisterScreen() {
           <Animated.View entering={FadeInUp.delay(300).springify()} style={styles.form}>
             
             {/* School Selector */}
-            <Pressable style={styles.inputContainer} onPress={() => setShowTenantModal(true)}>
-              <Ionicons name="business-outline" size={20} color="#8e8e93" style={styles.inputIcon} />
-              <Text style={[styles.inputText, !selectedTenant && { color: colors.textMuted }]}>
-                {selectedTenant ? selectedTenant.name : "Select your School"}
-              </Text>
-              <Ionicons name="chevron-down" size={20} color="#8e8e93" />
-            </Pressable>
+            <View>
+              <Pressable style={styles.inputContainer} onPress={() => setShowTenantModal(true)}>
+                <Ionicons name="business-outline" size={20} color="#8e8e93" style={styles.inputIcon} />
+                <Text style={[styles.inputText, !selectedTenant && { color: colors.textMuted }]}>
+                  {selectedTenant ? selectedTenant.name : "Select your School"}
+                </Text>
+                <Ionicons name="chevron-down" size={20} color="#8e8e93" />
+              </Pressable>
+              {errors.tenantId && <Text style={[styles.errorText, { color: colors.danger }]}>{errors.tenantId.message}</Text>}
+            </View>
 
             {/* Name Input */}
-            <View style={styles.inputContainer}>
-              <Ionicons name="person-outline" size={20} color="#8e8e93" style={styles.inputIcon} />
-              <TextInput
-                placeholder="Full Name"
-                placeholderTextColor="#8e8e93"
-                value={name}
-                onChangeText={setName}
-                style={styles.input}
-              />
-            </View>
+            <Controller
+              control={control}
+              name="name"
+              render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
+                <InputField
+                  leftIcon="person-outline"
+                  placeholder="Full Name"
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  error={error?.message}
+                />
+              )}
+            />
 
             {/* Email Input */}
-            <View style={styles.inputContainer}>
-              <Ionicons name="mail-outline" size={20} color="#8e8e93" style={styles.inputIcon} />
-              <TextInput
-                placeholder="Email Address"
-                placeholderTextColor="#8e8e93"
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                style={styles.input}
-              />
-            </View>
+            <Controller
+              control={control}
+              name="email"
+              render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
+                <InputField
+                  leftIcon="mail-outline"
+                  placeholder="Email Address"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  error={error?.message}
+                />
+              )}
+            />
 
             {/* Phone Input */}
-            <View style={styles.inputContainer}>
-              <Ionicons name="call-outline" size={20} color="#8e8e93" style={styles.inputIcon} />
-              <TextInput
-                placeholder="Phone Number"
-                placeholderTextColor="#8e8e93"
-                value={phone}
-                onChangeText={setPhone}
-                keyboardType="phone-pad"
-                style={styles.input}
-              />
-            </View>
+            <Controller
+              control={control}
+              name="phone"
+              render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
+                <InputField
+                  leftIcon="call-outline"
+                  placeholder="Phone Number"
+                  keyboardType="phone-pad"
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  error={error?.message}
+                />
+              )}
+            />
 
             {/* Roll Number Input */}
-            <View style={styles.inputContainer}>
-              <Ionicons name="id-card-outline" size={20} color="#8e8e93" style={styles.inputIcon} />
-              <TextInput
-                placeholder="Roll Number"
-                placeholderTextColor="#8e8e93"
-                value={rollNumber}
-                onChangeText={setRollNumber}
-                autoCapitalize="characters"
-                style={styles.input}
-              />
-            </View>
+            <Controller
+              control={control}
+              name="rollNumber"
+              render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
+                <InputField
+                  leftIcon="id-card-outline"
+                  placeholder="Roll Number"
+                  autoCapitalize="characters"
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  error={error?.message}
+                />
+              )}
+            />
 
             {/* Password Input */}
-            <View style={styles.inputContainer}>
-              <Ionicons name="lock-closed-outline" size={20} color="#8e8e93" style={styles.inputIcon} />
-              <TextInput
-                placeholder="Password"
-                placeholderTextColor="#8e8e93"
-                secureTextEntry={!showPassword}
-                value={password}
-                onChangeText={setPassword}
-                style={styles.input}
-              />
-              <Pressable onPress={() => setShowPassword(!showPassword)} style={styles.eyeIcon}>
-                <Ionicons name={showPassword ? "eye-off-outline" : "eye-outline"} size={20} color="#8e8e93" />
-              </Pressable>
-            </View>
+            <Controller
+              control={control}
+              name="password"
+              render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
+                <InputField
+                  leftIcon="lock-closed-outline"
+                  placeholder="Password"
+                  isPassword={true}
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  error={error?.message}
+                />
+              )}
+            />
 
             <Pressable
-              onPress={onRegister}
+              onPress={handleSubmit(onRegister)}
               style={({ pressed }) => [
                 styles.registerButton,
                 pressed && { opacity: 0.8 },
@@ -223,6 +248,7 @@ export default function RegisterScreen() {
                   style={[styles.tenantOption, selectedTenant?.id === item.id && styles.tenantOptionSelected]}
                   onPress={() => {
                     setSelectedTenant(item);
+                    setValue("tenantId", item.id, { shouldValidate: true });
                     setShowTenantModal(false);
                   }}
                 >
@@ -313,19 +339,15 @@ const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => S
   inputIcon: {
     marginRight: moderateScale(12),
   },
-  input: {
-    flex: 1,
-    fontSize: fontScale(16),
-    color: colors.text,
-    height: '100%',
-  },
   inputText: {
     flex: 1,
     fontSize: fontScale(16),
     color: colors.text,
   },
-  eyeIcon: {
-    padding: moderateScale(8),
+  errorText: {
+    fontSize: 12,
+    marginTop: 6,
+    fontWeight: '500',
   },
   registerButton: {
     backgroundColor: isDark ? colors.primary : BRAND_COLOR,

@@ -12,6 +12,7 @@ import {
   View,
   useWindowDimensions
 } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Print from "expo-print";
 import { Audio } from "expo-av";
 import { Ionicons } from "@expo/vector-icons";
@@ -91,7 +92,8 @@ const itemSelectSoundSource = require("../../assets/sounds/item-select.wav");
 export default function Screen() {
   const theme = useTheme();
   const { colors, isDark } = theme;
-  const styles = createStyles(theme);
+  const insets = useSafeAreaInsets();
+  const styles = createStyles({ colors, isDark, insets });
   const { width: screenWidth } = useWindowDimensions();
   const { user, accessToken } = useAuthStore();
   const { isConnected } = useNetworkStatus();
@@ -1040,7 +1042,7 @@ export default function Screen() {
   );
 }
 
-const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => StyleSheet.create({
+const createStyles = ({ colors, isDark, insets }: { colors: any, isDark: boolean, insets: any }) => StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: colors.background
@@ -1325,7 +1327,7 @@ const createStyles = ({ colors, isDark }: { colors: any, isDark: boolean }) => S
     borderTopLeftRadius: moderateScale(32),
     borderTopRightRadius: moderateScale(32),
     paddingTop: verticalScale(20),
-    paddingBottom: verticalScale(28),
+    paddingBottom: Math.max(verticalScale(28), insets.bottom + 12),
     paddingHorizontal: moderateScale(20),
     gap: moderateScale(16),
     shadowColor: "#0F172A",

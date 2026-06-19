@@ -49,5 +49,17 @@ export const authService = {
     apiRequest<AuthPayload>("/auth/login", {
       method: "POST",
       body: payload
+    }),
+
+  forgotPassword: (payload: { identifier: string; method: "email" | "phone" }) =>
+    apiRequest<{ success: boolean; message: string }>("/auth/forgot-password", {
+      method: "POST",
+      body: payload
+    }),
+
+  resetPassword: (payload: { identifier: string; token: string; newPassword: string; method: "email" | "phone" }) =>
+    apiRequest<{ success: boolean; message: string }>("/auth/reset-password", {
+      method: "POST",
+      body: payload
     })
 };

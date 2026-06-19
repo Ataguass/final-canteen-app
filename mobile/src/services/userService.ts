@@ -47,6 +47,14 @@ export const userService = {
       body: payload
     }),
 
+  updatePushToken: (token: string, tenantId: string, pushToken: string) =>
+    apiRequest<{ success: boolean; message: string }>("/users/me/push-token", {
+      method: "PUT",
+      token,
+      tenantId,
+      body: { pushToken }
+    }),
+
   listUsers: (token: string, tenantId: string) =>
     apiRequest<{ success: boolean; data: ManagedUser[] }>("/users", {
       token,

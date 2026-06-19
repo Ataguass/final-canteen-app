@@ -4,6 +4,22 @@ import * as Recharts from "recharts";
 const { AreaChart, Area, BarChart: RBarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } = Recharts;
 
+import { initializeApp, getApps } from "firebase/app";
+import { getAuth, RecaptchaVerifier, signInWithPhoneNumber, ConfirmationResult } from "firebase/auth";
+import { QRCodeSVG } from "qrcode.react";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyC9_diUOG7TTC54S81pyzeQ2qlVUgHouHc",
+  authDomain: "canteen-management-app-5a922.firebaseapp.com",
+  projectId: "canteen-management-app-5a922",
+  storageBucket: "canteen-management-app-5a922.firebasestorage.app",
+  messagingSenderId: "584881360124",
+  appId: "1:584881360124:web:1234567890abcdef"
+};
+
+const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
+const auth = getAuth(app);
+
 type Role = "ADMIN" | "SUPER_ADMIN" | "TEACHER" | "STUDENT" | "STAFF" | "GUEST";
 type PaymentMethod = "CASH" | "UPI" | "WALLET" | "CREDIT" | "CARD" | "OTHER";
 type PaymentStatus = "PAID" | "UNPAID" | "PARTIAL";
@@ -127,7 +143,7 @@ type WalletUser = {
   walletBalance: number;
 };
 
-type View = "dashboard" | "pos" | "orders" | "menu" | "stock" | "reports" | "users" | "banners" | "invoice" | "backups" | "community" | "wallet";
+type View = "dashboard" | "pos" | "orders" | "menu" | "stock" | "reports" | "users" | "banners" | "invoice" | "backups" | "community" | "wallet" | "qr-codes";
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api";
 const sessionKey = "canteen-web-admin-session";
@@ -145,7 +161,8 @@ const navIcons: Record<string, JSX.Element> = {
   invoice: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>,
   backups: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>,
   community: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
-  wallet: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M16 12h2"/></svg>
+  wallet: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M16 12h2"/></svg>,
+  "qr-codes": <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><rect x="7" y="7" width="3" height="3"/><rect x="14" y="7" width="3" height="3"/><rect x="7" y="14" width="3" height="3"/><rect x="14" y="14" width="3" height="3"/></svg>
 };
 
 const views: Array<{ id: View; label: string; hint: string }> = [
@@ -160,7 +177,8 @@ const views: Array<{ id: View; label: string; hint: string }> = [
   { id: "invoice", label: "Invoice", hint: "Receipt logo and fields" },
   { id: "backups", label: "Backups", hint: "Download and restore data" },
   { id: "community", label: "Community", hint: "Announcements and posts" },
-  { id: "wallet", label: "Wallets", hint: "Teacher and staff wallet top-up" }
+  { id: "wallet", label: "Wallets", hint: "Teacher and staff wallet top-up" },
+  { id: "qr-codes", label: "QR Codes", hint: "Print table ordering stickers" }
 ];
 
 const money = (value: number) =>
@@ -189,6 +207,16 @@ export default function AdminWebPage() {
   const [loginIdentifier, setLoginIdentifier] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Forgot password state
+  const [authMode, setAuthMode] = useState<"LOGIN" | "FORGOT" | "OTP" | "NEW_PASS">("LOGIN");
+  const [resetMethod, setResetMethod] = useState<"email" | "phone">("email");
+  const [resetIdentifier, setResetIdentifier] = useState("");
+  const [resetOtp, setResetOtp] = useState("");
+  const [resetFirebaseToken, setResetFirebaseToken] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
   const [notice, setNotice] = useState("");
   const [error, setError] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -389,6 +417,113 @@ export default function AdminWebPage() {
     () => items.filter((item) => item.stockQty <= item.lowStockThreshold).sort((a, b) => a.stockQty - b.stockQty),
     [items]
   );
+
+  const handleForgotPassword = async (event: FormEvent) => {
+    event.preventDefault();
+    setError("");
+    setNotice("");
+    if (!resetIdentifier) return;
+    
+    const trimmed = resetIdentifier.trim();
+    const isEmail = trimmed.includes("@");
+    setResetMethod(isEmail ? "email" : "phone");
+
+    setLoading(true);
+    try {
+      if (isEmail) {
+        await fetch(`${apiBaseUrl}/auth/forgot-password`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ identifier: trimmed, method: "email" })
+        });
+        setAuthMode("OTP");
+        setNotice("If the email is registered, an OTP has been sent.");
+      } else {
+        let formattedPhone = trimmed.replace(/\\s+/g, "");
+        if (!formattedPhone.startsWith("+")) formattedPhone = `+91${formattedPhone}`;
+        
+        if (!(window as any).recaptchaVerifier) {
+          (window as any).recaptchaVerifier = new RecaptchaVerifier(auth, "recaptcha-container", {
+            size: "invisible"
+          });
+        }
+        const confirmation = await signInWithPhoneNumber(auth, formattedPhone, (window as any).recaptchaVerifier);
+        setConfirmationResult(confirmation);
+        setAuthMode("OTP");
+        setNotice("An OTP has been sent to your phone.");
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Request failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async (event: FormEvent) => {
+    event.preventDefault();
+    setError("");
+    setNotice("");
+    
+    if (resetMethod === "phone") {
+      if (!confirmationResult) {
+        setError("Session missing. Try again.");
+        return;
+      }
+      setLoading(true);
+      try {
+        const credential = await confirmationResult.confirm(resetOtp);
+        if (credential && credential.user) {
+          const idToken = await credential.user.getIdToken();
+          setResetFirebaseToken(idToken);
+          setAuthMode("NEW_PASS");
+        }
+      } catch (err) {
+        setError("Invalid OTP");
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      setAuthMode("NEW_PASS");
+    }
+  };
+
+  const handleResetPassword = async (event: FormEvent) => {
+    event.preventDefault();
+    setError("");
+    setNotice("");
+    
+    if (newPassword !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+    
+    setLoading(true);
+    try {
+      const response = await fetch(`${apiBaseUrl}/auth/reset-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          identifier: resetIdentifier.trim(),
+          method: resetMethod,
+          token: resetMethod === "phone" ? resetFirebaseToken : resetOtp,
+          newPassword
+        })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Reset failed");
+      
+      setNotice("Password reset successfully. You can now log in.");
+      setAuthMode("LOGIN");
+      setResetIdentifier("");
+      setResetOtp("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Reset failed");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleLogin = async (event: FormEvent) => {
     event.preventDefault();
@@ -879,26 +1014,97 @@ export default function AdminWebPage() {
             <div>
               <img src="/canteen_logo_final.png" alt="Canteen Logo" style={{ width: 64, height: 64, marginBottom: 16, borderRadius: 12 }} />
               <p className="eyebrow">Canteen Admin</p>
-              <h1>Operations console</h1>
-              <p className="muted">Manage orders, menu, stock, users, banners, and backups from a browser.</p>
+              {authMode === "LOGIN" ? (
+                <>
+                  <h1>Operations console</h1>
+                  <p className="muted">Manage orders, menu, stock, users, banners, and backups from a browser.</p>
+                </>
+              ) : authMode === "FORGOT" ? (
+                <>
+                  <h1>Reset Password</h1>
+                  <p className="muted">Enter your email or phone number to receive a reset code.</p>
+                </>
+              ) : authMode === "OTP" ? (
+                <>
+                  <h1>Verify Code</h1>
+                  <p className="muted">Enter the 6-digit code sent to {resetIdentifier}.</p>
+                </>
+              ) : (
+                <>
+                  <h1>New Password</h1>
+                  <p className="muted">Set a new password for your account.</p>
+                </>
+              )}
             </div>
-            <form onSubmit={handleLogin} className="form">
-              <label>
-                Phone or Email
-                <input value={loginIdentifier} onChange={(event) => setLoginIdentifier(event.target.value)} required />
-              </label>
-              <label>
-                Password
-                <input
-                  value={loginPassword}
-                  onChange={(event) => setLoginPassword(event.target.value)}
-                  type="password"
-                  required
-                />
-              </label>
-              {error ? <p className="errorText">{error}</p> : null}
-              <button disabled={loading} className="primaryButton">{loading ? "Signing in..." : "Sign in"}</button>
-            </form>
+
+            {authMode === "LOGIN" && (
+              <form onSubmit={handleLogin} className="form">
+                <label>
+                  Phone or Email
+                  <input value={loginIdentifier} onChange={(event) => setLoginIdentifier(event.target.value)} required />
+                </label>
+                <label>
+                  Password
+                  <input
+                    value={loginPassword}
+                    onChange={(event) => setLoginPassword(event.target.value)}
+                    type="password"
+                    required
+                  />
+                </label>
+                <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                  <button type="button" onClick={() => { setAuthMode("FORGOT"); setError(""); setNotice(""); }} style={{ background: "none", border: "none", color: "var(--primary)", fontSize: 14, cursor: "pointer", padding: 0 }}>Forgot Password?</button>
+                </div>
+                {error ? <p className="errorText">{error}</p> : null}
+                {notice ? <div style={{ color: "green", fontSize: 14, marginTop: 4 }}>{notice}</div> : null}
+                <button disabled={loading} className="primaryButton">{loading ? "Signing in..." : "Sign in"}</button>
+              </form>
+            )}
+
+            {authMode === "FORGOT" && (
+              <form onSubmit={handleForgotPassword} className="form">
+                <label>
+                  Phone or Email
+                  <input value={resetIdentifier} onChange={(event) => setResetIdentifier(event.target.value)} required />
+                </label>
+                {error ? <p className="errorText">{error}</p> : null}
+                {notice ? <div style={{ color: "green", fontSize: 14, marginTop: 4 }}>{notice}</div> : null}
+                <button disabled={loading} className="primaryButton">{loading ? "Sending..." : "Send Reset Code"}</button>
+                <button type="button" onClick={() => { setAuthMode("LOGIN"); setError(""); setNotice(""); }} className="ghostButton" style={{ marginTop: 8, justifyContent: "center" }}>Back to Login</button>
+              </form>
+            )}
+
+            {authMode === "OTP" && (
+              <form onSubmit={handleVerifyOtp} className="form">
+                <label>
+                  6-Digit OTP
+                  <input value={resetOtp} onChange={(event) => setResetOtp(event.target.value.replace(/\D/g, "").slice(0, 6))} required pattern="\d{6}" title="6-digit code" />
+                </label>
+                {error ? <p className="errorText">{error}</p> : null}
+                {notice ? <div style={{ color: "green", fontSize: 14, marginTop: 4 }}>{notice}</div> : null}
+                <button disabled={loading} className="primaryButton">{loading ? "Verifying..." : "Verify Code"}</button>
+                <button type="button" onClick={() => { setAuthMode("FORGOT"); setError(""); setNotice(""); }} className="ghostButton" style={{ marginTop: 8, justifyContent: "center" }}>Back</button>
+              </form>
+            )}
+
+            {authMode === "NEW_PASS" && (
+              <form onSubmit={handleResetPassword} className="form">
+                <label>
+                  New Password
+                  <input type="password" value={newPassword} onChange={(event) => setNewPassword(event.target.value)} required minLength={6} />
+                </label>
+                <label>
+                  Confirm Password
+                  <input type="password" value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} required minLength={6} />
+                </label>
+                {error ? <p className="errorText">{error}</p> : null}
+                {notice ? <div style={{ color: "green", fontSize: 14, marginTop: 4 }}>{notice}</div> : null}
+                <button disabled={loading} className="primaryButton">{loading ? "Updating..." : "Update Password"}</button>
+                <button type="button" onClick={() => { setAuthMode("LOGIN"); setError(""); setNotice(""); }} className="ghostButton" style={{ marginTop: 8, justifyContent: "center" }}>Cancel</button>
+              </form>
+            )}
+            
+            <div id="recaptcha-container"></div>
           </section>
         </main>
         <style jsx global>{globalCss}</style>
@@ -1420,6 +1626,10 @@ export default function AdminWebPage() {
                 </div>
               </div>
             </section>
+          ) : null}
+
+          {activeView === "qr-codes" ? (
+            <QRCodesPanel baseUrl={typeof window !== "undefined" ? window.location.origin : ""} />
           ) : null}
 
         </section>
@@ -2610,7 +2820,86 @@ function StockTable({ items, updateStock }: { items: MenuItem[]; updateStock: (i
   );
 }
 
+function QRCodesPanel({ baseUrl }: { baseUrl: string }) {
+  const [tableCount, setTableCount] = useState(10);
+  const tables = Array.from({ length: tableCount }, (_, i) => i + 1);
+
+  return (
+    <div className="viewContainer qr-panel">
+      <div className="viewHeader print-hide">
+        <h2 className="viewTitle">QR Codes</h2>
+        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+          <span style={{ color: "var(--muted)", fontSize: 14 }}>Tables:</span>
+          <input
+            type="number"
+            min="1"
+            max="100"
+            value={tableCount}
+            onChange={(e) => setTableCount(parseInt(e.target.value) || 1)}
+            style={{ width: "80px", padding: "8px", borderRadius: "8px", border: "1px solid var(--border)", background: "var(--surface)", color: "var(--text)" }}
+          />
+          <button className="primaryButton" onClick={() => window.print()}>
+            Print QR Codes
+          </button>
+        </div>
+      </div>
+      
+      <div className="viewBody">
+        <p className="muted print-hide" style={{ marginBottom: "20px" }}>Print these QR codes and place them on your tables. Guests scan them to open the ordering app instantly.</p>
+        <div className="qr-grid">
+          {tables.map(tableId => {
+            const url = `${baseUrl}/qr/${tableId}`;
+            return (
+              <div key={tableId} className="qr-card">
+                <div className="qr-code-wrapper">
+                  {/* @ts-expect-error type mismatch with qrcode.react */}
+                  <QRCodeSVG value={url} size={150} level="M" />
+                </div>
+                <h3>Table {tableId}</h3>
+                <span className="muted" style={{ fontSize: 12 }}>Scan to order</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 const globalCss = `
+  @media print {
+    .print-hide, .sidebar, .sidebarNav, .sidebarHeader, .no-print { display: none !important; }
+    .appShell { margin: 0 !important; padding: 0 !important; display: block !important; }
+    .mainContent { padding: 0 !important; overflow: visible !important; }
+    .viewContainer { margin: 0 !important; padding: 0 !important; display: block !important; box-shadow: none !important; border: none !important; }
+    .qr-grid { display: flex; flex-wrap: wrap; gap: 40px; justify-content: center; }
+    .qr-card { border: 2px dashed #ccc !important; padding: 20px !important; break-inside: avoid; text-align: center; }
+    body { background: white !important; color: black !important; }
+    .qr-card h3 { color: black !important; margin-top: 10px; font-size: 20px; }
+  }
+
+  .qr-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+  }
+  .qr-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+  .qr-code-wrapper {
+    background: white;
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+  }
+
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
   :root {

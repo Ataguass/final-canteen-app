@@ -2,11 +2,14 @@ import { Ionicons } from "@expo/vector-icons";
 import * as ImageManipulator from "expo-image-manipulator";
 import * as ImagePicker from "expo-image-picker";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Alert, Image, Linking, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { Controller, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuthStore } from '../../../stores/useAuthStore';
 import { communityService } from "../../../services/communityService";
 import { useTheme } from '../../../hooks/useTheme';
+import { communityPostSchema, CommunityPostFormData } from "../../../schemas/admin";
 
 const MAX_IMAGE_WIDTH = 1280;
 const MAX_IMAGE_HEIGHT = 1280;
@@ -33,27 +36,30 @@ export default function Screen() {
     shadowOffset: { width: 0, height: 4 },
     elevation: 2
   } as const;
-  const [title, setTitle] = useState("");
-  const [body, setBody] = useState("");
-  const [mediaUrl, setMediaUrl] = useState<string | null>(null);
-  const [mediaType, setMediaType] = useState<"IMAGE" | "VIDEO" | null>(null);
-  const [isPinned, setIsPinned] = useState(false);
-  const [isVisible, setIsVisible] = useState(true);
+
+  const { control, handleSubmit, setValue, watch, reset } = useForm<CommunityPostFormData>({
+    resolver: zodResolver(communityPostSchema),
+    defaultValues: {
+      title: "",
+      body: "",
+      mediaUrl: null,
+      mediaType: null,
+      isPinned: false,
+      isVisible: true,
+    }
+  });
+
+  const mediaUrl = watch("mediaUrl");
+  const mediaType = watch("mediaType");
+  const isPinned = watch("isPinned");
+  const isVisible = watch("isVisible");
+
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
 
-  const resetForm = useCallback(() => {
-    setTitle("");
-    setBody("");
-    setMediaUrl(null);
-    setMediaType(null);
-    setIsPinned(false);
-    setIsVisible(true);
-  }, []);
-
   useEffect(() => {
-    resetForm();
-  }, [resetForm, resetKey]);
+    reset();
+  }, [reset, resetKey]);
 
   const uploadCommunityMedia = async () => {
     if (!user?.tenantId || !accessToken) return;
@@ -118,8 +124,8 @@ export default function Screen() {
         type: uploadType,
         name: uploadName
       });
-      setMediaUrl(response.data.mediaUrl);
-      setMediaType(response.data.mediaType);
+      setValue("mediaUrl", response.data.mediaUrl);
+      setValue("mediaType", response.data.mediaType);
       Alert.alert("Uploaded", `${response.data.mediaType === "IMAGE" ? "Image" : "Video"} uploaded.`);
     } catch (error) {
       Alert.alert("Upload failed", error instanceof Error ? error.message : "Could not upload media");
@@ -128,23 +134,12 @@ export default function Screen() {
     }
   };
 
-  const onCreate = async () => {
+  const onCreate = async (data: CommunityPostFormData) => {
     if (!user?.tenantId || !accessToken) return;
-    if (!title.trim() || !body.trim()) {
-      Alert.alert("Missing fields", "Title and body are required.");
-      return;
-    }
     try {
       setSaving(true);
-      await communityService.createPost(accessToken, user.tenantId, {
-        title: title.trim(),
-        body: body.trim(),
-        mediaUrl,
-        mediaType,
-        isPinned,
-        isVisible
-      });
-      resetForm();
+      await communityService.createPost(accessToken, user.tenantId, data);
+      reset();
       Alert.alert("Success", "Community post created.");
       router.replace("/(admin)/community");
     } catch (error) {
@@ -163,42 +158,60 @@ export default function Screen() {
 
       <View style={{ ...cardShadow, padding: 16, gap: 12 }}>
         <Text style={{ fontSize: 16, fontWeight: "800", color: colors.text }}>Content</Text>
-        <TextInput
-          value={title}
-          onChangeText={setTitle}
-          placeholder="Post title"
-          placeholderTextColor="#94A3B8"
-          style={{
-            borderWidth: 1,
-            borderColor: colors.border,
-            borderRadius: 12,
-            paddingHorizontal: 16,
-            paddingVertical: 14,
-            backgroundColor: colors.background,
-            color: colors.text,
-            fontSize: 16,
-            fontWeight: "600"
-          }}
+        <Controller
+          control={control}
+          name="title"
+          render={({ field: { onChange, value }, fieldState: { error } }) => (
+            <View style={{ gap: 4 }}>
+              <TextInput
+                value={value}
+                onChangeText={onChange}
+                placeholder="Post title"
+                placeholderTextColor="#94A3B8"
+                style={{
+                  borderWidth: 1,
+                  borderColor: error ? "#EF4444" : colors.border,
+                  borderRadius: 12,
+                  paddingHorizontal: 16,
+                  paddingVertical: 14,
+                  backgroundColor: colors.background,
+                  color: colors.text,
+                  fontSize: 16,
+                  fontWeight: "600"
+                }}
+              />
+              {error && <Text style={{ color: "#EF4444", fontSize: 12, marginLeft: 4 }}>{error.message}</Text>}
+            </View>
+          )}
         />
-        <TextInput
-          value={body}
-          onChangeText={setBody}
-          placeholder="Write your announcement..."
-          placeholderTextColor="#94A3B8"
-          multiline
-          style={{
-            borderWidth: 1,
-            borderColor: colors.border,
-            borderRadius: 12,
-            paddingHorizontal: 16,
-            paddingVertical: 14,
-            minHeight: 180,
-            textAlignVertical: "top",
-            backgroundColor: colors.background,
-            color: colors.text,
-            fontSize: 15,
-            lineHeight: 22
-          }}
+        <Controller
+          control={control}
+          name="body"
+          render={({ field: { onChange, value }, fieldState: { error } }) => (
+            <View style={{ gap: 4 }}>
+              <TextInput
+                value={value}
+                onChangeText={onChange}
+                placeholder="Write your announcement..."
+                placeholderTextColor="#94A3B8"
+                multiline
+                style={{
+                  borderWidth: 1,
+                  borderColor: error ? "#EF4444" : colors.border,
+                  borderRadius: 12,
+                  paddingHorizontal: 16,
+                  paddingVertical: 14,
+                  minHeight: 180,
+                  textAlignVertical: "top",
+                  backgroundColor: colors.background,
+                  color: colors.text,
+                  fontSize: 15,
+                  lineHeight: 22
+                }}
+              />
+              {error && <Text style={{ color: "#EF4444", fontSize: 12, marginLeft: 4 }}>{error.message}</Text>}
+            </View>
+          )}
         />
       </View>
 
@@ -236,8 +249,8 @@ export default function Screen() {
             />
             <Pressable
               onPress={() => {
-                setMediaUrl(null);
-                setMediaType(null);
+                setValue("mediaUrl", null);
+                setValue("mediaType", null);
               }}
               style={{ position: "absolute", top: 12, right: 12, backgroundColor: "rgba(15, 23, 42, 0.7)", borderRadius: 20, padding: 8 }}
             >
@@ -255,8 +268,8 @@ export default function Screen() {
               </View>
               <Pressable
                 onPress={() => {
-                  setMediaUrl(null);
-                  setMediaType(null);
+                  setValue("mediaUrl", null);
+                  setValue("mediaType", null);
                 }}
               >
                 <Ionicons name="trash" size={20} color="#DC2626" />
@@ -280,7 +293,7 @@ export default function Screen() {
         <Text style={{ fontSize: 16, fontWeight: "800", color: colors.text }}>Settings</Text>
         <View style={{ flexDirection: "row", gap: 12 }}>
           <Pressable
-            onPress={() => setIsPinned((value) => !value)}
+            onPress={() => setValue("isPinned", !isPinned)}
             style={{
               flex: 1,
               borderRadius: 12,
@@ -298,7 +311,7 @@ export default function Screen() {
             <Text style={{ color: isPinned ? (isDark ? '#60A5FA' : "#4F46E5") : colors.textSecondary, fontWeight: "800" }}>Pinned</Text>
           </Pressable>
           <Pressable
-            onPress={() => setIsVisible((value) => !value)}
+            onPress={() => setValue("isVisible", !isVisible)}
             style={{
               flex: 1,
               borderRadius: 12,
@@ -319,7 +332,7 @@ export default function Screen() {
       </View>
 
       <Pressable
-        onPress={onCreate}
+        onPress={handleSubmit(onCreate)}
         disabled={saving}
         style={{
           borderRadius: 12,

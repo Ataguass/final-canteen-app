@@ -18,9 +18,10 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuthStore } from '../../stores/useAuthStore';
 import { useCartStore } from '../../stores/useCartStore';
 import { useToast } from "../../components/Toast";
-import { menuService } from "../../services/menuService";
+import { useCategories, useMenuItems } from "../../hooks/queries/useMenu";
 import { moderateScale, fontScale, verticalScale, scale, isTablet, gridColumns } from '../../utils/responsive';
 import { useTheme } from '../../hooks/useTheme';
+import { Shimmer } from "../../components/Shimmer";
 
 type SpeechRecognitionModule = {
   requestPermissionsAsync: () => Promise<{ granted?: boolean }>;
@@ -71,42 +72,19 @@ export default function Screen() {
   const speechListenersRef = useRef<Array<{ remove: () => void }>>([]);
   const hasShownVoiceFallbackRef = useRef(false);
 
-  const [loading, setLoading] = useState(false);
   const [query, setQuery] = useState("");
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [items, setItems] = useState<MenuItem[]>([]);
   const [isListening, setIsListening] = useState(false);
+
+  const { data: categoriesData, isLoading: isCatsLoading } = useCategories();
+  const { data: itemsData, isLoading: isItemsLoading } = useMenuItems();
+  
+  const loading = isCatsLoading || isItemsLoading;
+  const categories = categoriesData || [];
+  const items = useMemo(() => itemsData?.filter(i => i.isAvailable) || [], [itemsData]);
 
   const itemGridColumns = screenWidth >= 1200 ? 4 : screenWidth >= 900 ? 3 : 2;
   const itemCardWidth = itemGridColumns === 4 ? "23.5%" : itemGridColumns === 3 ? "32%" : "48.5%";
   const itemImageHeight = itemGridColumns === 4 ? 88 : itemGridColumns === 3 ? 98 : 108;
-
-  useFocusEffect(
-    useCallback(() => {
-      const timer = setTimeout(() => searchInputRef.current?.focus(), 120);
-      return () => clearTimeout(timer);
-    }, [])
-  );
-
-  useEffect(() => {
-    const load = async () => {
-      if (!user?.tenantId || !accessToken) return;
-      try {
-        setLoading(true);
-        const [cats, menu] = await Promise.all([
-          menuService.listCategories(accessToken, user.tenantId),
-          menuService.listItems(accessToken, user.tenantId)
-        ]);
-        setCategories(cats.data);
-        setItems(menu.data.filter((item) => item.isAvailable));
-      } catch (error) {
-        Alert.alert("Error", error instanceof Error ? error.message : "Failed to load menu");
-      } finally {
-        setLoading(false);
-      }
-    };
-    load().catch(() => undefined);
-  }, [user?.tenantId, accessToken]);
 
   useEffect(
     () => () => {
@@ -303,31 +281,40 @@ export default function Screen() {
         <View style={styles.discoverySection}>
           <Text style={styles.discoveryTitle}>WHAT'S ON YOUR MIND?</Text>
           <View style={styles.discoveryGrid}>
-            {discoveryCategories.map((category) => (
-              <Pressable
-                key={category.id}
-                onPress={() =>
-                  router.push({
-                    pathname: "/(student)/menu/[categoryId]",
-                    params: { categoryId: category.id }
-                  })
-                }
-                style={styles.discoveryItem}
-              >
-                <View style={styles.discoveryImageWrap}>
-                  {category.imageUrl ? (
-                    <Image source={{ uri: category.imageUrl }} style={styles.discoveryImage} resizeMode="cover" />
-                  ) : (
-                    <View style={styles.discoveryFallback}>
-                      <Ionicons name="fast-food-outline" size={24} color={colors.textMuted} />
-                    </View>
-                  )}
+            {loading ? (
+              Array.from({ length: 8 }).map((_, i) => (
+                <View key={i} style={styles.discoveryItem}>
+                  <Shimmer width={64} height={64} borderRadius={32} />
+                  <Shimmer width={50} height={12} borderRadius={4} style={{ marginTop: 8 }} />
                 </View>
-                <Text style={styles.discoveryName} numberOfLines={1}>
-                  {category.name}
-                </Text>
-              </Pressable>
-            ))}
+              ))
+            ) : (
+              discoveryCategories.map((category) => (
+                <Pressable
+                  key={category.id}
+                  onPress={() =>
+                    router.push({
+                      pathname: "/(student)/menu/[categoryId]",
+                      params: { categoryId: category.id }
+                    })
+                  }
+                  style={styles.discoveryItem}
+                >
+                  <View style={styles.discoveryImageWrap}>
+                    {category.imageUrl ? (
+                      <Image source={{ uri: category.imageUrl }} style={styles.discoveryImage} resizeMode="cover" />
+                    ) : (
+                      <View style={styles.discoveryFallback}>
+                        <Ionicons name="fast-food-outline" size={24} color={colors.textMuted} />
+                      </View>
+                    )}
+                  </View>
+                  <Text style={styles.discoveryName} numberOfLines={1}>
+                    {category.name}
+                  </Text>
+                </Pressable>
+              ))
+            )}
           </View>
         </View>
       ) : (
@@ -357,11 +344,23 @@ export default function Screen() {
           <View style={styles.resultHeader}>
             <Text style={styles.resultTitle}>Items</Text>
             <Text style={styles.resultMeta}>
-              {loading ? "Loading..." : `${filteredItems.length} shown`}
+              {loading ? "" : `${filteredItems.length} shown`}
             </Text>
           </View>
 
-          {filteredItems.length > 0 ? (
+          {loading ? (
+            <View style={styles.itemGrid}>
+              {Array.from({ length: 6 }).map((_, i) => (
+                <View key={i} style={[styles.itemCard, { width: itemCardWidth }]}>
+                  <Shimmer width="100%" height={itemImageHeight} borderRadius={0} />
+                  <View style={styles.itemBody}>
+                    <Shimmer width="70%" height={16} borderRadius={4} />
+                    <Shimmer width="40%" height={12} borderRadius={4} style={{ marginTop: 8 }} />
+                  </View>
+                </View>
+              ))}
+            </View>
+          ) : filteredItems.length > 0 ? (
             <View style={styles.itemGrid}>
               {filteredItems.map((item) => {
                 const isOutOfStock = item.stockQty <= 0;

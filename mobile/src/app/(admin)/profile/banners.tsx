@@ -3,10 +3,13 @@ import * as ImageManipulator from "expo-image-manipulator";
 import * as ImagePicker from "expo-image-picker";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Alert, Image, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { Controller, useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuthStore } from '../../../stores/useAuthStore';
 import { Banner } from "../../../types";
 import { bannerService} from "../../../services/bannerService";
 import { useTheme } from '../../../hooks/useTheme';
+import { bannerSchema, BannerFormData } from "../../../schemas/admin";
 
 const MAX_BANNER_SIZE_BYTES = 2 * 1024 * 1024;
 const MAX_BANNER_WIDTH = 1600;
@@ -33,10 +36,20 @@ export default function Screen() {
   const [banners, setBanners] = useState<Banner[]>([]);
   const [loading, setLoading] = useState(false);
   const [creating, setCreating] = useState(false);
-  const [title, setTitle] = useState("");
-  const [imageUrl, setImageUrl] = useState("");
-  const [actionUrl, setActionUrl] = useState("");
-  const [sortOrder, setSortOrder] = useState("0");
+
+  const { control, handleSubmit, setValue, watch, reset } = useForm<BannerFormData>({
+    resolver: zodResolver(bannerSchema),
+    defaultValues: {
+      title: "",
+      imageUrl: "",
+      actionUrl: "",
+      sortOrder: 0,
+      isActive: true,
+    }
+  });
+
+  const imageUrl = watch("imageUrl");
+
   const [uploadingImage, setUploadingImage] = useState(false);
   const [query, setQuery] = useState("");
   const [showActiveOnly, setShowActiveOnly] = useState(false);
@@ -64,24 +77,17 @@ export default function Screen() {
     load().catch(() => undefined);
   }, [load]);
 
-  const onCreate = async () => {
+  const onCreate = async (data: BannerFormData) => {
     if (!user?.tenantId || !accessToken) return;
-    if (!imageUrl.trim()) {
-      Alert.alert("Missing fields", "Image URL is required.");
-      return;
-    }
     try {
       setCreating(true);
       await bannerService.createBanner(accessToken, user.tenantId, {
-        title: title.trim(),
-        imageUrl: imageUrl.trim(),
-        actionUrl: actionUrl.trim() || undefined,
-        sortOrder: Number(sortOrder) || 0
+        title: data.title?.trim() || "",
+        imageUrl: data.imageUrl.trim(),
+        actionUrl: data.actionUrl?.trim() || undefined,
+        sortOrder: data.sortOrder || 0
       });
-      setTitle("");
-      setImageUrl("");
-      setActionUrl("");
-      setSortOrder("0");
+      reset();
       await load();
       Alert.alert("Success", "Banner created.");
     } catch (error) {
@@ -172,7 +178,7 @@ export default function Screen() {
 
       setUploadingImage(true);
       const upload = await bannerService.uploadBannerImage(accessToken, user.tenantId, `data:image/jpeg;base64,${base64}`);
-      setImageUrl(upload.data.imageUrl);
+      setValue("imageUrl", upload.data.imageUrl);
       Alert.alert("Uploaded", "Banner image uploaded from phone.");
     } catch (error) {
       Alert.alert("Upload failed", error instanceof Error ? error.message : "Could not upload image");
@@ -223,30 +229,57 @@ export default function Screen() {
         <Text style={{ fontSize: 18, fontWeight: "800", color: colors.text }}>Add New Banner</Text>
         
         <View style={{ flexDirection: "row", gap: 8 }}>
-          <TextInput
-            value={title}
-            onChangeText={setTitle}
-            placeholder="Banner title (optional)"
-            placeholderTextColor={colors.textSecondary}
-            style={{ flex: 2, borderWidth: 1, borderColor: colors.border, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, backgroundColor: colors.surfaceAlt, fontSize: 14, color: colors.text, fontWeight: "500" }}
+          <Controller
+            control={control}
+            name="title"
+            render={({ field: { onChange, value }, fieldState: { error } }) => (
+              <View style={{ flex: 2 }}>
+                <TextInput
+                  value={value || ""}
+                  onChangeText={onChange}
+                  placeholder="Banner title (optional)"
+                  placeholderTextColor={colors.textSecondary}
+                  style={{ borderWidth: 1, borderColor: error ? "#EF4444" : colors.border, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, backgroundColor: colors.surfaceAlt, fontSize: 14, color: colors.text, fontWeight: "500" }}
+                />
+                {error && <Text style={{ color: "#EF4444", fontSize: 12, marginLeft: 4, marginTop: 4 }}>{error.message}</Text>}
+              </View>
+            )}
           />
-          <TextInput
-            value={sortOrder}
-            onChangeText={setSortOrder}
-            placeholder="Order (0)"
-            keyboardType="numeric"
-            placeholderTextColor={colors.textSecondary}
-            style={{ flex: 1, borderWidth: 1, borderColor: colors.border, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, backgroundColor: colors.surfaceAlt, fontSize: 14, color: colors.text, fontWeight: "500" }}
+          <Controller
+            control={control}
+            name="sortOrder"
+            render={({ field: { onChange, value }, fieldState: { error } }) => (
+              <View style={{ flex: 1 }}>
+                <TextInput
+                  value={value === 0 ? "0" : String(value || "")}
+                  onChangeText={onChange}
+                  placeholder="Order (0)"
+                  keyboardType="numeric"
+                  placeholderTextColor={colors.textSecondary}
+                  style={{ borderWidth: 1, borderColor: error ? "#EF4444" : colors.border, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, backgroundColor: colors.surfaceAlt, fontSize: 14, color: colors.text, fontWeight: "500" }}
+                />
+                {error && <Text style={{ color: "#EF4444", fontSize: 12, marginLeft: 4, marginTop: 4 }}>{error.message}</Text>}
+              </View>
+            )}
           />
         </View>
 
-        <TextInput
-          value={actionUrl}
-          onChangeText={setActionUrl}
-          placeholder="Action URL (optional destination link)"
-          autoCapitalize="none"
-          placeholderTextColor={colors.textSecondary}
-          style={{ borderWidth: 1, borderColor: colors.border, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, backgroundColor: colors.surfaceAlt, fontSize: 14, color: colors.text, fontWeight: "500" }}
+        <Controller
+          control={control}
+          name="actionUrl"
+          render={({ field: { onChange, value }, fieldState: { error } }) => (
+            <View>
+              <TextInput
+                value={value || ""}
+                onChangeText={onChange}
+                placeholder="Action URL (optional destination link)"
+                autoCapitalize="none"
+                placeholderTextColor={colors.textSecondary}
+                style={{ borderWidth: 1, borderColor: error ? "#EF4444" : colors.border, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, backgroundColor: colors.surfaceAlt, fontSize: 14, color: colors.text, fontWeight: "500" }}
+              />
+              {error && <Text style={{ color: "#EF4444", fontSize: 12, marginLeft: 4, marginTop: 4 }}>{error.message}</Text>}
+            </View>
+          )}
         />
 
         <View style={{ backgroundColor: colors.surfaceAlt, borderWidth: 1, borderColor: colors.border, borderStyle: "dashed", borderRadius: 14, padding: 16, alignItems: "center", gap: 10 }}>
@@ -285,17 +318,26 @@ export default function Screen() {
           </Text>
         </View>
 
-        <TextInput
-          value={imageUrl}
-          onChangeText={setImageUrl}
-          placeholder="Or paste an image URL here..."
-          autoCapitalize="none"
-          placeholderTextColor={colors.textSecondary}
-          style={{ borderWidth: 1, borderColor: colors.border, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10, backgroundColor: colors.surfaceAlt, fontSize: 13, color: colors.text, fontWeight: "500" }}
+        <Controller
+          control={control}
+          name="imageUrl"
+          render={({ field: { onChange, value }, fieldState: { error } }) => (
+            <View>
+              <TextInput
+                value={value || ""}
+                onChangeText={onChange}
+                placeholder="Or paste an image URL here..."
+                autoCapitalize="none"
+                placeholderTextColor={colors.textSecondary}
+                style={{ borderWidth: 1, borderColor: error ? "#EF4444" : colors.border, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 10, backgroundColor: colors.surfaceAlt, fontSize: 13, color: colors.text, fontWeight: "500" }}
+              />
+              {error && <Text style={{ color: "#EF4444", fontSize: 12, marginLeft: 4, marginTop: 4 }}>{error.message}</Text>}
+            </View>
+          )}
         />
 
         <Pressable
-          onPress={onCreate}
+          onPress={handleSubmit(onCreate)}
           disabled={creating}
           style={{ borderRadius: 14, paddingVertical: 14, alignItems: "center", backgroundColor: isDark ? colors.text : "#0F172A", marginTop: 4, shadowColor: "#000", shadowOpacity: 0.1, shadowRadius: 8, shadowOffset: { width: 0, height: 4 }, elevation: 3 }}
         >

@@ -2,10 +2,14 @@ import { Ionicons } from "@expo/vector-icons";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Alert, Modal, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { useAuthStore } from '../../../stores/useAuthStore';
-import { ManageableUserRole } from "../../../types";
-import { ManagedUser } from "../../../types";
-import {   userService } from "../../../services/userService";
+import { ManageableUserRole, ManagedUser } from "../../../types";
+import { userService } from "../../../services/userService";
 import { useTheme } from '../../../hooks/useTheme';
+import { useForm, Controller } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { userCreateSchema, UserCreateFormData } from "../../../schemas/admin";
+import { InputField } from "../../../components/ui/InputField";
+import Animated, { FadeInUp, FadeInDown } from "react-native-reanimated";
 
 type RoleFilter = "ALL" | ManageableUserRole;
 type ApprovalFilter = "ALL" | "APPROVED" | "PENDING";
@@ -138,10 +142,6 @@ export default function Screen() {
     elevation: 3
   } as const;
   const [users, setUsers] = useState<ManagedUser[]>([]);
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [password, setPassword] = useState("");
-  const [role, setRole] = useState<ManageableUserRole>("TEACHER");
   const [creating, setCreating] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [query, setQuery] = useState("");
@@ -154,6 +154,18 @@ export default function Screen() {
   const [bulkDefaultRole, setBulkDefaultRole] = useState<ManageableUserRole>("TEACHER");
   const [bulkImporting, setBulkImporting] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+
+  const { control, handleSubmit, reset, watch, setValue } = useForm<UserCreateFormData>({
+    resolver: zodResolver(userCreateSchema),
+    defaultValues: {
+      name: "",
+      phone: "",
+      password: "",
+      role: "TEACHER"
+    }
+  });
+
+  const currentRole = watch("role");
 
   const loadUsers = useCallback(async () => {
     if (!user?.tenantId || !accessToken) return;
@@ -173,27 +185,21 @@ export default function Screen() {
     });
   }, [loadUsers]);
 
-  const onCreate = async () => {
+  const onCreate = async (data: UserCreateFormData) => {
     if (!user?.tenantId || !accessToken) return;
-    if (!name.trim() || !phone.trim() || !password.trim()) {
-      Alert.alert("Missing fields", "Name, phone and password are required.");
-      return;
-    }
 
     try {
       setCreating(true);
       await userService.createUser(accessToken, user.tenantId, {
-        name: name.trim(),
-        phone: phone.trim(),
-        password: password.trim(),
-        role,
+        name: data.name.trim(),
+        phone: data.phone.trim(),
+        password: data.password.trim(),
+        role: data.role,
         isApproved: true
       });
-      setName("");
-      setPhone("");
-      setPassword("");
+      reset();
       await loadUsers();
-      Alert.alert("Success", `${role === "TEACHER" ? "Teacher" : "Staff"} account created.`);
+      Alert.alert("Success", `${data.role === "TEACHER" ? "Teacher" : "Staff"} account created.`);
     } catch (error) {
       Alert.alert("Error", error instanceof Error ? error.message : "Could not create user");
     } finally {
@@ -345,44 +351,67 @@ export default function Screen() {
         </ScrollView>
 
         {/* CREATE USER */}
-        <View style={{ ...cardShadow, padding: 16, gap: 12 }}>
-          <Text style={{ fontSize: 16, fontWeight: "800", color: colors.text }}>Add New User</Text>
-          <View style={{ flexDirection: "row", gap: 10 }}>
-            <TextInput
-              placeholder="Full name"
-              placeholderTextColor={colors.textSecondary}
-              value={name}
-              onChangeText={setName}
-              style={{ flex: 1, borderWidth: 1, borderColor: colors.border, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, backgroundColor: colors.surfaceAlt, fontSize: 14, color: colors.text }}
+        <Animated.View entering={FadeInUp.delay(100).springify()} style={{ ...cardShadow, padding: 16, gap: 16 }}>
+          <Text style={{ fontSize: 18, fontWeight: "800", color: colors.text }}>Add New User</Text>
+          <View style={{ gap: 12 }}>
+            <Controller
+              control={control}
+              name="name"
+              render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
+                <InputField
+                  leftIcon="person-outline"
+                  placeholder="Full Name"
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  error={error?.message}
+                  containerStyle={{ flex: 1 }}
+                />
+              )}
             />
-            <TextInput
-              placeholder="Phone"
-              placeholderTextColor={colors.textSecondary}
-              value={phone}
-              onChangeText={setPhone}
-              keyboardType="phone-pad"
-              style={{ flex: 1, borderWidth: 1, borderColor: colors.border, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, backgroundColor: colors.surfaceAlt, fontSize: 14, color: colors.text }}
+            <Controller
+              control={control}
+              name="phone"
+              render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
+                <InputField
+                  leftIcon="call-outline"
+                  placeholder="Phone Number"
+                  keyboardType="phone-pad"
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  error={error?.message}
+                  containerStyle={{ flex: 1 }}
+                />
+              )}
             />
-          </View>
-          <View style={{ flexDirection: "row", gap: 10, alignItems: "center" }}>
-            <TextInput
-              placeholder="Temporary password"
-              placeholderTextColor={colors.textSecondary}
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-              style={{ flex: 3, borderWidth: 1, borderColor: colors.border, borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, backgroundColor: colors.surfaceAlt, fontSize: 14, color: colors.text }}
+            <Controller
+              control={control}
+              name="password"
+              render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
+                <InputField
+                  leftIcon="lock-closed-outline"
+                  placeholder="Temporary Password"
+                  isPassword={true}
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  error={error?.message}
+                  containerStyle={{ flex: 1 }}
+                />
+              )}
             />
-            <View style={{ flex: 2, flexDirection: "row", backgroundColor: colors.surfaceAlt, borderRadius: 12, padding: 4 }}>
+            
+            <View style={{ flexDirection: "row", backgroundColor: colors.surfaceAlt, borderRadius: 12, padding: 4 }}>
               {(["TEACHER", "STAFF"] as ManageableUserRole[]).map((value) => {
-                const active = role === value;
+                const active = currentRole === value;
                 return (
                   <Pressable
                     key={value}
-                    onPress={() => setRole(value)}
-                    style={{ flex: 1, borderRadius: 8, paddingVertical: 8, alignItems: "center", backgroundColor: active ? colors.card : "transparent", shadowColor: active ? "#000" : "transparent", shadowOpacity: 0.05, shadowRadius: 4, elevation: active ? 1 : 0 }}
+                    onPress={() => setValue("role", value, { shouldValidate: true })}
+                    style={{ flex: 1, borderRadius: 8, paddingVertical: 10, alignItems: "center", backgroundColor: active ? colors.card : "transparent", shadowColor: active ? "#000" : "transparent", shadowOpacity: 0.05, shadowRadius: 4, elevation: active ? 1 : 0 }}
                   >
-                    <Text style={{ color: active ? colors.text : colors.textSecondary, fontWeight: active ? "800" : "600", fontSize: 12 }}>
+                    <Text style={{ color: active ? colors.text : colors.textSecondary, fontWeight: active ? "800" : "600", fontSize: 14 }}>
                       {value === "TEACHER" ? "Teacher" : "Staff"}
                     </Text>
                   </Pressable>
@@ -391,13 +420,13 @@ export default function Screen() {
             </View>
           </View>
           <Pressable
-            onPress={onCreate}
+            onPress={handleSubmit(onCreate)}
             disabled={creating}
             style={{ borderRadius: 12, paddingVertical: 14, alignItems: "center", backgroundColor: colors.primary, marginTop: 4 }}
           >
-            <Text style={{ color: "white", fontWeight: "800", fontSize: 15 }}>{creating ? "Creating..." : "Create User"}</Text>
+            <Text style={{ color: "white", fontWeight: "800", fontSize: 16 }}>{creating ? "Creating..." : "Create User"}</Text>
           </Pressable>
-        </View>
+        </Animated.View>
 
         <View style={{ ...cardShadow, padding: 12, gap: 10 }}>
           <Text style={{ fontSize: 16, fontWeight: "800", color: colors.text }}>Bulk Import (CSV)</Text>
