@@ -2,7 +2,7 @@
   "name": "mobile",
   "version": "0.1.0",
   "private": true,
-  "main": "index.js",
+  "main": "expo-router/entry",
   "scripts": {
     "start": "set EXPO_NO_METRO_WORKSPACE_ROOT=1&& set EXPO_NO_DEPENDENCY_VALIDATION=1&& expo start --clear",
     "android": "expo run:android",

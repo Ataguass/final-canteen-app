@@ -36,4 +36,6 @@ rootProject.name = 'Canteen App'
 expoAutolinking.useExpoVersionCatalog()
 
 include ':app'
+include ':expo'
+project(':expo').projectDir = new File(rootDir, '../../node_modules/expo/android')
 includeBuild(expoAutolinking.reactNativeGradlePlugin)

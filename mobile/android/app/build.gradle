@@ -179,6 +179,8 @@ dependencies {
     } else {
         implementation jscFlavor
     }
+
+    implementation project(':expo')
 }
 
 apply plugin: 'com.google.gms.google-services'
