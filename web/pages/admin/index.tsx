@@ -1238,7 +1238,9 @@ export default function AdminWebPage() {
           {/* Brand header */}
           <div className="sidebarHeader">
             <div className="brandBlock">
-              <div className="brandMark">🍽</div>
+              <div className="brandMark">
+                <img src="/canteen_logo_final.png" alt="Logo" style={{ width: "100%", height: "100%", objectFit: "contain", borderRadius: "10px" }} />
+              </div>
               {!sidebarCollapsed && (
                 <div className="brandText">
                   <p className="brandTitle">Canteen</p>
@@ -3163,9 +3165,9 @@ const globalCss = `
     --line: #e5e9f2;
     --text: #0f1623;
     --muted: #6b7a99;
-    --primary: #6c47ff;
-    --primary-light: #ede9ff;
-    --primary-dark: #4f2fe0;
+    --primary: #FF6B35;
+    --primary-light: #FFF0EB;
+    --primary-dark: #E65A2A;
     --green: #12b76a;
     --green-light: #d1fadf;
     --amber: #f79009;
@@ -3181,7 +3183,7 @@ const globalCss = `
     --radius: 14px;
     --radius-sm: 8px;
     --shadow: 0 1px 4px rgba(15,23,42,.06), 0 4px 16px rgba(15,23,42,.06);
-    --shadow-md: 0 4px 24px rgba(108,71,255,.10), 0 1px 4px rgba(15,23,42,.06);
+    --shadow-md: 0 4px 24px rgba(255,107,53,.20), 0 1px 4px rgba(15,23,42,.06);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -3210,7 +3212,7 @@ const globalCss = `
   }
   input:focus, select:focus, textarea:focus {
     border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(108,71,255,.12);
+    box-shadow: 0 0 0 3px rgba(255,107,53,.15);
     background: #fff;
   }
   textarea { resize: vertical; min-height: 80px; }
@@ -3232,10 +3234,10 @@ const globalCss = `
     background: var(--surface);
     border-radius: 24px;
     overflow: hidden;
-    box-shadow: 0 32px 80px rgba(108,71,255,.18), 0 8px 24px rgba(15,23,42,.08);
+    box-shadow: 0 32px 80px rgba(255,107,53,.20), 0 8px 24px rgba(15,23,42,.08);
   }
   .loginPanel > div:first-child {
-    background: linear-gradient(145deg, #6c47ff 0%, #4f2fe0 60%, #2d1aa8 100%);
+    background: linear-gradient(145deg, #FF6B35 0%, #E65A2A 60%, #cc5025 100%);
     padding: 48px 40px;
     display: flex;
     flex-direction: column;
@@ -3249,7 +3251,7 @@ const globalCss = `
     letter-spacing: .12em;
     text-transform: uppercase;
     opacity: .75;
-    color: #c4b5fd;
+    color: #ffebd6;
   }
   .loginPanel > div:first-child h1 {
     font-size: 36px;
@@ -3330,13 +3332,13 @@ const globalCss = `
   .brandMark {
     width: 36px;
     height: 36px;
-    background: linear-gradient(135deg, #6c47ff, #4f2fe0);
+    background: white;
     border-radius: 10px;
     display: grid;
     place-items: center;
     font-size: 18px;
     flex-shrink: 0;
-    box-shadow: 0 4px 12px rgba(108,71,255,.35);
+    box-shadow: 0 4px 12px rgba(255,107,53,.25);
   }
   .brandText { overflow: hidden; white-space: nowrap; }
   .brandTitle { font-size: 15px; font-weight: 800; color: var(--text); letter-spacing: -.01em; display: block; }
@@ -3897,7 +3899,7 @@ const globalCss = `
     box-shadow: var(--shadow);
     transition: all .2s;
   }
-  .quickActionCard:hover { border-color: var(--primary); box-shadow: 0 4px 20px rgba(108,71,255,.12); transform: translateY(-1px); }
+  .quickActionCard:hover { border-color: var(--primary); box-shadow: 0 4px 20px rgba(255,107,53,.15); transform: translateY(-1px); }
   .quickActionIcon { font-size: 22px; flex-shrink: 0; width: 40px; height: 40px; display: grid; place-items: center; background: var(--primary-light); border-radius: 10px; }
   .quickActionContent { flex: 1; min-width: 0; }
   .quickActionContent strong { display: block; font-size: 13px; font-weight: 700; }
@@ -3998,7 +4000,7 @@ const globalCss = `
     background: var(--surface); border: 1.5px solid var(--line); border-radius: 10px;
     padding: 0 14px; transition: border-color .15s;
   }
-  .posSearchBox:focus-within { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(108,71,255,.10); }
+  .posSearchBox:focus-within { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(255,107,53,.15); }
   .posSearchInput { flex: 1; border: none; background: none; padding: 10px 0; outline: none; font-size: 14px; }
   .searchIcon { color: var(--muted); font-size: 15px; }
   .categoryTabs { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -4022,8 +4024,8 @@ const globalCss = `
     box-shadow: var(--shadow);
     position: relative;
   }
-  .posCard:hover { border-color: var(--primary); box-shadow: 0 4px 20px rgba(108,71,255,.15); transform: translateY(-2px); }
-  .posCard.selected { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(108,71,255,.25); }
+  .posCard:hover { border-color: var(--primary); box-shadow: 0 4px 20px rgba(255,107,53,.20); transform: translateY(-2px); }
+  .posCard.selected { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(255,107,53,.35); }
   .posCard.special { border-color: var(--amber); }
   .specialBadge { position: absolute; top: 8px; left: 8px; background: var(--amber); color: white; font-size: 9px; font-weight: 800; padding: 2px 7px; border-radius: 99px; text-transform: uppercase; letter-spacing: .06em; }
   .posImage { height: 90px; background: var(--surface2); display: grid; place-items: center; font-size: 36px; overflow: hidden; }
@@ -4058,7 +4060,7 @@ const globalCss = `
     display: grid; place-items: center; flex-shrink: 0;
     transition: background .12s;
   }
-  .qtyStepper button:hover { background: #d8d0ff; }
+  .qtyStepper button:hover { background: #ffd2c2; }
   .qtyStepper input { width: 44px; text-align: center; padding: 6px 4px; font-size: 14px; font-weight: 700; }
 
   /* ─── CHECKOUT ─── */
@@ -4103,7 +4105,7 @@ const globalCss = `
   .barRow { display: grid; grid-template-columns: 80px 1fr 90px; gap: 10px; align-items: center; font-size: 12.5px; }
   .barRow span { text-align: right; color: var(--muted); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .barTrack { height: 8px; background: var(--surface2); border-radius: 99px; overflow: hidden; }
-  .barFill { height: 100%; background: linear-gradient(90deg, #6c47ff, #4f2fe0); border-radius: 99px; transition: width .5s; }
+  .barFill { height: 100%; background: linear-gradient(90deg, #FF6B35, #E65A2A); border-radius: 99px; transition: width .5s; }
   .barRow b { font-size: 12px; font-weight: 700; white-space: nowrap; }
 
   /* ─── REPORTS ─── */
