@@ -2852,7 +2852,6 @@ function QRCodesPanel({ baseUrl }: { baseUrl: string }) {
             return (
               <div key={tableId} className="qr-card">
                 <div className="qr-code-wrapper">
-                  {/* @ts-expect-error type mismatch with qrcode.react */}
                   <QRCodeSVG value={url} size={150} level="M" />
                 </div>
                 <h3>Table {tableId}</h3>
