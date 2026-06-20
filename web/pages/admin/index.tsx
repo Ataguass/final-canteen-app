@@ -3202,17 +3202,18 @@ const globalCss = `
   button:disabled { cursor: not-allowed; opacity: .55; }
   input, select, textarea {
     background: var(--surface2);
-    border: 1.5px solid var(--line);
-    border-radius: var(--radius-sm);
-    padding: 9px 12px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 12px 16px;
     color: var(--text);
     width: 100%;
-    transition: border-color .15s, box-shadow .15s;
+    transition: all .2s cubic-bezier(.4,0,.2,1);
     outline: none;
+    font-size: 14.5px;
   }
   input:focus, select:focus, textarea:focus {
     border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(255,107,53,.15);
+    box-shadow: 0 0 0 4px rgba(255,107,53,.15);
     background: #fff;
   }
   textarea { resize: vertical; min-height: 80px; }
@@ -3283,13 +3284,13 @@ const globalCss = `
     font-weight: 400;
   }
   .loginPanel form, .loginPanel .form {
-    padding: 48px 40px;
+    padding: 64px 48px;
     display: flex;
     flex-direction: column;
-    gap: 18px;
+    gap: 24px;
     justify-content: center;
   }
-  .loginPanel .form label { display: flex; flex-direction: column; gap: 6px; }
+  .loginPanel .form label { display: flex; flex-direction: column; gap: 8px; font-weight: 700; color: #334155; }
   .loginPanel .eyebrow {
     font-size: 11px; font-weight: 800; letter-spacing: .1em;
     text-transform: uppercase; color: var(--primary);
@@ -3542,33 +3543,33 @@ const globalCss = `
   .avatar {
     width: 36px; height: 36px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #6c47ff, #4f2fe0);
+    background: linear-gradient(145deg, #FF6B35 0%, #E65A2A 100%);
     color: white;
     font-weight: 800;
     font-size: 14px;
     display: grid;
     place-items: center;
     flex-shrink: 0;
-    box-shadow: 0 2px 8px rgba(108,71,255,.3);
+    box-shadow: 0 2px 8px rgba(255,107,53,.3);
   }
   @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
   /* ─── BUTTONS ─── */
   .primaryButton {
-    background: linear-gradient(135deg, #6c47ff, #4f2fe0);
+    background: linear-gradient(145deg, #FF6B35 0%, #E65A2A 100%);
     color: white;
     border: none;
-    border-radius: 10px;
-    padding: 10px 20px;
-    font-weight: 700;
-    font-size: 13.5px;
-    transition: all .2s;
-    box-shadow: 0 4px 12px rgba(108,71,255,.3);
+    border-radius: 12px;
+    padding: 12px 24px;
+    font-weight: 800;
+    font-size: 14.5px;
+    transition: all .2s cubic-bezier(.4,0,.2,1);
+    box-shadow: 0 4px 12px rgba(255,107,53,.3);
     white-space: nowrap;
   }
   .primaryButton:hover:not(:disabled) {
-    transform: translateY(-1px);
-    box-shadow: 0 6px 20px rgba(108,71,255,.4);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(255,107,53,.4);
   }
   .primaryButton.danger { background: linear-gradient(135deg, #f04438, #c9291e); box-shadow: 0 4px 12px rgba(240,68,56,.3); }
   .primaryButton.narrow { padding: 8px 16px; font-size: 13px; }
