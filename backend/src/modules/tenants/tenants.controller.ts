@@ -272,7 +272,16 @@ export const listTenants = async (req: Request, res: Response): Promise<void> =>
       primaryColor: true,
       currency: true,
       taxPercent: true,
-      createdAt: true
+      createdAt: true,
+      users: {
+        where: { role: "ADMIN" },
+        select: {
+          id: true,
+          name: true,
+          phone: true,
+          isActive: true
+        }
+      }
     }
   });
 

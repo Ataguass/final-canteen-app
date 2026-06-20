@@ -40,6 +40,7 @@ type Tenant = {
   slug: string;
   schoolCode: string;
   createdAt: string;
+  users?: Array<{ id: string; name: string; phone: string; isActive: boolean; role?: string }>;
 };
 
 type Session = {
@@ -277,6 +278,7 @@ export default function AdminWebPage() {
   const [uploadingEditCatImage, setUploadingEditCatImage] = useState(false);
 
   // Edit state – items
+  const [editingAdmin, setEditingAdmin] = useState<{ id: string, name: string, phone: string, password?: string } | null>(null);
   const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
   const [editItemName, setEditItemName] = useState("");
   const [editItemPrice, setEditItemPrice] = useState("");
@@ -326,6 +328,59 @@ export default function AdminWebPage() {
       throw new Error((json as { message?: string }).message ?? "Request failed");
     }
     return json as T;
+  };
+
+  const handleUpdateAdmin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingAdmin) return;
+    try {
+      setLoading(true);
+      await api(`/users/admin/${editingAdmin.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({
+          name: editingAdmin.name,
+          phone: editingAdmin.phone,
+          password: editingAdmin.password || undefined
+        })
+      });
+      setNotice("Admin updated successfully");
+      setEditingAdmin(null);
+      loadAll();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to update admin");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleToggleAdminStatus = async (adminId: string, isActive: boolean) => {
+    try {
+      setLoading(true);
+      await api(`/users/admin/${adminId}/status`, {
+        method: "PATCH",
+        body: JSON.stringify({ isActive })
+      });
+      setNotice(`Admin ${isActive ? "activated" : "suspended"} successfully`);
+      loadAll();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to toggle admin status");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteAdmin = async (adminId: string) => {
+    if (!window.confirm("Are you sure you want to delete this admin? This cannot be undone.")) return;
+    try {
+      setLoading(true);
+      await api(`/users/admin/${adminId}`, { method: "DELETE" });
+      setNotice("Admin deleted successfully");
+      loadAll();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to delete admin");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const loadAll = async () => {
@@ -1325,11 +1380,50 @@ export default function AdminWebPage() {
                         <div style={{ fontSize: 12, color: "var(--muted)" }}>
                           {shortDate(t.createdAt)}
                         </div>
+                        <div style={{ marginTop: 12 }}>
+                          {t.users?.map(admin => (
+                            <div key={admin.id} style={{ display: "flex", gap: 12, alignItems: "center", background: "var(--surface)", padding: 8, borderRadius: 6, marginBottom: 4 }}>
+                              <div style={{ flex: 1, fontSize: 13 }}>
+                                <strong>{admin.name}</strong> ({admin.phone}) 
+                                {!admin.isActive && <span style={{ color: "red", marginLeft: 4 }}>[Suspended]</span>}
+                              </div>
+                              <button className="ghostButton" style={{ padding: "4px 8px", fontSize: 12 }} onClick={() => setEditingAdmin({ id: admin.id, name: admin.name, phone: admin.phone })}>Edit</button>
+                              <button className="ghostButton" style={{ padding: "4px 8px", fontSize: 12 }} onClick={() => handleToggleAdminStatus(admin.id, !admin.isActive)}>{admin.isActive ? "Suspend" : "Activate"}</button>
+                              <button className="dangerButton" style={{ padding: "4px 8px", fontSize: 12 }} onClick={() => handleDeleteAdmin(admin.id)}>Delete</button>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     ))}
                   </div>
                 </div>
               </div>
+
+              {editingAdmin && (
+                <div className="modalOverlay" style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, backgroundColor: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 999 }}>
+                  <div className="modalContent" style={{ background: "var(--surface)", padding: 24, borderRadius: 12, width: "100%", maxWidth: 400 }}>
+                    <h3>Edit Admin</h3>
+                    <form onSubmit={handleUpdateAdmin} className="form">
+                      <label className="formLabel">
+                        Name
+                        <input value={editingAdmin.name} onChange={e => setEditingAdmin({...editingAdmin, name: e.target.value})} required />
+                      </label>
+                      <label className="formLabel">
+                        Phone
+                        <input value={editingAdmin.phone} onChange={e => setEditingAdmin({...editingAdmin, phone: e.target.value})} required />
+                      </label>
+                      <label className="formLabel">
+                        New Password (Optional)
+                        <input type="password" value={editingAdmin.password || ""} onChange={e => setEditingAdmin({...editingAdmin, password: e.target.value})} placeholder="Leave blank to keep current" minLength={6} />
+                      </label>
+                      <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
+                        <button type="submit" className="primaryButton" disabled={loading}>{loading ? "Saving..." : "Save Changes"}</button>
+                        <button type="button" className="ghostButton" onClick={() => setEditingAdmin(null)}>Cancel</button>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+              )}
             </section>
           ) : null}
 

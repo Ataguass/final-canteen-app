@@ -475,3 +475,52 @@ export const getUserWalletBalance = async (req, res) => {
     });
     res.status(200).json({ success: true, data: users });
 };
+export const superUpdateAdmin = async (req, res) => {
+    const { id } = req.params;
+    const { name, phone, password } = req.body;
+    const user = await prisma.user.findFirst({ where: { id, role: Role.ADMIN } });
+    if (!user)
+        throw new AppError("Admin not found", 404);
+    const data = {};
+    if (name)
+        data.name = name.trim();
+    if (phone)
+        data.phone = phone.trim();
+    if (password && password.trim().length >= 6) {
+        data.passwordHash = await bcrypt.hash(password.trim(), 10);
+    }
+    const updated = await prisma.user.update({
+        where: { id },
+        data,
+        select: { id: true, name: true, phone: true, role: true, isActive: true }
+    });
+    res.status(200).json({ success: true, data: updated });
+};
+export const superToggleAdminStatus = async (req, res) => {
+    const { id } = req.params;
+    const { isActive } = req.body;
+    if (typeof isActive !== "boolean")
+        throw new AppError("isActive is required", 400);
+    const user = await prisma.user.findFirst({ where: { id, role: Role.ADMIN } });
+    if (!user)
+        throw new AppError("Admin not found", 404);
+    const updated = await prisma.user.update({
+        where: { id },
+        data: { isActive },
+        select: { id: true, name: true, phone: true, role: true, isActive: true }
+    });
+    res.status(200).json({ success: true, data: updated });
+};
+export const superDeleteAdmin = async (req, res) => {
+    const { id } = req.params;
+    const user = await prisma.user.findFirst({ where: { id, role: Role.ADMIN } });
+    if (!user)
+        throw new AppError("Admin not found", 404);
+    try {
+        await prisma.user.delete({ where: { id } });
+        res.status(200).json({ success: true, message: "Admin deleted successfully" });
+    }
+    catch (error) {
+        throw new AppError("Cannot delete admin. They might have processed orders or stock logs. Suspend them instead.", 400);
+    }
+};

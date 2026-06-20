@@ -194,7 +194,16 @@ export const listTenants = async (req, res) => {
             primaryColor: true,
             currency: true,
             taxPercent: true,
-            createdAt: true
+            createdAt: true,
+            users: {
+                where: { role: "ADMIN" },
+                select: {
+                    id: true,
+                    name: true,
+                    phone: true,
+                    isActive: true
+                }
+            }
         }
     });
     res.status(200).json({ success: true, data: tenants });

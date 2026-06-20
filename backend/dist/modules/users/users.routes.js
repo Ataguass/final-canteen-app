@@ -3,7 +3,7 @@ import { auth } from "../../middleware/auth.js";
 import { asyncHandler } from "../../middleware/asyncHandler.js";
 import { roleGuard } from "../../middleware/roleGuard.js";
 import { tenantResolver } from "../../middleware/tenantResolver.js";
-import { bulkImportUsers, createUser, getMyProfile, getUserWalletBalance, listUsers, topupUserWallet, updateMyPassword, updateMyProfile, updateUserActive, updateUserApproval, updateUserPassword, updatePushToken } from "./users.controller.js";
+import { bulkImportUsers, createUser, getMyProfile, getUserWalletBalance, listUsers, topupUserWallet, updateMyPassword, updateMyProfile, updateUserActive, updateUserApproval, updateUserPassword, updatePushToken, superUpdateAdmin, superToggleAdminStatus, superDeleteAdmin } from "./users.controller.js";
 export const usersRouter = Router();
 usersRouter.get("/me", auth, tenantResolver, asyncHandler(getMyProfile));
 usersRouter.patch("/me", auth, tenantResolver, asyncHandler(updateMyProfile));
@@ -17,3 +17,6 @@ usersRouter.patch("/:id/active", auth, tenantResolver, roleGuard("ADMIN", "SUPER
 usersRouter.patch("/:id/password", auth, tenantResolver, roleGuard("ADMIN", "SUPER_ADMIN"), asyncHandler(updateUserPassword));
 usersRouter.get("/wallets", auth, tenantResolver, roleGuard("ADMIN", "SUPER_ADMIN"), asyncHandler(getUserWalletBalance));
 usersRouter.patch("/:id/wallet-topup", auth, tenantResolver, roleGuard("ADMIN", "SUPER_ADMIN"), asyncHandler(topupUserWallet));
+usersRouter.patch("/admin/:id", auth, roleGuard("SUPER_ADMIN"), asyncHandler(superUpdateAdmin));
+usersRouter.patch("/admin/:id/status", auth, roleGuard("SUPER_ADMIN"), asyncHandler(superToggleAdminStatus));
+usersRouter.delete("/admin/:id", auth, roleGuard("SUPER_ADMIN"), asyncHandler(superDeleteAdmin));

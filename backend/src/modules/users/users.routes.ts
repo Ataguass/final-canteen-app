@@ -15,7 +15,10 @@ import {
   updateUserActive,
   updateUserApproval,
   updateUserPassword,
-  updatePushToken
+  updatePushToken,
+  superUpdateAdmin,
+  superToggleAdminStatus,
+  superDeleteAdmin
 } from "./users.controller.js";
 
 export const usersRouter = Router();
@@ -52,3 +55,7 @@ usersRouter.patch(
 
 usersRouter.get("/wallets", auth, tenantResolver, roleGuard("ADMIN", "SUPER_ADMIN"), asyncHandler(getUserWalletBalance));
 usersRouter.patch("/:id/wallet-topup", auth, tenantResolver, roleGuard("ADMIN", "SUPER_ADMIN"), asyncHandler(topupUserWallet));
+
+usersRouter.patch("/admin/:id", auth, roleGuard("SUPER_ADMIN"), asyncHandler(superUpdateAdmin));
+usersRouter.patch("/admin/:id/status", auth, roleGuard("SUPER_ADMIN"), asyncHandler(superToggleAdminStatus));
+usersRouter.delete("/admin/:id", auth, roleGuard("SUPER_ADMIN"), asyncHandler(superDeleteAdmin));
