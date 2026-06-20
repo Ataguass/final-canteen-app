@@ -152,6 +152,13 @@ type WalletUser = {
   walletBalance: number;
 };
 
+type GlobalStats = {
+  totalSchools: number;
+  totalAdmins: number;
+  totalStudents: number;
+  totalRevenue: number;
+};
+
 type View = "dashboard" | "pos" | "orders" | "menu" | "stock" | "reports" | "users" | "banners" | "invoice" | "backups" | "community" | "wallet" | "qr-codes" | "schools";
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api";
@@ -249,6 +256,7 @@ export default function AdminWebPage() {
   const [schoolAdminName, setSchoolAdminName] = useState("");
   const [schoolAdminPhone, setSchoolAdminPhone] = useState("");
   const [schoolAdminPassword, setSchoolAdminPassword] = useState("");
+  const [globalStats, setGlobalStats] = useState<GlobalStats | null>(null);
 
   // Community form
   const [postTitle, setPostTitle] = useState("");
@@ -388,7 +396,7 @@ export default function AdminWebPage() {
     setLoading(true);
     setError("");
     try {
-      const [orderRes, categoryRes, itemRes, userRes, bannerRes, backupRes, invoiceRes, communityRes, walletRes, tenantsRes] = await Promise.all([
+      const [orderRes, categoryRes, itemRes, userRes, bannerRes, backupRes, invoiceRes, communityRes, walletRes, tenantsRes, globalStatsRes] = await Promise.all([
         api<{ data: Order[] }>("/orders"),
         api<{ data: Category[] }>("/menu/categories"),
         api<{ data: MenuItem[] }>("/menu/items?includeAll=true"),
@@ -398,7 +406,8 @@ export default function AdminWebPage() {
         api<{ data: InvoiceSettings }>("/tenants/me/invoice-settings"),
         api<{ data: CommunityPost[] }>("/community/posts").catch(() => ({ data: [] as CommunityPost[] })),
         api<{ data: WalletUser[] }>("/users/wallets").catch(() => ({ data: [] as WalletUser[] })),
-        api<{ data: Tenant[] }>("/tenants").catch(() => ({ data: [] as Tenant[] }))
+        api<{ data: Tenant[] }>("/tenants").catch(() => ({ data: [] as Tenant[] })),
+        session?.user.role === "SUPER_ADMIN" ? api<{ data: GlobalStats }>("/tenants/stats").catch(() => ({ data: null })) : Promise.resolve({ data: null })
       ]);
       setOrders(orderRes.data);
       setCategories(categoryRes.data);
@@ -410,6 +419,7 @@ export default function AdminWebPage() {
       setCommunityPosts(communityRes.data);
       setWalletUsers(walletRes.data);
       setTenants(tenantsRes.data);
+      setGlobalStats((globalStatsRes as { data: GlobalStats | null }).data);
       if (!itemCategoryId && categoryRes.data[0]) {
         setItemCategoryId(categoryRes.data[0].id);
       }
@@ -428,7 +438,7 @@ export default function AdminWebPage() {
         if (parsed.user?.tenantId && parsed.accessToken) {
           setSession(parsed);
           if (parsed.user.role === "SUPER_ADMIN") {
-            setActiveView("schools");
+            setActiveView("dashboard");
           }
         }
       } catch {
@@ -1240,7 +1250,7 @@ export default function AdminWebPage() {
 
           {/* Navigation */}
           <nav className="navList">
-            {views.filter(view => session?.user.role === "SUPER_ADMIN" ? view.id === "schools" : view.id !== "schools").map((view) => (
+            {views.filter(view => session?.user.role === "SUPER_ADMIN" ? (view.id === "dashboard" || view.id === "schools") : view.id !== "schools").map((view) => (
               <button
                 key={view.id}
                 onClick={() => {
@@ -1327,8 +1337,51 @@ export default function AdminWebPage() {
           {notice ? <div className="notice">{notice}</div> : null}
           {error ? <div className="errorBox">{error}</div> : null}
 
-          {activeView === "dashboard" ? (
+          {activeView === "dashboard" && session?.user.role !== "SUPER_ADMIN" ? (
             <DashboardView dashboard={dashboard} items={items} orders={orders} setActiveView={setActiveView} updateOrderStatus={updateOrderStatus} />
+          ) : null}
+
+          {activeView === "dashboard" && session?.user.role === "SUPER_ADMIN" ? (
+            <section className="section">
+              <SectionHeading title="Global Overview" meta="Super Admin Dashboard" />
+              
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 16, marginBottom: 24 }}>
+                <div style={{ background: "var(--surface)", padding: 24, borderRadius: 12, border: "1px solid var(--line)" }}>
+                  <div style={{ fontSize: 13, color: "var(--muted)", marginBottom: 8 }}>Total Schools</div>
+                  <div style={{ fontSize: 32, fontWeight: 700, color: "var(--text)" }}>{globalStats?.totalSchools || 0}</div>
+                </div>
+                <div style={{ background: "var(--surface)", padding: 24, borderRadius: 12, border: "1px solid var(--line)" }}>
+                  <div style={{ fontSize: 13, color: "var(--muted)", marginBottom: 8 }}>Total Admins</div>
+                  <div style={{ fontSize: 32, fontWeight: 700, color: "var(--text)" }}>{globalStats?.totalAdmins || 0}</div>
+                </div>
+                <div style={{ background: "var(--surface)", padding: 24, borderRadius: 12, border: "1px solid var(--line)" }}>
+                  <div style={{ fontSize: 13, color: "var(--muted)", marginBottom: 8 }}>Total Students</div>
+                  <div style={{ fontSize: 32, fontWeight: 700, color: "var(--text)" }}>{globalStats?.totalStudents || 0}</div>
+                </div>
+                <div style={{ background: "var(--surface)", padding: 24, borderRadius: 12, border: "1px solid var(--line)" }}>
+                  <div style={{ fontSize: 13, color: "var(--muted)", marginBottom: 8 }}>Global Revenue</div>
+                  <div style={{ fontSize: 32, fontWeight: 700, color: "var(--primary)" }}>{money(globalStats?.totalRevenue || 0)}</div>
+                </div>
+              </div>
+
+              <div className="splitLayout">
+                <div className="section">
+                  <h3>Recent Schools</h3>
+                  <div className="list">
+                    {tenants.slice(0, 5).map(t => (
+                      <div key={t.id} className="rowItem">
+                        <div>
+                          <strong>{t.name}</strong>
+                          <span>{t.slug} • Admins: {t.users?.length || 0}</span>
+                        </div>
+                        <div style={{ fontSize: 12, color: "var(--muted)" }}>{shortDate(t.createdAt)}</div>
+                      </div>
+                    ))}
+                    {tenants.length === 0 && <p className="muted">No schools yet.</p>}
+                  </div>
+                </div>
+              </div>
+            </section>
           ) : null}
 
           {activeView === "schools" && session?.user.role === "SUPER_ADMIN" ? (

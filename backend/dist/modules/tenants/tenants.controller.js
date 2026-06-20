@@ -341,3 +341,28 @@ export const updateFeatureSettings = async (req, res) => {
     });
     res.status(200).json({ success: true, data: updated });
 };
+export const getGlobalStats = async (req, res) => {
+    const totalSchools = await prisma.tenant.count({
+        where: { slug: { not: "main" } }
+    });
+    const totalAdmins = await prisma.user.count({
+        where: { role: Role.ADMIN }
+    });
+    const totalStudents = await prisma.user.count({
+        where: { role: Role.STUDENT }
+    });
+    // Calculate total revenue across all completed orders across all tenants
+    const aggregateResult = await prisma.order.aggregate({
+        _sum: { totalAmount: true },
+        where: { status: "COMPLETED" }
+    });
+    res.status(200).json({
+        success: true,
+        data: {
+            totalSchools,
+            totalAdmins,
+            totalStudents,
+            totalRevenue: aggregateResult._sum.totalAmount || 0
+        }
+    });
+};

@@ -14,13 +14,15 @@ import {
   resolveTenant,
   uploadInvoiceLogo,
   updateFeatureSettings,
-  updateInvoiceSettings
+  updateInvoiceSettings,
+  getGlobalStats
 } from "./tenants.controller.js";
 
 export const tenantsRouter = Router();
 
 tenantsRouter.get("/resolve", asyncHandler(resolveTenant));
 tenantsRouter.get("/", asyncHandler(listTenants));
+tenantsRouter.get("/stats", auth, roleGuard("SUPER_ADMIN"), asyncHandler(getGlobalStats));
 tenantsRouter.post("/", asyncHandler(createTenant));
 tenantsRouter.post(
   "/dashboard",
