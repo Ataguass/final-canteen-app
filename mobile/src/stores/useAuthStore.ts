@@ -133,7 +133,4 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   }
 }));
 
-// Hydrate immediately on import
-useAuthStore.getState().hydrate().catch(() => {
-  useAuthStore.setState({ isHydrated: true });
-});
+// Hydrate should be called inside a useEffect in the root layout to prevent native module deadlocks on startup.

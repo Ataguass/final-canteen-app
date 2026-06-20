@@ -9,7 +9,11 @@ import { ThemeProvider } from "../hooks/useTheme";
 import { useEffect, useState, createContext, useContext } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+console.log("RootLayout evaluating...");
+
 import { usePushNotifications } from "../hooks/usePushNotifications";
+
+console.log("Push notifications imported...");
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -94,6 +98,9 @@ export default function RootLayout() {
   useEffect(() => {
     AsyncStorage.getItem("has_seen_onboarding").then((val) => {
       setHasSeenOnboarding(val === "true");
+    });
+    useAuthStore.getState().hydrate().catch(() => {
+      useAuthStore.setState({ isHydrated: true });
     });
   }, []);
 
