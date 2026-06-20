@@ -262,6 +262,7 @@ export const createTenantAdmin = async (req: Request, res: Response): Promise<vo
 
 export const listTenants = async (req: Request, res: Response): Promise<void> => {
   const tenants = await prisma.tenant.findMany({
+    where: { slug: { not: "main" } },
     orderBy: { createdAt: "desc" },
     select: {
       id: true,
@@ -287,6 +288,7 @@ export const resolveTenant = async (req: Request, res: Response): Promise<void> 
   const normalized = normalizeSchoolCode(codeRaw);
   const tenant = await prisma.tenant.findFirst({
     where: {
+      slug: { not: "main" },
       OR: [
         { schoolCode: normalized || "__NO_MATCH__" },
         { slug: { equals: codeRaw.toLowerCase(), mode: "insensitive" } }
