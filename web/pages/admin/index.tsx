@@ -3225,7 +3225,7 @@ const globalCss = `
     display: grid;
     place-items: center;
     padding: 24px;
-    background: linear-gradient(135deg, #f8f9fd 0%, #FFF0EB 50%, #ffe4d6 100%);
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
   }
   .loginPanel {
     width: min(960px, 100%);
@@ -3238,7 +3238,7 @@ const globalCss = `
     box-shadow: 0 32px 80px rgba(255,107,53,.15), 0 8px 24px rgba(15,23,42,.08);
   }
   .loginLeftPanel {
-    background: linear-gradient(145deg, #FF6B35 0%, #E65A2A 60%, #cc5025 100%);
+    background: linear-gradient(145deg, #0f172a 0%, #1e293b 100%);
     padding: 64px 40px;
     display: flex;
     flex-direction: column;
@@ -3268,7 +3268,7 @@ const globalCss = `
     letter-spacing: .12em;
     text-transform: uppercase;
     opacity: .75;
-    color: #ffebd6;
+    color: #94a3b8;
   }
   .loginLeftPanel h1 {
     font-size: 40px;
@@ -3543,7 +3543,7 @@ const globalCss = `
   .avatar {
     width: 36px; height: 36px;
     border-radius: 50%;
-    background: linear-gradient(145deg, #FF6B35 0%, #E65A2A 100%);
+    background: #FF6B35;
     color: white;
     font-weight: 800;
     font-size: 14px;
@@ -3556,7 +3556,7 @@ const globalCss = `
 
   /* ─── BUTTONS ─── */
   .primaryButton {
-    background: linear-gradient(145deg, #FF6B35 0%, #E65A2A 100%);
+    background: #FF6B35;
     color: white;
     border: none;
     border-radius: 12px;
@@ -4122,7 +4122,7 @@ const globalCss = `
   .barRow { display: grid; grid-template-columns: 80px 1fr 90px; gap: 10px; align-items: center; font-size: 12.5px; }
   .barRow span { text-align: right; color: var(--muted); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .barTrack { height: 8px; background: var(--surface2); border-radius: 99px; overflow: hidden; }
-  .barFill { height: 100%; background: linear-gradient(90deg, #FF6B35, #E65A2A); border-radius: 99px; transition: width .5s; }
+  .barFill { height: 100%; background: #FF6B35; border-radius: 99px; transition: width .5s; }
   .barRow b { font-size: 12px; font-weight: 700; white-space: nowrap; }
 
   /* ─── REPORTS ─── */
