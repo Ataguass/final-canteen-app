@@ -372,6 +372,9 @@ export default function AdminWebPage() {
         const parsed = JSON.parse(saved) as Session;
         if (parsed.user?.tenantId && parsed.accessToken) {
           setSession(parsed);
+          if (parsed.user.role === "SUPER_ADMIN") {
+            setActiveView("schools");
+          }
         }
       } catch {
         localStorage.removeItem(sessionKey);
@@ -577,6 +580,11 @@ export default function AdminWebPage() {
         throw new Error("Only admin accounts can open the web admin panel");
       }
       setSession(nextSession);
+      if (nextSession.user.role === "SUPER_ADMIN") {
+        setActiveView("schools");
+      } else {
+        setActiveView("dashboard");
+      }
       localStorage.setItem(sessionKey, JSON.stringify(nextSession));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed");
@@ -1177,7 +1185,7 @@ export default function AdminWebPage() {
 
           {/* Navigation */}
           <nav className="navList">
-            {views.filter(view => view.id !== "schools" || session?.user.role === "SUPER_ADMIN").map((view) => (
+            {views.filter(view => session?.user.role === "SUPER_ADMIN" ? view.id === "schools" : view.id !== "schools").map((view) => (
               <button
                 key={view.id}
                 onClick={() => {
