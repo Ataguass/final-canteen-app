@@ -179,7 +179,51 @@ export const deleteItem = async (req, res) => {
     if (!item) {
         throw new AppError("Menu item not found", 404);
     }
+    // Check if item has order history
+    const hasOrderHistory = await prisma.orderItem.findFirst({
+        where: { menuItemId: id }
+    });
+    if (hasOrderHistory) {
+        throw new AppError("Cannot delete item because it has order history. Please make it unavailable instead.", 400);
+    }
+    // Delete associated stock movements first
+    await prisma.stockMovement.deleteMany({
+        where: { menuItemId: id }
+    });
     await prisma.menuItem.delete({ where: { id } });
+    res.status(204).send();
+};
+export const deleteCategory = async (req, res) => {
+    const tenantId = req.tenantId;
+    const { id } = req.params;
+    const category = await prisma.category.findFirst({ where: { id, tenantId } });
+    if (!category) {
+        throw new AppError("Category not found", 404);
+    }
+    // Find all items in this category
+    const items = await prisma.menuItem.findMany({
+        where: { categoryId: id }
+    });
+    const itemIds = items.map(item => item.id);
+    // Check if any of these items have order history
+    if (itemIds.length > 0) {
+        const hasOrderHistory = await prisma.orderItem.findFirst({
+            where: { menuItemId: { in: itemIds } }
+        });
+        if (hasOrderHistory) {
+            throw new AppError("Cannot delete category because it contains items with order history. Please make the items or category inactive instead.", 400);
+        }
+        // Delete associated stock movements for all items in the category
+        await prisma.stockMovement.deleteMany({
+            where: { menuItemId: { in: itemIds } }
+        });
+        // Delete all items in the category
+        await prisma.menuItem.deleteMany({
+            where: { categoryId: id }
+        });
+    }
+    // Finally, delete the category itself
+    await prisma.category.delete({ where: { id } });
     res.status(204).send();
 };
 export const uploadMenuImage = async (req, res) => {

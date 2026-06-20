@@ -1,4 +1,5 @@
 import { OrderStatus, PaymentMethod, PaymentStatus, StockMovementType, WalletTransactionType } from "@prisma/client";
+import { Expo } from "expo-server-sdk";
 import { prisma } from "../../config/database.js";
 import { getIo } from "../../config/socket.js";
 import { AppError } from "../../utils/appError.js";
@@ -52,6 +53,9 @@ const nextOrderNumber = async () => {
 const resolveOrderOwnership = async (tenantId, requesterUserId, requesterRole, payload) => {
     const paymentMethod = payload.paymentMethod ?? PaymentMethod.CASH;
     if (paymentMethod !== PaymentMethod.WALLET) {
+        if (!requesterUserId && requesterRole === "GUEST") {
+            return { orderUserId: undefined, orderRole: "GUEST", walletPayer: null };
+        }
         return {
             orderUserId: requesterUserId,
             orderRole: requesterRole,
@@ -262,6 +266,17 @@ export const placeOrder = async (req, res) => {
     emitOrderEvents(order);
     res.status(201).json({ success: true, data: order });
 };
+export const placeOrderPublic = async (req, res) => {
+    const tenantId = req.tenantId;
+    const payload = req.body;
+    // Force payment parameters for guest checkout (simulated online payment)
+    payload.paymentMethod = PaymentMethod.UPI;
+    payload.paymentStatus = PaymentStatus.PAID;
+    // Pass undefined for userId and "GUEST" for role
+    const order = await createOrder(tenantId, undefined, "GUEST", payload);
+    emitOrderEvents(order);
+    res.status(201).json({ success: true, data: order });
+};
 export const listOrders = async (req, res) => {
     const tenantId = req.tenantId;
     const role = req.user?.role;
@@ -306,13 +321,38 @@ export const updateOrderStatus = async (req, res) => {
     const order = await prisma.order.update({
         where: { id },
         data: { status },
-        include: { items: true }
+        include: {
+            items: true,
+            user: {
+                select: { pushToken: true }
+            }
+        }
     });
     const io = getIo();
     io.emit("order:status_changed", order);
     io.to(`tenant:${order.tenantId}`).emit("order:status_changed", order);
     if (order.userId) {
         io.to(`user:${order.userId}`).emit("order:status_changed", order);
+        // Send Push Notification if READY
+        if (status === "READY" && order.user?.pushToken) {
+            const expo = new Expo();
+            const messages = [{
+                    to: order.user.pushToken,
+                    sound: 'default',
+                    title: 'Order Ready!',
+                    body: `Your order #${order.orderNumber} is ready for pickup!`,
+                    data: { orderId: order.id },
+                }];
+            try {
+                const chunks = expo.chunkPushNotifications(messages);
+                for (const chunk of chunks) {
+                    await expo.sendPushNotificationsAsync(chunk);
+                }
+            }
+            catch (error) {
+                console.error("Failed to send push notification:", error);
+            }
+        }
     }
     res.status(200).json({ success: true, data: order });
 };

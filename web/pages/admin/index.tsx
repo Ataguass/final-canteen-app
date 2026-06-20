@@ -34,6 +34,14 @@ type SessionUser = {
   phone?: string | null;
 };
 
+type Tenant = {
+  id: string;
+  name: string;
+  slug: string;
+  schoolCode: string;
+  createdAt: string;
+};
+
 type Session = {
   user: SessionUser;
   accessToken: string;
@@ -143,7 +151,7 @@ type WalletUser = {
   walletBalance: number;
 };
 
-type View = "dashboard" | "pos" | "orders" | "menu" | "stock" | "reports" | "users" | "banners" | "invoice" | "backups" | "community" | "wallet" | "qr-codes";
+type View = "dashboard" | "pos" | "orders" | "menu" | "stock" | "reports" | "users" | "banners" | "invoice" | "backups" | "community" | "wallet" | "qr-codes" | "schools";
 
 const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api";
 const sessionKey = "canteen-web-admin-session";
@@ -162,7 +170,8 @@ const navIcons: Record<string, JSX.Element> = {
   backups: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>,
   community: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>,
   wallet: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M16 12h2"/></svg>,
-  "qr-codes": <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><rect x="7" y="7" width="3" height="3"/><rect x="14" y="7" width="3" height="3"/><rect x="7" y="14" width="3" height="3"/><rect x="14" y="14" width="3" height="3"/></svg>
+  "qr-codes": <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><rect x="7" y="7" width="3" height="3"/><rect x="14" y="7" width="3" height="3"/><rect x="7" y="14" width="3" height="3"/><rect x="14" y="14" width="3" height="3"/></svg>,
+  schools: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
 };
 
 const views: Array<{ id: View; label: string; hint: string }> = [
@@ -178,7 +187,8 @@ const views: Array<{ id: View; label: string; hint: string }> = [
   { id: "backups", label: "Backups", hint: "Download and restore data" },
   { id: "community", label: "Community", hint: "Announcements and posts" },
   { id: "wallet", label: "Wallets", hint: "Teacher and staff wallet top-up" },
-  { id: "qr-codes", label: "QR Codes", hint: "Print table ordering stickers" }
+  { id: "qr-codes", label: "QR Codes", hint: "Print table ordering stickers" },
+  { id: "schools", label: "Schools", hint: "Manage canteen tenants (Super Admin)" }
 ];
 
 const money = (value: number) =>
@@ -231,6 +241,13 @@ export default function AdminWebPage() {
   const [invoiceSettings, setInvoiceSettings] = useState<InvoiceSettings | null>(null);
   const [communityPosts, setCommunityPosts] = useState<CommunityPost[]>([]);
   const [walletUsers, setWalletUsers] = useState<WalletUser[]>([]);
+  const [tenants, setTenants] = useState<Tenant[]>([]);
+  const [schoolName, setSchoolName] = useState("");
+  const [schoolSlug, setSchoolSlug] = useState("");
+  const [schoolCode, setSchoolCode] = useState("");
+  const [schoolAdminName, setSchoolAdminName] = useState("");
+  const [schoolAdminPhone, setSchoolAdminPhone] = useState("");
+  const [schoolAdminPassword, setSchoolAdminPassword] = useState("");
 
   // Community form
   const [postTitle, setPostTitle] = useState("");
@@ -316,7 +333,7 @@ export default function AdminWebPage() {
     setLoading(true);
     setError("");
     try {
-      const [orderRes, categoryRes, itemRes, userRes, bannerRes, backupRes, invoiceRes, communityRes, walletRes] = await Promise.all([
+      const [orderRes, categoryRes, itemRes, userRes, bannerRes, backupRes, invoiceRes, communityRes, walletRes, tenantsRes] = await Promise.all([
         api<{ data: Order[] }>("/orders"),
         api<{ data: Category[] }>("/menu/categories"),
         api<{ data: MenuItem[] }>("/menu/items?includeAll=true"),
@@ -325,7 +342,8 @@ export default function AdminWebPage() {
         api<{ data: Backup[] }>("/backups/me"),
         api<{ data: InvoiceSettings }>("/tenants/me/invoice-settings"),
         api<{ data: CommunityPost[] }>("/community/posts").catch(() => ({ data: [] as CommunityPost[] })),
-        api<{ data: WalletUser[] }>("/users/wallets").catch(() => ({ data: [] as WalletUser[] }))
+        api<{ data: WalletUser[] }>("/users/wallets").catch(() => ({ data: [] as WalletUser[] })),
+        api<{ data: Tenant[] }>("/tenants").catch(() => ({ data: [] as Tenant[] }))
       ]);
       setOrders(orderRes.data);
       setCategories(categoryRes.data);
@@ -336,6 +354,7 @@ export default function AdminWebPage() {
       setInvoiceSettings(invoiceRes.data);
       setCommunityPosts(communityRes.data);
       setWalletUsers(walletRes.data);
+      setTenants(tenantsRes.data);
       if (!itemCategoryId && categoryRes.data[0]) {
         setItemCategoryId(categoryRes.data[0].id);
       }
@@ -580,6 +599,7 @@ export default function AdminWebPage() {
         setBanners([]);
         setBackups([]);
         setInvoiceSettings(null);
+        setTenants([]);
         setPosQuantities({});
         setSidebarOpen(false);
         setConfirmAction(null);
@@ -776,6 +796,29 @@ export default function AdminWebPage() {
       setUserName("");
       setUserPhone("");
       setUserPassword("");
+    });
+  };
+
+  const createSchool = (event: FormEvent) => {
+    event.preventDefault();
+    mutate("School created", async () => {
+      await api("/tenants/dashboard", {
+        method: "POST",
+        body: JSON.stringify({
+          name: schoolName,
+          slug: schoolSlug,
+          schoolCode: schoolCode || undefined,
+          adminName: schoolAdminName,
+          adminPhone: schoolAdminPhone,
+          adminPassword: schoolAdminPassword
+        })
+      });
+      setSchoolName("");
+      setSchoolSlug("");
+      setSchoolCode("");
+      setSchoolAdminName("");
+      setSchoolAdminPhone("");
+      setSchoolAdminPassword("");
     });
   };
 
@@ -1134,7 +1177,7 @@ export default function AdminWebPage() {
 
           {/* Navigation */}
           <nav className="navList">
-            {views.map((view) => (
+            {views.filter(view => view.id !== "schools" || session?.user.role === "SUPER_ADMIN").map((view) => (
               <button
                 key={view.id}
                 onClick={() => {
@@ -1223,6 +1266,63 @@ export default function AdminWebPage() {
 
           {activeView === "dashboard" ? (
             <DashboardView dashboard={dashboard} items={items} orders={orders} setActiveView={setActiveView} updateOrderStatus={updateOrderStatus} />
+          ) : null}
+
+          {activeView === "schools" && session?.user.role === "SUPER_ADMIN" ? (
+            <section className="section">
+              <SectionHeading title="Schools (Tenants)" meta={`${tenants.length} total`} />
+              <div className="splitLayout">
+                <div className="section">
+                  <h3>Add New School</h3>
+                  <form onSubmit={createSchool} className="form">
+                    <label className="formLabel">
+                      School Name
+                      <input value={schoolName} onChange={(e) => setSchoolName(e.target.value)} required placeholder="e.g. Cambridge High" />
+                    </label>
+                    <label className="formLabel">
+                      School URL Slug
+                      <input value={schoolSlug} onChange={(e) => setSchoolSlug(e.target.value)} required placeholder="e.g. cambridge" />
+                    </label>
+                    <label className="formLabel">
+                      School Code (Optional)
+                      <input value={schoolCode} onChange={(e) => setSchoolCode(e.target.value)} placeholder="e.g. CAMB123" />
+                    </label>
+                    <hr style={{ border: "none", borderTop: "1px dashed var(--line)", margin: "8px 0" }} />
+                    <h4>Initial Admin Setup</h4>
+                    <label className="formLabel">
+                      Admin Name
+                      <input value={schoolAdminName} onChange={(e) => setSchoolAdminName(e.target.value)} required placeholder="e.g. John Doe" />
+                    </label>
+                    <label className="formLabel">
+                      Admin Phone
+                      <input value={schoolAdminPhone} onChange={(e) => setSchoolAdminPhone(e.target.value)} required placeholder="e.g. 9876543210" />
+                    </label>
+                    <label className="formLabel">
+                      Admin Password
+                      <input type="password" value={schoolAdminPassword} onChange={(e) => setSchoolAdminPassword(e.target.value)} required placeholder="Minimum 6 chars" minLength={6} />
+                    </label>
+                    <button className="primaryButton" style={{ marginTop: 8 }}>Create School</button>
+                  </form>
+                </div>
+                <div className="section">
+                  <h3>Existing Schools</h3>
+                  <div className="list">
+                    {tenants.length === 0 && <p className="muted">No schools found.</p>}
+                    {tenants.map(t => (
+                      <div key={t.id} className="rowItem">
+                        <div>
+                          <strong>{t.name}</strong>
+                          <span>Slug: {t.slug} • Code: {t.schoolCode || "None"}</span>
+                        </div>
+                        <div style={{ fontSize: 12, color: "var(--muted)" }}>
+                          {shortDate(t.createdAt)}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </section>
           ) : null}
 
           {activeView === "pos" ? (

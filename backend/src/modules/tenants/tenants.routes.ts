@@ -5,6 +5,7 @@ import { roleGuard } from "../../middleware/roleGuard.js";
 import { tenantResolver } from "../../middleware/tenantResolver.js";
 import {
   createTenant,
+  createTenantFromDashboard,
   createTenantAdmin,
   getFeatureSettings,
   getInvoiceSettings,
@@ -21,6 +22,12 @@ export const tenantsRouter = Router();
 tenantsRouter.get("/resolve", asyncHandler(resolveTenant));
 tenantsRouter.get("/", asyncHandler(listTenants));
 tenantsRouter.post("/", asyncHandler(createTenant));
+tenantsRouter.post(
+  "/dashboard",
+  auth,
+  roleGuard("SUPER_ADMIN"),
+  asyncHandler(createTenantFromDashboard)
+);
 tenantsRouter.post(
   "/admin",
   auth,

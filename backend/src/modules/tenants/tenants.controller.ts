@@ -142,6 +142,65 @@ export const createTenant = async (req: Request, res: Response): Promise<void> =
   res.status(201).json({ success: true, data: tenant });
 };
 
+export const createTenantFromDashboard = async (req: Request, res: Response): Promise<void> => {
+  const {
+    name,
+    slug,
+    schoolCode,
+    adminName,
+    adminPhone,
+    adminPassword
+  } = req.body as {
+    name: string;
+    slug: string;
+    schoolCode?: string;
+    adminName: string;
+    adminPhone: string;
+    adminPassword: string;
+  };
+
+  if (!name || !slug || !adminName || !adminPhone || !adminPassword) {
+    throw new AppError("name, slug, adminName, adminPhone, adminPassword are required", 400);
+  }
+
+  const existing = await prisma.tenant.findUnique({ where: { slug } });
+  if (existing) {
+    throw new AppError("Tenant slug already exists", 409);
+  }
+
+  const finalSchoolCode = await ensureUniqueSchoolCode(schoolCode);
+  const passwordHash = await bcrypt.hash(adminPassword, 10);
+
+  const tenant = await prisma.tenant.create({
+    data: {
+      name,
+      slug,
+      schoolCode: finalSchoolCode,
+      users: {
+        create: {
+          name: adminName,
+          phone: adminPhone,
+          passwordHash,
+          role: Role.ADMIN,
+          isApproved: true
+        }
+      }
+    },
+    include: {
+      users: {
+        select: {
+          id: true,
+          name: true,
+          phone: true,
+          role: true
+        }
+      }
+    }
+  });
+
+  res.status(201).json({ success: true, data: tenant });
+};
+
 export const createTenantAdmin = async (req: Request, res: Response): Promise<void> => {
   const {
     name,

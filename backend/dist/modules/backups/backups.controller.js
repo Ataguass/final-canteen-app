@@ -481,6 +481,65 @@ export const createBackup = async (req, res) => {
         }
     });
 };
+export const uploadBackup = async (req, res) => {
+    const tenantId = req.tenantId;
+    const file = req.file;
+    if (!file) {
+        throw new AppError("No file uploaded. Please upload a valid JSON backup file.", 400);
+    }
+    const content = file.buffer.toString("utf8");
+    let parsed;
+    try {
+        parsed = JSON.parse(content);
+    }
+    catch {
+        throw new AppError("Uploaded file is not valid JSON.", 400);
+    }
+    if (!parsed || typeof parsed !== "object") {
+        throw new AppError("Invalid backup file format", 400);
+    }
+    const data = parsed;
+    if (data.version !== BACKUP_VERSION) {
+        throw new AppError("Unsupported backup version", 400);
+    }
+    if (data.tenantId !== tenantId) {
+        throw new AppError("Backup belongs to a different tenant and cannot be uploaded here.", 400);
+    }
+    const requiredLists = [
+        "users",
+        "categories",
+        "menuItems",
+        "banners",
+        "communityPosts",
+        "orders",
+        "orderItems",
+        "stockMovements",
+        "walletTransactions"
+    ];
+    for (const key of requiredLists) {
+        if (!Array.isArray(data[key])) {
+            throw new AppError(`Backup is missing ${String(key)}`, 400);
+        }
+    }
+    if (!data.tenant || typeof data.tenant !== "object") {
+        throw new AppError("Backup is missing tenant settings", 400);
+    }
+    const backup = data;
+    const backupId = buildBackupId();
+    const dir = await ensureTenantBackupDir(tenantId);
+    const filePath = path.join(dir, backupId);
+    await fs.writeFile(filePath, content, "utf8");
+    res.status(201).json({
+        success: true,
+        message: "Backup uploaded successfully",
+        data: {
+            id: backupId,
+            createdAt: backup.createdAt,
+            sizeBytes: Buffer.byteLength(content, "utf8"),
+            counts: buildCounts(backup)
+        }
+    });
+};
 export const restoreBackup = async (req, res) => {
     const tenantId = req.tenantId;
     const requesterUserId = req.user?.sub ?? "";

@@ -10,7 +10,7 @@ const start = async () => {
     try {
         await prisma.$connect();
         await redis.connect();
-        server.listen(env.port, () => {
+        server.listen(env.port, "0.0.0.0", () => {
             console.log(`API listening on port ${env.port}`);
         });
     }
