@@ -1127,8 +1127,8 @@ export default function AdminWebPage() {
         </Head>
         <main className="loginShell">
           <section className="loginPanel">
-            <div>
-              <img src="/canteen_logo_final.png" alt="Canteen Logo" style={{ width: 64, height: 64, marginBottom: 16, borderRadius: 12 }} />
+            <div className="loginLeftPanel">
+              <img src="/canteen_logo_final.png" alt="Canteen Logo" className="loginLogo" />
               <p className="eyebrow">Canteen Admin</p>
               {authMode === "LOGIN" ? (
                 <>
@@ -3224,28 +3224,44 @@ const globalCss = `
     display: grid;
     place-items: center;
     padding: 24px;
-    background: linear-gradient(135deg, #f0f2f8 0%, #ede9ff 50%, #e0d5ff 100%);
+    background: linear-gradient(135deg, #f8f9fd 0%, #FFF0EB 50%, #ffe4d6 100%);
   }
   .loginPanel {
     width: min(960px, 100%);
     display: grid;
-    grid-template-columns: 1.2fr .8fr;
+    grid-template-columns: 1fr 1fr;
     gap: 0;
     background: var(--surface);
-    border-radius: 24px;
+    border-radius: 28px;
     overflow: hidden;
-    box-shadow: 0 32px 80px rgba(255,107,53,.20), 0 8px 24px rgba(15,23,42,.08);
+    box-shadow: 0 32px 80px rgba(255,107,53,.15), 0 8px 24px rgba(15,23,42,.08);
   }
-  .loginPanel > div:first-child {
+  .loginLeftPanel {
     background: linear-gradient(145deg, #FF6B35 0%, #E65A2A 60%, #cc5025 100%);
-    padding: 48px 40px;
+    padding: 64px 40px;
     display: flex;
     flex-direction: column;
     justify-content: center;
+    align-items: center;
+    text-align: center;
     gap: 16px;
     color: white;
   }
-  .loginPanel > div:first-child .eyebrow {
+  .loginLogo {
+    width: 160px;
+    height: 160px;
+    margin-bottom: 24px;
+    border-radius: 32px;
+    object-fit: contain;
+    background: white;
+    padding: 16px;
+    box-shadow: 0 16px 40px rgba(0,0,0,.2);
+    transition: transform .3s cubic-bezier(.4,0,.2,1);
+  }
+  .loginLogo:hover {
+    transform: scale(1.05) translateY(-4px);
+  }
+  .loginLeftPanel .eyebrow {
     font-size: 11px;
     font-weight: 800;
     letter-spacing: .12em;
@@ -3253,14 +3269,14 @@ const globalCss = `
     opacity: .75;
     color: #ffebd6;
   }
-  .loginPanel > div:first-child h1 {
-    font-size: 36px;
+  .loginLeftPanel h1 {
+    font-size: 40px;
     font-weight: 900;
     color: white;
     line-height: 1.15;
     letter-spacing: -.02em;
   }
-  .loginPanel > div:first-child .muted {
+  .loginLeftPanel .muted {
     color: rgba(255,255,255,.7);
     font-size: 15px;
     line-height: 1.6;
