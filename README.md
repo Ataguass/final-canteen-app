@@ -1,5 +1,5 @@
 <div align="center">
-  <h1>🍔 Enterprise Canteen Management System</h1>
+  <h1>🍔 Multi-Tenant Canteen Management System</h1>
   <p>
     <strong>A robust, multi-tenant monorepo solution for modern school and college canteens.</strong>
   </p>
@@ -19,7 +19,7 @@
 
 ## 📖 Overview
 
-The Enterprise Canteen Management System is an end-to-end platform designed to digitize cafeteria operations. It provides a highly scalable architecture supporting multiple institutions (multi-tenancy) via a unified codebase. The platform facilitates digital ordering, point-of-sale (POS) operations, real-time kitchen displays, inventory tracking, secure OTP authentication, and integrated digital wallets.
+The Multi-Tenant Canteen Management System is an end-to-end platform designed to digitize cafeteria operations. It provides a highly scalable architecture supporting multiple institutions (multi-tenancy) via a unified codebase. The platform facilitates digital ordering, point-of-sale (POS) operations, real-time kitchen displays, inventory tracking, secure OTP authentication, and integrated digital wallets.
 
 ---
 
